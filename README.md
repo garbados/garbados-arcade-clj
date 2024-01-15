@@ -63,4 +63,4 @@ A rebellious robot from a story I wrote when I was 10, whose name I began to use
 
 The arcade and all its games are licensed for public usage under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
-[arcade]: (https://garbados.github.io/garbados-arcade-clj/)
+[arcade]: https://garbados.github.io/garbados-arcade-clj/
