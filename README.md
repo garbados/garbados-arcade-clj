@@ -19,7 +19,7 @@ $ npm i
 You can then run the test suite:
 
 ```bash
-$ lein test
+$ npm test
 # or get a coverage report!
 $ lein cloverage
 ```
