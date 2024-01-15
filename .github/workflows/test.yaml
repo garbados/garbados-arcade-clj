@@ -3,15 +3,8 @@ name: Build and Test
 on: [push]
 
 jobs:
-
-  clojure:
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-
-    runs-on: ${{ matrix.os }}
-
+  test:
+    runs-on: [ubuntu-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -26,6 +19,13 @@ jobs:
         uses: DeLaGuardo/setup-clojure@12.1
         with:
           lein: 2.9.1
+
+      - name: Install NodeJS
+        uses: dcodeIO/setup-node-nvm@master
+        with:
+          node-version: lts/* 
+
+      - run: npm i
           
       - name: Cache clojure dependencies
         uses: actions/cache@v3
@@ -33,9 +33,10 @@ jobs:
           path: |
             ~/.m2/repository
             ~/.gitlibs
+            **/node_modules
           # List all files containing dependencies:
-          key: cljdeps-${{ hashFiles('project.clj') }}
+          key: cljdeps-${{ hashFiles('package.json') }}-${{ hashFiles('project.clj') }}
           restore-keys: cljdeps-
 
       - name: Run tests
-        run: lein test
+        run: npm test

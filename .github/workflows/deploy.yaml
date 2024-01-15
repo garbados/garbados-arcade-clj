@@ -25,8 +25,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # It is important to install java before installing clojure tools which needs java
-      # exclusions: babashka, clj-kondo and cljstyle
       - name: Prepare java
         uses: actions/setup-java@v3
         with:
@@ -45,21 +43,21 @@ jobs:
 
       - run: npm i
           
-      # Optional step:
       - name: Cache clojure dependencies
         uses: actions/cache@v3
         with:
           path: |
             ~/.m2/repository
             ~/.gitlibs
-            ~/.node_modules
-          # List all files containing dependencies:
-          key: cljdeps-${{ hashFiles('package.json') }}-${{ hashFiles('project.clj') }}
+            **/node_modules
+          key: cljdeps-${{ hashFiles('**/package.json') }}-${{ hashFiles('**/project.clj') }}
           restore-keys: cljdeps-
       
       - run: npm run release
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
