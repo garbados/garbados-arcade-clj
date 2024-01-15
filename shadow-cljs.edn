@@ -1,0 +1,13 @@
+;; shadow-cljs configuration
+{:lein {:profile "+cljs"}
+ :builds
+ {:lib
+  {:target :esm
+   :runtime :browser
+   :modules {:index {:exports {arcade arcade.exports/arcade
+                               planetcall planetcall.exports/planetcall}}}
+   :output-dir "lib/arcade"}
+  :longtime
+  {:target :browser
+   :output-dir "public/js/longtime"
+   :modules {:main {:entries [longtime.web]}}}}}

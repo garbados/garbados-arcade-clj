@@ -1,0 +1,101 @@
+Ideotech:
+
+- Science:
+	- 1. Knowledge yields increase by 1.
+	- 2a. *Hacker* Loadout (grants *Disable* ability), *Observer* mod (grants *Perceptive*)
+	- 2b. Knowledge yields +2; unit upkeep +1
+	- 3a. Academy improvement (Knowledge adjacency +2)
+	- 3b. Material yields +2
+	- 3c. Energy yields +2
+	- 4a. *Arbiter* loadout, *Optical Camo* mod (grants *Hidden*)
+	- 4b. *Singularity Collider* wonder (grants *Dimensional Tear* action, disregards ideological restrictions on research)
+	- 4c. Knowledge yields +3; unit upkeep +2
+  - 4d. *Saboteur* Loadout (grants *Subvert* ability)
+
+- Science-Ecology:
+	- 2. *Cultivate Forest* action (Forest vegetation improves yields by +1)
+	- 3a. Forest vegetation improves yields by +1
+	- 3b. *Reactor* improvements gain -1 impact and +2 energy
+	- 4a. *Ark Launchpad* transformational wonder
+	- 4b. Forest vegetation improves yields by +1 and applies -1 impact. This bonus is doubled when adjacent to fungus.
+	- 4c. *Heaven's Eye* wonder, which grants the *Create Miasma* action and grants your units advantage while in miasma.
+
+- Ecology:
+	- 1. Fungus vegetation no longer impedes unit movement.
+	- 2a. May construct improvements on and claim spaces with Fungus vegetation; gain the *Cultivate Fungus* action.
+	- 2b. *Zero Trace* mod (grants *Clean* trait) and *Scrub Radiation* action
+	- 3a. *Detoxer* improvement (-5 impact, -1 energy); Fungus vegetation improves yields by +1
+	- 3b. Units treat spaces with *Fungus* as though they were roads; miasma no longer harms your units.
+	- 3c. -1 action per turn; resource yields are doubled.
+	- 4a. Improvements on a natural feature matching its primary yield grant a +2 adjacency bonus. (i.e. a farm on a xenobog grants +2 food yield to adjacent farms.)
+	- 4b. Units on spaces with Fungus vegetation are considered *Hidden*.
+	- 4c. *Harmonize* action (grants *Plenitude* faction condition, doubling yields for the turn)
+  - 4d. Fungus vegetation improves yields by +2 and applies -1 impact.
+
+- Ecology-Contact:
+	- 2a. Construct *Temple* (food +1 (plus rainfall), knowledge +1, impact -1)
+	- 3a. Grants the *Loper* and *Wormswarm* chassis.
+	- 3b. *Survivor's Song* wonder (creates a permanent alliance with native fauna so that they stack with your units peacefully and can pass over your spaces harmlessly. This alliance does not provide treaty income.)
+	- 4a. *Temple* improvement gains +2 knowledge and -2 impact.
+	- 4b. Grants the *Razorbeak* and *Draconaut* chassis.
+	- 4c. *Planetdream* transformational wonder
+
+- Contact:
+	- 1. Trade multiplier increased by 1.
+	- 2a. Trade multiplier increased by 1.
+	- 2b. *Volunteer* mod (+2 resolve)
+	- 3a. *Psi-training* mod (grants *Psychic* trait)
+	- 3b. *Empath Guild* wonder (doubles your trade multiplier)
+	- 3c. Trade multiplier increased by 1; ideological differences do not limit treaties with you.
+	- 4a. *Psi-beacon* loadout (grants *Psi-field* trait, *Psychout* ability)
+	- 4b. Trade multiplier increased by 3; cannot voluntarily lower treaty levels.
+  - 4c. *Planetary Congress* wonder (grants *Call Vote* action, which initiates a vote among all factions regarding one of several resolutions.)
+  - 4d. Base resolve for units increases from 1 to 3.
+
+- Contact-Industry:
+	- 2. Construct *Museum* (knowledge +4, energy -1)
+	- 3a. Museums grant a random rare faction-wide bonus.
+	- 3b. *Automoton* mod (granted *Automated*) and *Durasteel* mod (grants *Fortified*)
+	- 4a. *Grand Reliquary* wonder (grants +1 action and increases trade multiplier by 1)
+	- 4b. *Excavate* action (places a Ruin feature on a space; causes significant eco-damage)
+	- 4c. *Beacon Institute* transformational wonder
+
+- Industry:
+	- 1. *Mine* improvement (+3 materials, +1 impact) and *Clearcut* action (removes vegetation, +5 materials, +2 impact)
+	- 2a. *Dome* improvement (resilience adjacency +1)
+	- 2b. *Settler* loadout (self-destructs to claim a space not adjacent to any claims)
+	- 3a. Gain +1 action per turn.
+	- 3b. *Convoy* loadout; stockpile storage doubles.
+	- 3c. Primary yields +1; improvements gain +1 impact
+	- 4a. *Earthscape* wonder (grants +1 resiliency to your improvements)
+	- 4b. *Dome* applies its bonus within a range of 2 (adjacent => nearby)
+  - 4c. Primary yields +2; improvements gain +2 impact
+  - 4d. *Borehole*, *Condenser*, and *Refractor* (+2 adjacency for materials, food, and energy respectively; +3 impact)
+
+- Military-Industry:
+	- 2. *Trooper* mod (advantage against wildlife) and *Combust Miasma* action.
+	- 3a. *Cruiser* and *Foil* chassis
+	- 3b. *Spikejet* chassis, *Carrier* mod
+	- 4a. *Hovertank* chassis
+	- 4b. *Neograv* chassis
+  - 4c. *Dimensional Gate* transformational wonder; resurrect the ancients' gateway network and explore new worlds.
+
+- Military:
+	- 1. *Commander* loadout (grants *Commanding* trait) and *Speeder* chassis
+	- 2a. *Railguns* loadout (attacks)
+	- 2b. *Missilier* loadout (bombards)
+	- 3a. *Bunker* improvement (grants advantage to units stacking on it)
+	- 3b. *Magspears* loadout (attacks)
+	- 3c. *Discharger* loadout (bombards)
+	- 4a. *Missile Silo* improvement, which grants the *Launch Missile* action
+	- 4b. *Disruptor* loadout (attacks)
+  - 4c. *Starcaller* loadout (bombards)
+  - 4d. Gain +1 action per turn.
+
+- Science-Military:
+	- 2. *Sensor* improvement (+1 knowledge, -1 energy; perceives nearby spaces)
+	- 3a. *Windrider* chassis
+	- 3b. *Fissile Engine*, and *Anti-Materiel* mods
+	- 4a. *Jaeger* chassis, *Neural Dampener* mod (raises influence of arms, lowers influence of resolve)
+	- 4b. *Pulse Tower* improvement, which grants the *Pulse Blast* action
+  - 4c. *Planet Buster* transformational wonder

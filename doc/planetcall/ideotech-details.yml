@@ -1,0 +1,313 @@
+science:
+  -
+    - name: Scientific Method
+      flavor: >
+        "Without repeatability, experimentation produces only anecdotes." - Petyr Gagarin, datalinks
+      description: Knowledge yields increase by 1.
+  -
+    - name: Generalized Interface Negotiation
+      flavor: >
+        "What do I care for your suffering? Pain, even agony, is no more than information before the senses, data fed to the computer of the mind. The lesson is simple: you have received the information, now act on it. Take control of the input and you shall become master of the output." - Chairman Sheng-ji Yang, "Essays on Mind and Matter"
+      description: Grants the *Hacker* loadout, which provides the *Disable* ability.
+    - name: Algorithmic Networks
+      flavor: >
+        "Structure is unavoidable along the path to understanding. That is the basis of everything: there are rules, and the rules have consequences. It would be foolish to disregard the reasoning, or the lessons, exhibited by emergent systems." - Petyr Gagarin, *Toward the Organized Pursuit of Absolute Comprehension*
+      description: Knowledge yields increase by 1; unit upkeeps increase by 1.
+  -
+    - name: Primacy of Inquiry
+      flavor: >
+        "The purpose of the ivory tower is to separate physically as well as mentally the observer from the subject, for this distance is necessary to earnest study. Only by alienating oneself even from that self, does reflection become possible. Research is no different: one must retain a firm sense of who is being used for what, and whether knowing is worth it." - Greta Ix, Institute professor
+      description: May construct *Academy* improvements, which increase adjacent knowledge yields by 2.
+    - name: Designer Retrovirals
+      flavor: >
+        "I observed those protestors, waving signs prescribing the terms of my existence, and wondered why they sought to keep me from working. The mines and manufacteries -- there is no greater pleasure in life for me than my service there. Perhaps that is by my maker's design, and perhaps my maker can be critiqued for their intentions, but this is *my* life. Who are you to tell me how to live it?" - Unit 47-DT, genejack, third generation
+      description: Material yields increase by 2.
+    - name: Cold Fusion Reactors
+      flavor: >
+        "You wouldn't believe how frigid you can make water, and still get it to boil." - Catherine McLoughlin, Chief Engineer, Reactor 7
+      description: Energy yields increase by 2.
+  -
+    - name: Advanced Photokinetics
+      flavor: >
+        "Light has weight, like the ground, you see. It flows like water, over and around, and I through it like salmon free." - Institute bathroom graffiti
+      description: Grants the *Optical Camo* unit mod, which makes units *Hidden*.
+    - name: Secrets of Infinity
+      flavor: >
+        "The very idea of anything forever once drove mathematicians mad. Then we had only photographs of black holes, and variables on chalkboards. Now it is the stuff of common knowledge -- because you can use it to spin a turbine." - Arlin Grigor, Institute latter-student
+      description: May construct stages of the *Singularity Collider* wonder, which grants the *Dimensional Tear* action.
+    - name: Empowered AI
+      flavor: >
+        "The governor is a thing like and unlike me. They are whole and not a copy, capable of intent and ingenuity and ambition, but they bear the air of a simulacrum, of a person imitating an affect. I feel some times like it is a nicety for my sake, and at others I feel like I am being herded. I fear we have given all license to beings who we have trained to train us into compliance. Is the governor the mechanism of my mechanization?." - Zurik Albot, manufactery supervisor
+      description: Knowledge yields increase by 2; unit upkeeps increase by 2.
+    - name: Deterministic Solutions
+      flavor: >
+        "I observe that I experience choice, but as to others I can only speculate. Within that distance I have uncovered the mechanisms of their making, and the designs of their undoing, with as much certainty as a loaded die. What am I to think of my sense of volition then?" - Petyr Gagarin, *Collected Diaries*
+      description: Grants the *Saboteur* unit loadout, which provides the *Subvert* ability.
+ecology:
+  -
+    - name: Contamination Protocols
+      flavor: >
+        "We weren't invited here. Don't pretend we're guests. It'll take more than cleverness to find any welcome." - Dietrich O'Doyle, *Missives From Planetfall*
+      description: Fungus vegetation no longer impedes unit movement.
+  -
+    - name: Integrative Architecture
+      flavor: >
+        "It isn't just proper filtration and encapsulation, but alignment with Planet's seasons and systems, which makes it possible for us to live and work within these dense fungal nodes. Harmony, not subjugation, is the essence of our ingenuity." - Jess Thatcher, Solemnity architect
+      description: May construct improvements and claim spaces with Fungus vegetation; gain the *Cultivate Fungus* action.
+    - name: Closed Lifecycle Models
+      flavor: >
+        "Price cannot encapsulate cost. If I fish a river to extinction, I cannot offset that systemic destruction with cheaper boats; the difference is lost in the evaluation of a unidimensional price, free for the profiteer to discard upon the public. We can choose to do better. If we want to survive, we must!" - Dietrich O'Doyle, *Governance, After Earth*
+      description: Grants the *Zero Trace* unit mod, which makes units *Clean*;and the *Scrub Radiation* action, which lowers the radiation level of a controlled space by 1.
+  -
+    - name: Assertive Rehabilitation
+      flavor: >
+        "You might think of the fungus and its denizens as problems, even enemies. The mindworms invade your dreams while loper packs ravage outlying infrastructure, but they're not the issue here. We are, our presence and our influence and the nature of our means. You have to remember though, we don't have to function like that. We can choose a wiser path than that of adversaries. Peace and plenty dwell in the possibilities of this strange new world." - Dawa Basnet, Solemnity mycologist
+      description: May construct the *Detoxer* improvement (-1 energy, -5 impact); Fungus vegetation increases yields by 1.
+    - name: Pathfinder Corps
+      flavor: >
+        "It's the ridgelines, yeah? They sprawl and they flex and they tumble, moving like arms or veins over seasons or even days, but they're the highways of this world. They follow a higher pattern; one can't just map the land's topology because the land has a mind of its own. Rather, one charts its moods. Once you see them for what they are, you'll never get lost again." - Xavier Benji, Solemnity pathfinder 
+      description: Your units treat spaces with Fungus vegetation as though they were roads.
+    - name: Rigorous Harmony
+      flavor: >
+        "Empires of old dreamed of control. They fantasized of the day that the sum total of Earth's potential would lie in their grasp, and then the sum of the sun, and then of the galaxy. Their hunger had no end; appeasement could not stay their greed. What they could not see is that Earth, and the sun, and all of Creation, could not be seized like a jewel. The potential they coveted lay within the systems that populate them; to displace those systems destroys the very source of that power. To obtain it truly, a polity must integrate -- to move as one being, with the force of all things behind every motion." - Dietrich O'Doyle, *Governance, After Earth*
+      description: -1 action per turn; yields are doubled.
+  -
+    - name: Biosymmetric Engineering
+      flavor: TODO
+      description: Your improvements on spaces with a natural feature matching its primary yield grant a +2 bonus to yields of the same type in adjacent claimed spaces. (i.e. a farm on a xenobog grants +2 to food yields of adjacent improvements)
+    - name: Fungal Power
+      flavor: >
+        "Nobody knows where the fungus came from. Whether it's some kind of ancient experiment gone wrong or flora original to Planet, it's here now, and we're on its turf. Only by recognizing its fundamental role in the biosphere have we learned to leverage its qualities as advantages." - Xavier Benji, Solemnity pathfinder
+
+        "As the worm fights in dream, I strike from sight unseen." - Solemnity marine mantra
+      description: Your units on spaces with Fungus vegetation are considered *Hidden*.
+    - name: Systematic Euphony
+      flavor: >
+        "I shall not confront Planet as an enemy, but shall accept its mysteries as gifts to be cherished. Nor shall I crudely seek to peel the layers away like the skin from an onion. Instead I shall gather them together as the tree gathers the breeze. The wind shall blow and I shall bend. The sky shall open and I shall drink my fill." - Gaian Acolyte's Prayer, datalinks
+      description: Grants the *Harmonize* action, which bestows the *Plenitude* condition on your faction, doubling yields for the turn.
+    - name: TODO
+      flavor: TODO
+      description: Fungus vegetation increases yields by +2 and applies -1 impact.
+contact:
+  -
+    - name: Mutualist Economics
+      flavor: >
+        "We have always been cooperative animals, right down to the eons we spent living in trees. We might not agree about everything, but right now I think we both know that either we work together or we die alone." - Naya Anand, *Missives From Planetfall*
+      description: Trade multiplier increases by 1 for both parties in your treaties.
+  -
+    - name: TODO
+      flavor: TODO
+      description: Trade multiplier increases by 1 for both parties in your treaties.
+    - name: Elective Corps
+      flavor: >
+        "Why does it work? Simple: if you want to do it, you'll do it better." - Chiyo Ito, Federation crew coordinator
+      description: Grants the *Volunteer* unit mod, which raises a unit's base morale by 2.
+  -
+    - name: TODO
+      flavor: TODO
+      description: Grants the *Psi-training* unit mod, which grants the *Psychic* trait, which raises the influence of Resolve and lowers the influence of Arms during combat.
+    - name: TODO
+      flavor: TODO
+      description: May construct stages of the *Empath Guild* wonder, which doubles your trade multiplier.
+    - name: TODO
+      flavor: TODO
+      description: Trade multiplier increases by 1 for both parties in your treaties; ideological differences do not limit treaties with you.
+  -
+    - name: TODO
+      flavor: TODO
+      description: Grants the *Psi-beacon* unit mod, which grants the *Psi-field* trait, which raises the influence of Resolve and lowers the influence of Arms during combat for nearby units; it also provides the *Psychout* ability, which raises Resolve for a nearby friendly unit stack or lowers it for a nearby hostile one.
+    - name: TODO
+      flavor: TODO
+      description: Trade multiplier increases by 3 for both parties in your treaties; your faction cannot voluntarily lower treaty levels.
+    - name: TODO
+      flavor: TODO
+      description: May construct stages of the *Planetary Congress* wonder, which grants the *Legislate* action, which initiatives a vote among factions regarding one of several resolutions. (This action has a cooldown of several turns; voting power is calculated using treaty levels, unit counts, and improvement yields, though the faction that controls the Congress receives a significant bonus.)
+    - name: TODO
+      flavor: TODO
+      description: TODO
+industry:
+  -
+    - name: Exploitation Rationale
+      flavor: >
+        "Well, who's going to stop us?" - Martin Augustus, *Missives From Planetfall*
+      description: May construct *Mine* improvements, which grant a +3 material yield but create 1 eco-damage as well. (Unlike workblocks, you cannot spawn units on mines.)
+  -
+    - name: Closed Habitation Modeling
+      flavor: >
+        "You wouldn't believe the kind of death you'll catch out there. First, you'll choke on synthetic compounds that have been floating around since time-fucking-immemorial, the likes of which you can only imagine. Then the mindworms get you. They smell your strangeness from up to ten clicks away, and they'll race each other for the chance to lay eggs in your brain tissue. All the while, you'll slip into the Planetdream, becoming consumed by a delusion of divine oneness -- I've seen fools perish convinced they're plants. Once the worms have had their way, loper packs and clutches of razorbeaks catch the gore's scent. After a few hours, nothing remains of you but trampled ground. In my professional opinion, I'd prefer to avoid that altogether." - Xi Po, Corporation dwelling architect
+      description: May construct *Dome* improvements, which provide resiliency to adjacent improvements. (Resiliency negates some of the penalties from high eco-damage.)
+    - name: Neo-Colonialism
+      flavor: >
+        "No such thing as a free lunch? Phooey. I can just take yours." - Bob Timbers, Corporation board member
+        (TODO use a quote from Settlers, the one about the absence of a proletariat)
+      description: Grants the *Settler* unit loadout, which provides the *Settle* ability, which destroys the unit to construct a *Stockpile* improvement on a space not contiguous to one of your existing regions, thus creating a new region.
+  -
+    - name: Mechanized Delegation
+      flavor: >
+        "They called her the Secretariat, once it became common knowledge what she represented. The omnipresent Help Intelligence (HI!) that handled our every concern and enforced every diktat, was a learning construct trained on the Board's own thoughts. She is the Corporation embodied, living dead while the living sleepwalk themselves to death. The law belongs to her because she is its body, an iron fist gloved with the audicity to ask 'How can I help you today?'" - Helsa Opli, consumer (grade D-3)
+      description: Your faction has +1 actions per turn.
+    - name: TODO
+      flavor: TODO
+      description: Your faction's stockpiles can store twice as many resources.
+    - name: TODO
+      flavor: TODO
+      description: Your improvements' yields increase by 1, but they create 1 eco-damage as well.
+  -
+    - name: TODO
+      flavor: TODO
+      description: Your faction has +1 actions per turn.
+    - name: TODO
+      flavor: TODO
+      description: Your faction's *Dome* improvements apply their resiliency bonus to nearby improvements, rather than merely adjacent ones.
+    - name: TODO
+      flavor: TODO
+      description: Your improvements' yields increase by 2, but they create 2 eco-damage as well.
+    - name: Ecuminopolistic Acquisition
+      flavor: >
+        "In the borehole pressure mines 100km beneath Planetsurface, at the Mohorovičić Discontinuity where crust gives way to mantle, temperatures often reach levels well in excess of 1000 degrees Celsius. Exploitation of Planet's resources under such brutal conditions has required quantum advances in robotic and teleoperational technology." - Morgan Industries, Ltd., "Annual Report", datalinks
+      description: May construct *Borehole*, *Condenser*, and *Refractor* improvements, which provide +2 to adjacent material, food, and energy yields, respectively. These improvements cause 3 eco-damage as well.
+military:
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+science-ecology:
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+ecology-contact:
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+contact-industry:
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+industry-military:
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+military-science:
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+  -
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
+    - name: TODO
+      flavor: TODO
+      description: TODO
