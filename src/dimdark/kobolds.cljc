@@ -1,5 +1,6 @@
 (ns dimdark.kobolds
   (:require [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as g]
             [dimdark.core :as d]
             [dimdark.equipment :as eq]))
 
@@ -10,7 +11,6 @@
     :muu
     :yap
     :yip})
-
 (s/def ::name kobold-names)
 
 (def kobold-classes
@@ -20,7 +20,6 @@
     :warrior
     :sneak
     :guardian})
-
 (s/def ::class kobold-classes)
 
 (def kobold-name->class
@@ -35,9 +34,9 @@
 (def kobold-class-growth
   {:mage
    {:prowess 3
-    :alacrity 2
+    :alacrity 3
     :vigor 2
-    :spirit 3
+    :spirit 4
     :focus 5
     :luck 1}
    :druid
@@ -52,13 +51,13 @@
     :alacrity 5
     :vigor 2
     :spirit 3
-    :focus 2
+    :focus 1
     :luck 4}
    :warrior
    {:prowess 5
-    :alacrity 3
-    :vigor 3
-    :spirit 2
+    :alacrity 1
+    :vigor 4
+    :spirit 3
     :focus 2
     :luck 3}
    :sneak
@@ -77,25 +76,12 @@
     :luck 3}})
 
 (s/def ::growth
-  (s/and
-   (s/map-of ::attribute (s/int-in 1 6))
-   (s/or :mage (:mage kobold-class-growth)
-         :druid (:druid kobold-class-growth)
-         :ranger (:ranger kobold-class-growth)
-         :warrior (:warrior kobold-class-growth)
-         :sneak (:sneak kobold-class-growth)
-         :guardian (:guardian kobold-class-growth))))
-
-(s/def ::kobold
-  (s/and
-   ::creature
-   (s/keys :req-un [::name
-                    ::class
-                    ::growt
-                    ::equipped])))
-
-(s/def ::kobolds
-  (s/map-of ::name ::kobold))
+  (s/with-gen
+    (s/map-of ::d/attribute ::d/level)
+    #(g/fmap
+      (fn [klass]
+        (klass kobold-class-growth))
+      (s/gen ::class))))
 
 (def base-attributes
   (reduce
@@ -131,10 +117,76 @@
                :abilities []
                :growth growth
                :attributes (merge-with + base-attributes growth)
+               :aptitudes (reduce #(assoc %1 %2 0) {} d/elements)
+               :resistances (reduce #(assoc %1 %2 0) {} d/elements)
+               :merits (reduce #(assoc %1 %2 0) {} d/merits)
                :equipped {:weapon (kobold-name starting-weapons)
                           :armor (kobold-name starting-armor)}})))
    {}
    kobold-names))
 
+(s/def ::kobold
+  (s/with-gen
+    (s/and
+     ::d/creature
+     (s/keys :req-un [::name
+                      ::class
+                      ::growth
+                      ::equipped]))
+    #(g/fmap
+      (fn [kobold-name]
+        (kobold-name kobolds))
+      (s/gen ::name))))
+
+(s/def ::kobolds
+  (s/map-of ::name ::kobold))
+
+(defn equipment-stats [kobold]
+  (merge-with
+   +
+   (let [{:keys [type level]} (get-in kobold [:equipped :weapon])]
+     (eq/weapon-level->stats type level))
+   (let [{:keys [type level]} (get-in kobold [:equipped :armor])]
+     (eq/armor-level->stats type level))
+   (->> (:equipped kobold)
+        (map eq/equipment->mod-stats)
+        (apply merge-with +))))
+(defn kobold-stat [stat kobold]
+  (+ (d/creature-stat stat kobold)
+     (stat (equipment-stats kobold) 0)))
+(s/fdef kobold-stat
+  :args (s/cat :stat ::d/stat
+               :kobold ::kobold)
+  :ret nat-int?)
 (defn kobold->stats [kobold]
-  )
+  (->> d/stats
+       (map #(vec [% (kobold-stat % kobold)]))
+       (reduce #(assoc %1 (first %2) (second %2)) {})))
+(s/fdef kobold->stats
+  :args (s/cat :kobold ::kobold)
+  :ret (s/map-of ::d/stat nat-int?))
+(def proficiencies
+  {:drg {:weapons #{:tome :orb}
+         :armor #{:light}}
+   :grp {:weapons #{:staff :club}
+         :armor #{:light :medium}}
+   :knz {:weapons #{:bow :crossbow}
+         :armor #{:light}}
+   :muu {:weapons #{:spear :polearm}
+         :armor #{:light :medium}}
+   :yap {:weapons #{:dagger :claws}
+         :armor #{:light}}
+   :yip {:weapons #{:sword :axe}
+         :armor #{:medium :heavy}}})
+(defn equippable? [{:keys [name]} {:keys [slot type]}]
+  (case slot
+    :weapon
+    (contains? (get-in proficiencies [name :weapons]) type)
+    :armor
+    (contains? (get-in proficiencies [name :armor]) (type eq/armor->class))
+    :accessory
+    true))
+(s/fdef equippable?
+  :args (s/cat :kobold ::kobold
+               :equipment ::eq/equipment)
+  :ret boolean?)

@@ -159,10 +159,7 @@
   (let [stats (type weapon-type->stats)]
     (if (= 1 (count stats))
       {(first stats) (* 2 level)}
-      (reduce
-       #(assoc %1 %2 level)
-       {}
-       stats))))
+      (reduce #(assoc %1 %2 level) {} stats))))
 
 (s/fdef weapon-level->stats
   :args (s/cat :type :weapon/type
@@ -190,6 +187,14 @@
   :args (s/cat :type :armor/type
                :level ::level)
   :ret (s/map-of #{:armor :initiative} nat-int?))
+
+(defn equipment->mod-stats [equipment]
+  (->> (map modifier->details (:modifiers equipment))
+       (reduce #(assoc %1 (first %2) (second %2)) {})))
+
+(s/fdef equipment->mod-stats
+  :args (s/cat :equipment ::equipment)
+  :ret (s/map-of ::d/stat nat-int?))
 
 (def rare-first-word
   ["Agony"
