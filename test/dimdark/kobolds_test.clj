@@ -27,4 +27,4 @@
   (testing "Kobold growth patterns use valid number of points"
     (doseq [[klass growth] k/kobold-class-growth]
       (is (= 18 (reduce + 0 (vals growth)))
-          (str klass " uses wrong number of points!")))))
+          (str (name klass) " uses wrong number of points!")))))
