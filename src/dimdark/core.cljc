@@ -15,117 +15,82 @@
                    ::attributes
                    ::abilities]))
 
-(def kobold-names #{:drg
-                    :grp
-                    :knz
-                    :muu
-                    :yap
-                    :yip})
+(def stats
+  #{:health
+    :attack
+    :defense
+    :initiative
+    :fortune
+    :aptitude
+    :fire-aptitude
+    :frost-aptitude
+    :poison-aptitude
+    :mental-aptitude
+    :resistance
+    :fire-resistance
+    :frost-resistance
+    :poison-resistance
+    :mental-resistance
+    :scales
+    :squish
+    :stink
+    :brat})
+(s/def ::health nat-int?)
+(s/def ::attack nat-int?)
+(s/def ::defense nat-int?)
+(s/def ::initiative nat-int?)
+(s/def ::fortune nat-int?)
+(s/def ::aptitude nat-int?)
+(s/def ::fire-aptitude nat-int?)
+(s/def ::frost-aptitude nat-int?)
+(s/def ::poison-aptitude nat-int?)
+(s/def ::mental-aptitude nat-int?)
+(s/def ::resistance nat-int?)
+(s/def ::fire-resistance nat-int?)
+(s/def ::frost-resistance nat-int?)
+(s/def ::poison-resistance nat-int?)
+(s/def ::mental-resistance nat-int?)
+(s/def ::scales nat-int?)
+(s/def ::squish nat-int?)
+(s/def ::stink nat-int?)
+(s/def ::brat nat-int?)
+(s/def ::stats
+  (s/keys :req-un [::health
+                   ::attack
+                   ::defense
+                   ::armor
+                   ::initiative
+                   ::fortune
+                   ::aptitude
+                   ::fire-aptitude
+                   ::frost-aptitude
+                   ::poison-aptitude
+                   ::mental-aptitude
+                   ::resistance
+                   ::fire-resistance
+                   ::frost-resistance
+                   ::poison-resistance
+                   ::mental-resistance
+                   ::scales
+                   ::squish
+                   ::stink
+                   ::brat]))
 
-(s/def :kobold/name kobold-names)
+(defn creature-health [creature]
+  (* 3
+     (+ (get-in creature [:attributes :prowess])
+        (get-in creature [:attributes :vigor]))))
 
-(def kobold-classes
-  #{:mage
-    :druid
-    :ranger
-    :warrior
-    :sneak
-    :guardian})
+(defn creature-attack [creature]
+  (get-in creature [:attributes :prowess]))
 
-(s/def :kobold/class kobold-classes)
+(defn creature-defense [creature]
+  (get-in creature [:attributes :alacrity]))
 
-(def kobold-name->class
-  {:drg :mage
-   :grp :druid
-   :knz :ranger
-   :muu :warrior
-   :yap :sneak
-   :yip :guardian})
+(def creature-armor (constantly 0))
 
-;; kobold growth apportions 18 growth points per level
-(def kobold-class-growth
-  {:mage
-   {:prowess 3
-    :alacrity 2
-    :vigor 2
-    :spirit 3
-    :focus 5
-    :luck 1}
-   :druid
-   {:prowess 1
-    :alacrity 2
-    :vigor 4
-    :spirit 5
-    :focus 3
-    :luck 3}
-   :ranger
-   {:prowess 3
-    :alacrity 5
-    :vigor 2
-    :spirit 3
-    :focus 2
-    :luck 4}
-   :warrior
-   {:prowess 5
-    :alacrity 3
-    :vigor 3
-    :spirit 2
-    :focus 2
-    :luck 3}
-   :sneak
-   {:prowess 2
-    :alacrity 4
-    :vigor 2
-    :spirit 2
-    :focus 3
-    :luck 5}
-   :guardian
-   {:prowess 4
-    :alacrity 1
-    :vigor 5
-    :spirit 3
-    :focus 2
-    :luck 3}})
+(defn creature-initiative [creature]
+  (+ (get-in creature [:attributes :alacrity])
+     (get-in creature [:attributes :vigor])))
 
-(s/def :kobold/growth
-  (s/and
-   (s/map-of ::attribute (s/int-in 1 6))
-   (s/or :mage (:mage kobold-class-growth)
-         :druid (:druid kobold-class-growth)
-         :ranger (:ranger kobold-class-growth)
-         :warrior (:warrior kobold-class-growth)
-         :sneak (:sneak kobold-class-growth)
-         :guardian (:guardian kobold-class-growth))))
-
-(s/def ::kobold
-  (s/and
-   ::creature
-   (s/keys :req-un [:kobold/name
-                    :kobold/class
-                    :kobold/growt
-                    ::equipped])))
-
-(s/def ::kobolds
-  (s/map-of :kobold/name ::kobold))
-
-(def base-attributes
-  (reduce
-   #(assoc %1 %2 2)
-   {}
-   attributes))
-
-(def kobolds
-  (reduce
-   (fn [kobolds kobold-name]
-     (let [klass (kobold-name kobold-name->class)
-           growth (klass kobold-class-growth)]
-       (assoc kobolds kobold-name
-              {:name kobold-name
-               :level 1
-               :class klass
-               :abilities []
-               :growth growth
-               :attributes (merge-with + base-attributes growth)})))
-   {}
-   kobold-names))
-
+(def creature-fortune (constantly 0))
