@@ -3,9 +3,10 @@
             [dimdark.core :as d]
             [dimdark.kobolds :as k]))
 
-(def -log2 (Math/log 2))
-(defn log2 [x]
-  (/ (Math/log x) -log2))
+(def clj-log2 #?(:clj (Math/log 2) :cljs nil))
+(defn math-log2 [x]
+  #?(:clj (/ (Math/log x) clj-log2)
+     :cljs (js/Math.log2 x)))
 
 (def traits
   #{:close
