@@ -126,39 +126,23 @@
 (defmethod creature-stat :aptitude [_ creature]
   (get-in creature [:attributes :focus] 0))
 (defmethod creature-stat :fire-aptitude [_ creature]
-  (+ (creature-stat :aptitude creature)
-     (creature-stat :scales creature)
-     (get-in creature [:aptitudes :fire] 0)))
+  (get-in creature [:aptitudes :fire] 0))
 (defmethod creature-stat :frost-aptitude [_ creature]
-  (+ (creature-stat :aptitude creature)
-     (creature-stat :squish creature)
-     (get-in creature [:aptitudes :frost] 0)))
+  (get-in creature [:aptitudes :frost] 0))
 (defmethod creature-stat :poison-aptitude [_ creature]
-  (+ (creature-stat :aptitude creature)
-     (creature-stat :stink creature)
-     (get-in creature [:aptitudes :poison] 0)))
+  (get-in creature [:aptitudes :poison] 0))
 (defmethod creature-stat :mental-aptitude [_ creature]
-  (+ (creature-stat :aptitude creature)
-     (creature-stat :brat creature)
-     (get-in creature [:aptitudes :mental] 0)))
+  (get-in creature [:aptitudes :mental] 0))
 (defmethod creature-stat :resistance [_ creature]
   (get-in creature [:attributes :spirit] 0))
 (defmethod creature-stat :fire-resistance [_ creature]
-  (+ (creature-stat :resistance creature)
-     (creature-stat :scales creature)
-     (get-in creature [:resistances :fire] 0)))
+  (get-in creature [:resistances :fire] 0))
 (defmethod creature-stat :frost-resistance [_ creature]
-  (+ (creature-stat :resistance creature)
-     (creature-stat :squish creature)
-     (get-in creature [:resistances :frost] 0)))
+  (get-in creature [:resistances :frost] 0))
 (defmethod creature-stat :poison-resistance [_ creature]
-  (+ (creature-stat :resistance creature)
-     (creature-stat :stink creature)
-     (get-in creature [:resistances :poison] 0)))
+  (get-in creature [:resistances :poison] 0))
 (defmethod creature-stat :mental-resistance [_ creature]
-  (+ (creature-stat :resistance creature)
-     (creature-stat :brat creature)
-     (get-in creature [:resistances :mental] 0)))
+  (get-in creature [:resistances :mental] 0))
 (defn creature->stats [creature]
   (->> stats
        (map #(vec [% (creature-stat % creature)]))

@@ -151,13 +151,16 @@
    (->> (:equipped kobold)
         (map eq/equipment->mod-stats)
         (apply merge-with +))))
+
 (defn kobold-stat [stat kobold]
   (+ (d/creature-stat stat kobold)
      (stat (equipment-stats kobold) 0)))
+
 (s/fdef kobold-stat
   :args (s/cat :stat ::d/stat
                :kobold ::kobold)
   :ret nat-int?)
+
 (defn kobold->stats [kobold]
   (->> d/stats
        (map #(vec [% (kobold-stat % kobold)]))
@@ -189,4 +192,11 @@
 (s/fdef equippable?
   :args (s/cat :kobold ::kobold
                :equipment ::eq/equipment)
+  :ret boolean?)
+
+(defn kobold? [thing]
+  (s/valid? ::kobold thing))
+
+(s/fdef kobold?
+  :args (s/cat :thing any?)
   :ret boolean?)
