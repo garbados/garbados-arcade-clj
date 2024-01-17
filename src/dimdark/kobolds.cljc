@@ -30,7 +30,7 @@
    :yap :sneak
    :yip :guardian})
 
-;; kobold growth apportions 18 growth points per level
+;; kobold growth apportions 20 growth points per level
 (def kobold-class-growth
   {:mage
    {:prowess 3
@@ -38,46 +38,55 @@
     :vigor 2
     :spirit 4
     :focus 5
-    :luck 1}
+    :luck 1
+    :scales 2}
    :druid
    {:prowess 1
     :alacrity 2
     :vigor 4
     :spirit 5
     :focus 3
-    :luck 3}
+    :luck 3
+    :stink 1
+    :squish 1}
    :ranger
    {:prowess 3
     :alacrity 5
     :vigor 2
     :spirit 3
     :focus 1
-    :luck 4}
+    :luck 4
+    :stink 1
+    :brat 1}
    :warrior
    {:prowess 5
     :alacrity 1
     :vigor 4
     :spirit 3
     :focus 2
-    :luck 3}
+    :luck 3
+    :squish 1
+    :brat 1}
    :sneak
    {:prowess 2
     :alacrity 4
     :vigor 2
     :spirit 2
     :focus 3
-    :luck 5}
+    :luck 5
+    :brat 2}
    :guardian
    {:prowess 4
     :alacrity 1
     :vigor 5
     :spirit 3
     :focus 2
-    :luck 3}})
+    :luck 3
+    :scales 2}})
 
 (s/def ::growth
   (s/with-gen
-    (s/map-of ::d/attribute ::d/level)
+    (s/map-of ::d/attr-or-merit ::d/level)
     #(g/fmap
       (fn [klass]
         (klass kobold-class-growth))
@@ -109,17 +118,19 @@
   (reduce
    (fn [kobolds kobold-name]
      (let [klass (kobold-name kobold-name->class)
-           growth (klass kobold-class-growth)]
+           growth (klass kobold-class-growth)
+           attr-growth (into {} (filter #(contains? d/attributes (first %)) growth))
+           merit-growth (into {} (filter #(contains? d/merits (first %)) growth))]
        (assoc kobolds kobold-name
               {:name kobold-name
                :level 1
                :class klass
                :abilities []
                :growth growth
-               :attributes (merge-with + base-attributes growth)
+               :attributes (merge-with + base-attributes attr-growth)
+               :merits merit-growth
                :aptitudes (reduce #(assoc %1 %2 0) {} d/elements)
                :resistances (reduce #(assoc %1 %2 0) {} d/elements)
-               :merits (reduce #(assoc %1 %2 0) {} d/merits)
                :equipped {:weapon (kobold-name starting-weapons)
                           :armor (kobold-name starting-armor)}})))
    {}

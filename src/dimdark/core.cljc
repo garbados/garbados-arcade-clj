@@ -9,26 +9,12 @@
 (s/def ::attributes (s/map-of ::attribute pos-int?))
 (def elements #{:fire :frost :poison :mental})
 (s/def ::element elements)
-(s/def ::aptitudes (s/map-of ::element nat-int?))
-(s/def ::resistances (s/map-of ::element nat-int?))
 (def merits #{:scales :squish :stink :brat})
-(def merit->element
-  {:scales :fire
-   :squish :frost
-   :stink  :poison
-   :brat   :mental})
 (s/def ::merit merits)
 (s/def ::merits (s/map-of ::merit nat-int?))
+(s/def ::aptitudes (s/map-of ::element nat-int?))
+(s/def ::resistances (s/map-of ::element nat-int?))
 (s/def ::abilities (s/coll-of keyword?))
-(s/def ::creature
-  (s/keys :req-un [::name
-                   ::level
-                   ::class
-                   ::attributes
-                   ::aptitudes
-                   ::resistances
-                   ::merits
-                   ::abilities]))
 
 (def ordered-stats
   [:health
@@ -38,19 +24,15 @@
    :initiative
    :fortune
    :aptitude
-   :fire-aptitude
-   :frost-aptitude
-   :poison-aptitude
-   :mental-aptitude
    :resistance
+   :fire-aptitude
    :fire-resistance
+   :frost-aptitude
    :frost-resistance
+   :poison-aptitude
    :poison-resistance
-   :mental-resistance
-   :scales
-   :squish
-   :stink
-   :brat])
+   :mental-aptitude
+   :mental-resistance])
 (def stats (set ordered-stats))
 (s/def ::stat stats)
 (s/def ::health nat-int?)
@@ -69,10 +51,6 @@
 (s/def ::frost-resistance nat-int?)
 (s/def ::poison-resistance nat-int?)
 (s/def ::mental-resistance nat-int?)
-(s/def ::scales nat-int?)
-(s/def ::squish nat-int?)
-(s/def ::stink nat-int?)
-(s/def ::brat nat-int?)
 (s/def ::stats
   (s/keys :req-un [::health
                    ::attack
@@ -89,15 +67,56 @@
                    ::fire-resistance
                    ::frost-resistance
                    ::poison-resistance
-                   ::mental-resistance
-                   ::scales
-                   ::squish
-                   ::stink
-                   ::brat]))
+                   ::mental-resistance]))
 
+(def effects
+  #{:damage
+    :healing
+    :mending
+    :delayed
+    :bleeding
+    :poisoned
+    :nauseous
+    :burning
+    :scorched
+    :chilled
+    :frozen
+    :sharpened
+    :disarmed
+    :focused
+    :distracted
+    :reinforced
+    :exposed
+    :blessed
+    :cursed
+    :quickened
+    :slowed
+    :laden
+    :robbed})
+(s/def ::effect effects)
+(s/def ::effects (s/map-of ::effect pos-int?))
+
+(s/def ::creature
+  (s/keys :req-un [::name
+                   ::level
+                   ::class
+                   ::attributes
+                   ::merits
+                   ::aptitudes
+                   ::resistances
+                   ::abilities]
+          :opt-un [::stats
+                   ::effects]))
+
+(s/def ::attr-or-merit
+  (s/or :attr ::attribute
+        :merit ::merit))
+(s/def ::stat-or-merit
+  (s/or :stat ::stat
+        :merit ::merit))
 (defmulti creature-stat (fn [stat _] stat))
 (s/fdef creature-stat
-  :args (s/cat :stat ::stat
+  :args (s/cat :stat ::stat-or-merit
                :creature ::creature)
   :ret nat-int?)
 (defmethod creature-stat :health [_ creature]
@@ -115,14 +134,6 @@
      (get-in creature [:attributes :vigor] 0)))
 (defmethod creature-stat :fortune [_ _]
   0)
-(defmethod creature-stat :scales [_ creature]
-  (get-in creature [:merits :scales] 0))
-(defmethod creature-stat :squish [_ creature]
-  (get-in creature [:merits :squish] 0))
-(defmethod creature-stat :stink [_ creature]
-  (get-in creature [:merits :stink] 0))
-(defmethod creature-stat :brat [_ creature]
-  (get-in creature [:merits :brat] 0))
 (defmethod creature-stat :aptitude [_ creature]
   (get-in creature [:attributes :focus] 0))
 (defmethod creature-stat :fire-aptitude [_ creature]
@@ -143,6 +154,14 @@
   (get-in creature [:resistances :poison] 0))
 (defmethod creature-stat :mental-resistance [_ creature]
   (get-in creature [:resistances :mental] 0))
+(defmethod creature-stat :scales [_ creature]
+  (get-in creature [:merits :scales] 0))
+(defmethod creature-stat :squish [_ creature]
+  (get-in creature [:merits :squish] 0))
+(defmethod creature-stat :stink [_ creature]
+  (get-in creature [:merits :stink] 0))
+(defmethod creature-stat :brat [_ creature]
+  (get-in creature [:merits :brat] 0))
 (defn creature->stats [creature]
   (->> stats
        (map #(vec [% (creature-stat % creature)]))
@@ -150,3 +169,12 @@
 (s/fdef creature->stats
   :args (s/cat :creature ::creature)
   :ret (s/map-of ::stat nat-int?))
+
+(defn reset-creature [creature]
+  (assoc creature
+         :stats (creature->stats creature)
+         :effects {}))
+
+(s/fdef reset-creature
+  :args (s/cat :creature ::creature)
+  :ret ::creature)

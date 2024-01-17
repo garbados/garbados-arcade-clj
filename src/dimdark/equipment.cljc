@@ -194,7 +194,7 @@
 
 (s/fdef equipment->mod-stats
   :args (s/cat :equipment ::equipment)
-  :ret (s/map-of ::d/stat nat-int?))
+  :ret (s/map-of ::d/stat-or-merit nat-int?))
 
 (def rare-first-word
   ["Agony"

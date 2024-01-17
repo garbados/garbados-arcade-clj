@@ -17,6 +17,9 @@
 (deftest spec-test
   (testing "modifier->details"
     (let [modifier-details-spec
-          (s/map-of ::eq/modifier (s/tuple d/stats ::eq/level))]
+          (s/map-of ::eq/modifier
+                    (s/tuple (s/or :stat ::d/stat
+                                   :merit ::d/merit)
+                             ::eq/level))]
       (is (s/valid? modifier-details-spec eq/modifier->details)
           (s/explain-str modifier-details-spec eq/modifier->details)))))

@@ -35,7 +35,7 @@
   (s/or :one ::d/stat
         :many (s/coll-of ::d/stat :kind set? :min-count 1)))
 (s/def ::uses (s/map-of ::stat-expr ::coefficient))
-(s/def ::effects (s/coll-of ::effect :kind set?))
+(s/def ::effects (s/map-of ::d/effect ::coefficient))
 (s/def ::self-effects ::effects)
 (s/def ::skill
   (s/keys :req-un [::d/name
@@ -65,44 +65,83 @@
            0
            uses)
     (contains? traits :fire) (+ (get-stat :fire-aptitude creature)
-                                (get-stat :scales creature))
+                                (get-in creature [:attributes :scales]))
     (contains? traits :frost) (+ (get-stat :frost-aptitude creature)
-                                 (get-stat :squish creature))
+                                 (get-in creature [:attributes :squish]))
     (contains? traits :poison) (+ (get-stat :poison-aptitude creature)
-                                  (get-stat :stink creature))
+                                  (get-in creature [:attributes :stink]))
     (contains? traits :mental) (+ (get-stat :mental-aptitude creature)
-                                  (get-stat :brat creature))))
+                                  (get-in creature [:attributes :brat]))))
 
 (defn get-target-magnitude [{:keys [traits]} creature]
   (cond-> 0
     (contains? traits :spell) (+ (get-stat :resistance creature))
     (contains? traits :physical) (+ (get-stat :defense creature))
     (contains? traits :fire) (+ (get-stat :fire-resistance creature)
-                                (get-stat :scales creature))
+                                (get-in creature [:attributes :scales]))
     (contains? traits :frost) (+ (get-stat :frost-resistance creature)
-                                 (get-stat :squish creature))
+                                 (get-in creature [:attributes :squish]))
     (contains? traits :poison) (+ (get-stat :poison-resistance creature)
-                                  (get-stat :stink creature))
+                                  (get-in creature [:attributes :stink]))
     (contains? traits :mental) (+ (get-stat :mental-resistance creature)
-                                  (get-stat :brat creature))))
+                                  (get-in creature [:attributes :brat]))))
 
-(defn use-skill [skill user & [target]]
+(defn use-skill-on-friendly-target [skill user]
+  (let [magnitude (int (get-user-magnitude skill user))
+        logarized (cond
+                    (pos? magnitude) (math-log2 magnitude)
+                    (zero? magnitude) 0
+                    :else (- (math-log2 (- magnitude))))
+        impact (int logarized)]
+    impact))
+
+(s/fdef use-skill-on-friendly-target
+  :args (s/cat :skill ::skill
+               :user ::d/creature)
+  :ret (s/tuple boolean? int?))
+
+(defn use-skill-on-hostile-target [skill user target]
   (let [user-magnitude (get-user-magnitude skill user)
-        target-magnitude (if target
-                           (get-target-magnitude skill target)
-                           0)
+        target-magnitude (get-target-magnitude skill target)
         magnitude (int (- user-magnitude target-magnitude))
-        logarized (if (nat-int? magnitude)
-                    (log2 magnitude)
-                    (- (log2 (- magnitude))))
-        threshold (- 10 logarized)
+        logarized (cond
+                    (pos? magnitude) (math-log2 magnitude)
+                    (zero? magnitude) 0
+                    :else (- (math-log2 (- magnitude))))
+        threshold (+ 10 (int logarized))
         roll (reduce + 0 (repeatedly 3 #(inc (rand-int 5))))
         diff (- threshold roll)
         success? (pos-int? diff)]
+    (println logarized threshold roll)
     [success? diff]))
 
-(s/fdef use-skill
+(s/fdef use-skill-on-hostile-target
   :args (s/cat :skill ::skill
                :user ::d/creature
                :target (s/? ::d/creature))
   :ret (s/tuple boolean? int?))
+
+(defn use-skill-on-hostile-targets [skill user targets]
+  (for [target targets]
+    (use-skill-on-hostile-target skill user target)))
+
+(s/fdef use-skill-on-hostile-targets
+  :args (s/cat :skill ::skill
+               :user ::d/creature
+               :targets (s/coll-of ::d/creature))
+  :ret (s/coll-of (s/tuple boolean? int?)))
+
+;; TODO
+(def skill->details
+  {:attack
+   {:name :attack
+    :traits #{:direct :close :hostile :physical}
+    :uses {:attack 1}
+    :effects {:damage 1}
+    :self-effects {}}
+   :shield-bash
+   {:name :shield-bash
+    :traits #{:direct :close :hostile :physical}
+    :uses {:attack 1}
+    :effects {:damage 0.5 :delayed 0.5}
+    :self-effects {}}})
