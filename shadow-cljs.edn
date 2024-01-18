@@ -10,4 +10,8 @@
   :longtime
   {:target :browser
    :output-dir "public/js/longtime"
-   :modules {:main {:entries [longtime.web]}}}}}
+   :modules {:main {:entries [longtime.web]}}}
+  :dimdark
+  {:target :browser
+   :output-dir "public/js/dimdark"
+   :modules {:main {:entries [dimdark.web]}}}}}
