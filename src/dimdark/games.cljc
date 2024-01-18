@@ -34,9 +34,12 @@
                    ::adventure
                    ::escapade]))
 
-(defn init-new-game []
-  {:kobolds k/kobolds
+(defn init-new-game [name]
+  {:name name
+   :kobolds k/kobolds
    :equipment []
    :items []
    :adventure nil
    :escapade nil})
+
+

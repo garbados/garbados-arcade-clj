@@ -13,4 +13,6 @@
    {:source-paths ["src" "test"]
     :dependencies [[thheller/shadow-cljs "2.26.4"]
                    [reagent "1.2.0"]
-                   [metosin/reitit "0.7.0-alpha7"]]}})
+                   [metosin/reitit "0.7.0-alpha7"]
+                   [metosin/reitit-spec "0.7.0-alpha7"]
+                   [metosin/reitit-frontend "0.7.0-alpha7"]]}})
