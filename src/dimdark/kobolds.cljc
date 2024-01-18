@@ -152,23 +152,39 @@
 (s/def ::kobolds
   (s/map-of ::name ::kobold))
 
-(defn equipment-stats [kobold]
+;; this function runs often so cache it
+(defn- -equipment-stats [equipped]
   (merge-with
    +
-   (let [{:keys [type level]} (get-in kobold [:equipped :weapon])]
+   (let [{:keys [type level]} (:weapon equipped)]
      (eq/weapon-level->stats type level))
-   (let [{:keys [type level]} (get-in kobold [:equipped :armor])]
+   (let [{:keys [type level]} (:armor equipped)]
      (eq/armor-level->stats type level))
-   (->> (:equipped kobold)
+   (->> (vals equipped)
         (map eq/equipment->mod-stats)
         (apply merge-with +))))
+(def ^:private -eq-stat-cache (atom []))
+(defn equipment-stats [{:keys [equipped]}]
+  (let [cache-stats
+        #(let [result (-equipment-stats equipped)]
+           (swap! -eq-stat-cache [equipped result])
+           result)]
+    (if-let [[prev-equipped prev-result] @-eq-stat-cache]
+      (if (= equipped prev-equipped)
+        prev-result
+        (cache-stats))
+      (cache-stats))))
+
+(s/fdef equipment-stats
+  :args (s/cat :kobold ::kobold)
+  :ret (s/map-of ::d/stat-or-merit nat-int?))
 
 (defn kobold-stat [stat kobold]
   (+ (d/creature-stat stat kobold)
      (stat (equipment-stats kobold) 0)))
 
 (s/fdef kobold-stat
-  :args (s/cat :stat ::d/stat
+  :args (s/cat :stat ::d/stat-or-merit
                :kobold ::kobold)
   :ret nat-int?)
 
@@ -176,9 +192,11 @@
   (->> d/stats
        (map #(vec [% (kobold-stat % kobold)]))
        (reduce #(assoc %1 (first %2) (second %2)) {})))
+
 (s/fdef kobold->stats
   :args (s/cat :kobold ::kobold)
-  :ret (s/map-of ::d/stat nat-int?))
+  :ret (s/map-of ::d/stat-or-merit nat-int?))
+
 (def proficiencies
   {:drg {:weapons #{:tome :orb}
          :armor #{:light}}
@@ -192,6 +210,7 @@
          :armor #{:light}}
    :yip {:weapons #{:sword :axe}
          :armor #{:medium :heavy}}})
+
 (defn equippable? [{:keys [name]} {:keys [slot type]}]
   (case slot
     :weapon
@@ -200,6 +219,7 @@
     (contains? (get-in proficiencies [name :armor]) (type eq/armor->class))
     :accessory
     true))
+
 (s/fdef equippable?
   :args (s/cat :kobold ::kobold
                :equipment ::eq/equipment)
@@ -209,5 +229,6 @@
   (s/valid? ::kobold thing))
 
 (s/fdef kobold?
-  :args (s/cat :thing any?)
+  :args (s/cat :thing (s/or :? any?
+                            :kobold ::kobold))
   :ret boolean?)

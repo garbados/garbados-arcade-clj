@@ -10,6 +10,7 @@
    [`eq/armor-level->stats
     `eq/equipment->mod-stats
     `eq/gen-basic-equipment
+    `eq/gen-equipment-from-level-rarity
     `eq/name-rare
     `eq/rand-modifier
     `eq/weapon-level->stats]))

@@ -5,9 +5,7 @@
             [reitit.coercion.spec :as rss]
             [reitit.frontend :as rf]
             [reitit.frontend.easy :as rfe]
-            [dimdark.core :as d]
-            [dimdark.kobolds :as k]
-            [dimdark.skills :as sk]
+            [dimdark.games :as g]
             [arcade.db :as db]))
 
 (def db (db/init-db "dimdark"))
@@ -57,17 +55,18 @@
        [:a.button.is-info
         {:href (rfe/href ::game)}
         "Play Game"]])
-    (when (some? @game)
-      (for [state [::game ::kobolds ::equipment ::crafting]]
+    (when (and (some? @game)
+               (nil? (get-in @game [:adventure])))
+      (for [state [::kobolds ::equipment ::crafting]]
         ^{:key state}
         [:div.level-item
          [:a.button.is-info
-          {}
-          (text/normalize-name state)]]))]
+          {:href (rfe/href state)}
+          (-> state name string/capitalize)]]))]
    [:div.level-right
     [:div.level-item
      [:a.button.is-info.is-light
-      {:href (rfe/)}
+      {:href (rfe/href ::credits)}
       "Credits"]]
     [:div.level-item
      [:a.button.is-info.is-light

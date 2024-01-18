@@ -9,7 +9,8 @@
    [`k/equipment-stats
     `k/equippable?
     `k/kobold-stat
-    `k/kobold->stats]))
+    `k/kobold->stats
+    `k/kobold?]))
 
 (deftest kobolds-spec-test
   (testing "Kobolds conform to spec."

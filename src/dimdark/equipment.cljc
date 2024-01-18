@@ -188,13 +188,14 @@
                :level ::level)
   :ret (s/map-of #{:armor :initiative} nat-int?))
 
-(defn equipment->mod-stats [equipment]
-  (->> (map modifier->details (:modifiers equipment))
-       (reduce #(assoc %1 (first %2) (second %2)) {})))
+(defn equipment->mod-stats [{:keys [modifiers]}]
+  (->> (map modifier->details modifiers)
+       (map #(into {} [%]))
+       (reduce (partial merge-with +))))
 
 (s/fdef equipment->mod-stats
   :args (s/cat :equipment ::equipment)
-  :ret (s/map-of ::d/stat-or-merit nat-int?))
+  :ret (s/nilable (s/map-of ::d/stat-or-merit nat-int?)))
 
 (def rare-first-word
   ["Agony"
@@ -427,3 +428,37 @@
 (s/fdef name-rare
   :args (s/cat :type ::type)
   :ret string?)
+
+(def rarities [:mundane :superior :enchanted :mythic])
+
+(defn gen-equipment-from-level-rarity [level rarity]
+  (let [i (.indexOf #?(:clj rarities :cljs (to-array rarities)) rarity)
+        modifiers
+        (take i (distinct (repeatedly #(rand-modifier level))))
+        type*
+        (case (rand-int 3)
+          0 (rand-nth (seq weapons))
+          1 (rand-nth (seq armors))
+          2 (rand-nth (seq accessories)))
+        armor? (= :armor (type* type->slot))
+        name*
+        (cond
+          (> i 1) (name-rare type*)
+          (= i 1) (let [[modifier] modifiers]
+                    (str (-> modifier name string/capitalize)
+                         " "
+                         (-> type* name string/capitalize)
+                         (when armor?
+                           " Armor")))
+          (= i 0) (str (-> type* name string/capitalize)
+                       (when armor?
+                         " Armor")))]
+    {:name name*
+     :type type*
+     :level level
+     :slot (type* type->slot)
+     :modifiers (vec modifiers)}))
+
+(s/fdef gen-equipment-from-level-rarity
+  :args (s/cat :level ::d/level
+               :rarity ::rarity))
