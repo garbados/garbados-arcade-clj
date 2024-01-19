@@ -1,10 +1,9 @@
 (ns dimdark.web
   (:require [arcade.db :as db]
             [arcade.reagent :refer [prompt-text]]
-            [clojure.string :as string]
+            [arcade.text :as text :refer-macros [inline-slurp]]
             [dimdark.games :as g]
-            [dimdark.text.credits :as credits]
-            [dimdark.text.intro :as intro]
+            [dimdark.web.game :as wg]
             [reagent.core :as r]
             [reagent.dom :as rd]
             [reitit.coercion.spec :as rss]
@@ -24,11 +23,10 @@
          #(do (reset! -game %)
               (rfe/navigate ::game))))
 
-(defn set-initial-game []
-  (or (case (count @-games)
-        0 (rfe/navigate ::new-game)
-        1 (load-game (first @-games)))
-      (rfe/navigate ::list-games)))
+(defn preload-game []
+  (when (= 1 (count @-games))
+    (.then (db/fetch-doc db (first @-games))
+           #(reset! -game %))))
 
 (defn init-new-game [save-name]
   (let [game (g/init-new-game save-name)]
@@ -37,25 +35,34 @@
     (swap! -games conj save-name)
     (rfe/navigate ::game)))
 
-(defn credits-view []
-  [:div.columns>div.column.is-10.is-offset-1>div.box>div.content
-   [:h3 credits/title]
-   [:p credits/thanks]
-   [:h4 credits/acknowledgements]
-   [:p credits/influences]])
-
 (defn index-view []
-  (set-initial-game)
+  (or (case (count @-games)
+        0 (rfe/navigate ::new-game)
+        1 (load-game (first @-games)))
+      (rfe/navigate ::list-games))
   [:<>])
+
+(def credits
+  (inline-slurp "resources/dimdark/credits.txt"))
+
+(defn credits-view []
+  [:div.columns>div.column.is-6.is-offset-3>div.box>div.content
+   [:h3 "Credits"]
+   (for [p (text/collect-text credits)]
+     [:p p])])
+
+(def intro-title
+  (inline-slurp "resources/dimdark/intro/title.txt"))
+
+(def intro-body
+  (inline-slurp "resources/dimdark/intro/body.txt"))
 
 (defn new-game-view []
   (let [-save-name (r/atom "")]
-    [:div.columns>div.column.is-10.is-offset-1>div.box>div.content
-     [:h3 intro/title]
-     [:p intro/section1]
-     [:p intro/section2]
-     [:p intro/section3]
-     [:p intro/section4]
+    [:div.columns>div.column.is-6.is-offset-3>div.box>div.content
+     [:h3 intro-title]
+     (for [p (text/collect-text intro-body)]
+       [:p p])
      [:div.field
       [:label.label "What do the kobolds call their dragon?"]
       [:div.control
@@ -67,7 +74,9 @@
         "Proceed into the Dimdark..."]]]]))
 
 (defn list-games-view []
-  [:div.columns>div.column.is-10.is-offset-1>div.box>div.content
+  (when (zero? (count @-games))
+    (rfe/navigate ::new-game))
+  [:div.columns>div.column.is-6.is-offset-3>div.box>div.content
    [:h3 "Saved Games"]
    (for [save-name @-games]
      ^{:key save-name}
@@ -77,9 +86,13 @@
        save-name]
       [:button.button.is-narrow.is-danger
        {:on-click
-        #(when (js/confirm "Delete this save?")
-           (.then (db/delete-doc db save-name)
-                  (fn [& _] (refresh-saved-games))))}
+        (fn [& _]
+          (when (js/confirm "Delete this save?")
+            (-> (db/delete-doc db save-name)
+                (.then refresh-saved-games)
+                (.then #(when (= save-name (:name @-game))
+                          (reset! -game nil)
+                          (rfe/navigate ::index))))))}
        "Delete!"]])])
 
 (def routes
@@ -95,9 +108,9 @@
    ["/list-games"
     {:name ::list-games
      :view list-games-view}]
-   #_["/game"
-      {:name ::game
-       :view game-view}]])
+   ["/game"
+    {:name ::game
+     :view (partial wg/game-view -game)}]])
 
 (def router
   (rf/router routes {:data {:coercion rss/coercion}}))
@@ -152,12 +165,9 @@
   (reset! current-view m))
 
 (defn- init-app! []
-  (rfe/start!
-   router
-   on-navigate
-   ;; set to false to enable HistoryAPI
-   {:use-fragment true})
-  (.then (refresh-saved-games)
-         #(rd/render [app] (js/document.getElementById "app"))))
+  (rfe/start! router on-navigate {:use-fragment true})
+  (-> (refresh-saved-games)
+      (.then preload-game)
+      (.then #(rd/render [app] (js/document.getElementById "app")))))
 
 (init-app!)

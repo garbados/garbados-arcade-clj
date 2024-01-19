@@ -11,7 +11,7 @@
             [longtime.moment :as moment]
             [longtime.project :as project]
             [longtime.remark :as remark]
-            [longtime.text :as text]
+            [arcade.text :as text]
             [reagent.core :as r]
             [reagent.dom :as rd]))
 

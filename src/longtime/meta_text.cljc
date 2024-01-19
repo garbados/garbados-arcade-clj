@@ -1,7 +1,7 @@
 (ns longtime.meta-text 
   (:require [clojure.string :as string]
             [longtime.core :as core]
-            [longtime.text :as text]))
+            [arcade.text :as text]))
 
 (def intro-text
   (text/join-text

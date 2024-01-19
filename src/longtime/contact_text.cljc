@@ -1,5 +1,5 @@
 (ns longtime.contact-text 
-  (:require [longtime.text :as text]))
+  (:require [arcade.text :as text]))
 
 (def auter-contact
   (text/join-text

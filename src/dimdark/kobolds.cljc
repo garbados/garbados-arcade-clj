@@ -163,17 +163,17 @@
    (->> (vals equipped)
         (map eq/equipment->mod-stats)
         (apply merge-with +))))
-(def ^:private -eq-stat-cache (atom []))
-(defn equipment-stats [{:keys [equipped]}]
-  (let [cache-stats
-        #(let [result (-equipment-stats equipped)]
-           (swap! -eq-stat-cache [equipped result])
-           result)]
-    (if-let [[prev-equipped prev-result] @-eq-stat-cache]
-      (if (= equipped prev-equipped)
-        prev-result
-        (cache-stats))
-      (cache-stats))))
+(def ^:private -eq-stat-cache (atom nil))
+(defn- cache-equipment-stats [equipped]
+  (let [result (-equipment-stats equipped)]
+    (reset! -eq-stat-cache [equipped result])
+    result))
+(defn equipment-stats [{:keys [equipped]}] 
+  (if-let [[prev-equipped prev-result] @-eq-stat-cache]
+    (if (= equipped prev-equipped)
+      prev-result
+      (cache-equipment-stats equipped))
+    (cache-equipment-stats equipped)))
 
 (s/fdef equipment-stats
   :args (s/cat :kobold ::kobold)

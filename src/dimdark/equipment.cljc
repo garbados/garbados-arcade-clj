@@ -430,6 +430,7 @@
   :ret string?)
 
 (def rarities [:mundane :superior :enchanted :mythic])
+(s/def ::rarity (set rarities))
 
 (defn gen-equipment-from-level-rarity [level rarity]
   (let [i (.indexOf #?(:clj rarities :cljs (to-array rarities)) rarity)
