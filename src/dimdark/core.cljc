@@ -3,6 +3,8 @@
 
 (s/def ::name keyword?)
 (s/def ::class keyword?)
+(def rows #{:front :back})
+(s/def ::row rows)
 (s/def ::level (s/int-in 1 6))
 (def attributes #{:prowess :alacrity :vigor :spirit :focus :luck})
 (s/def ::attribute attributes)
@@ -10,10 +12,13 @@
 (def elements #{:fire :frost :poison :mental})
 (s/def ::element elements)
 (def merits #{:scales :squish :stink :brat})
+(def merit->element
+  {:scales :fire
+   :squish :frost
+   :stink :poison
+   :brat :mental})
 (s/def ::merit merits)
 (s/def ::merits (s/map-of ::merit nat-int?))
-(s/def ::aptitudes (s/map-of ::element nat-int?))
-(s/def ::resistances (s/map-of ::element nat-int?))
 (s/def ::abilities (s/coll-of keyword?))
 
 (def ordered-stats
@@ -42,15 +47,9 @@
 (s/def ::initiative nat-int?)
 (s/def ::fortune nat-int?)
 (s/def ::aptitude nat-int?)
-(s/def ::fire-aptitude nat-int?)
-(s/def ::frost-aptitude nat-int?)
-(s/def ::poison-aptitude nat-int?)
-(s/def ::mental-aptitude nat-int?)
 (s/def ::resistance nat-int?)
-(s/def ::fire-resistance nat-int?)
-(s/def ::frost-resistance nat-int?)
-(s/def ::poison-resistance nat-int?)
-(s/def ::mental-resistance nat-int?)
+(s/def ::aptitudes (s/map-of ::element nat-int?))
+(s/def ::resistances (s/map-of ::element nat-int?))
 (s/def ::stats
   (s/keys :req-un [::health
                    ::attack
@@ -59,15 +58,9 @@
                    ::initiative
                    ::fortune
                    ::aptitude
-                   ::fire-aptitude
-                   ::frost-aptitude
-                   ::poison-aptitude
-                   ::mental-aptitude
+                   ::aptitudes
                    ::resistance
-                   ::fire-resistance
-                   ::frost-resistance
-                   ::poison-resistance
-                   ::mental-resistance]))
+                   ::resistances]))
 
 (def effects
   #{:damage
@@ -100,10 +93,9 @@
   (s/keys :req-un [::name
                    ::level
                    ::class
+                   ::row
                    ::attributes
                    ::merits
-                   ::aptitudes
-                   ::resistances
                    ::abilities]
           :opt-un [::stats
                    ::effects]))
@@ -178,3 +170,60 @@
 (s/fdef reset-creature
   :args (s/cat :creature ::creature)
   :ret ::creature)
+
+(defn attributes->stats
+  [{:keys [prowess alacrity vigor spirit focus luck
+           scales squish stink brat]
+    :or {prowess 0
+         alacrity 0
+         vigor 0
+         spirit 0
+         focus 0
+         scales 0
+         squish 0
+         stink 0
+         brat 0}}]
+  {:health (+ prowess vigor)
+   :attack prowess
+   :defense alacrity
+   :armor 0
+   :initiative (+ alacrity vigor)
+   :aptitude focus
+   :aptitudes {:fire scales :frost squish :poison stink :mental brat}
+   :resistance spirit
+   :resistances {:fire scales :frost squish :poison stink :mental brat}
+   :fortune luck})
+
+(defn stats+effects=>stats
+  [{:keys [health attack defense armor initiative aptitude aptitudes resistance resistances fortune]}
+   {:keys [sharpened quickened reinforced blessed focused laden
+           scorched chilled nauseous charmed]
+    :or {sharpened 0
+         quickened 0
+         reinforced 0
+         blessed 0
+         focused 0
+         laden 0
+         scorched 0
+         chilled 0
+         nauseous 0
+         charmed 0}}]
+  {:health health
+   :attack (+ attack sharpened)
+   :defense (+ defense quickened)
+   :armor (+ armor reinforced)
+   :initiative (+ initiative quickened)
+   :aptitude (+ aptitude focused)
+   :aptitudes aptitudes
+   :resistance (+ resistance blessed)
+   :resistances (let [{:keys [fire frost poison mental]} resistances]
+                  {:fire (- fire scorched)
+                   :frost (- frost chilled)
+                   :poison (- poison nauseous)
+                   :brat (- mental charmed)})
+   :fortune (+ fortune laden)})
+
+(s/fdef stats+effects=>stats
+  :args (s/cat :stats ::stats
+               :effects ::effects)
+  :ret ::stats)

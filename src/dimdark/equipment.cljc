@@ -1,5 +1,6 @@
 (ns dimdark.equipment 
   (:require [clojure.spec.alpha :as s]
+            [clojure.spec.gen.alpha :as g]
             [clojure.string :as string]
             [dimdark.core :as d]))
 
@@ -123,11 +124,15 @@
   :ret ::modifier)
 
 (s/def ::equipment
-  (s/keys :req-un [::name
-                   ::type
-                   ::level
-                   ::slot
-                   ::modifiers]))
+  (s/with-gen
+    (s/keys :req-un [::name
+                     ::type
+                     ::level
+                     ::slot
+                     ::modifiers])
+    #(g/fmap
+      (fn [equipment] (assoc equipment :slot (type->slot (:type equipment))))
+      (s/gen (s/keys :req-un [::name ::type ::level ::modifiers])))))
 
 (defn gen-basic-equipment [type]
   {:name (cond-> (string/capitalize (name type))
@@ -164,7 +169,7 @@
 (s/fdef weapon-level->stats
   :args (s/cat :type :weapon/type
                :level ::level)
-  :ret (s/map-of d/stats pos-int?))
+  :ret (s/map-of ::d/stat pos-int?))
 
 (def armor-type->stats
   {:padded  {:armor 0
@@ -188,14 +193,19 @@
                :level ::level)
   :ret (s/map-of #{:armor :initiative} nat-int?))
 
-(defn equipment->mod-stats [{:keys [modifiers]}]
-  (->> (map modifier->details modifiers)
-       (map #(into {} [%]))
-       (reduce (partial merge-with +))))
+(defn equipment->stats [{:keys [slot type level modifiers]}]
+  (merge-with +
+              (case slot
+                :weapon (weapon-level->stats type level)
+                :armor (armor-level->stats type level)
+                :accessory {})
+              (->> (map modifier->details modifiers)
+                   (map #(into {} [%]))
+                   (reduce (partial merge-with +) {}))))
 
-(s/fdef equipment->mod-stats
+(s/fdef equipment->stats
   :args (s/cat :equipment ::equipment)
-  :ret (s/nilable (s/map-of ::d/stat-or-merit nat-int?)))
+  :ret (s/map-of ::d/stat-or-merit pos-int?))
 
 (def rare-first-word
   ["Agony"
@@ -463,3 +473,23 @@
 (s/fdef gen-equipment-from-level-rarity
   :args (s/cat :level ::d/level
                :rarity ::rarity))
+
+#_(defn summarize-equipment [equipment]
+  (let [rarity-tier (count (:modifiers equipment))]
+    (cond
+      (> 1 rarity-tier)
+      (str (:name equipment)
+           " ( level "
+           (:level equipment)
+           " "
+           (:type equipment)
+           "; "
+           (string/join ", "
+                        (map name (:modifiers equipment)))
+           ")")
+      (= 1 rarity-tier)
+      (str (:name equipment)
+           " ("
+           (string/join ", "
+                        (map name (:modifiers equipment)))
+           ")"))))

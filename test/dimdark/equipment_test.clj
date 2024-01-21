@@ -8,7 +8,7 @@
 (deftest fspec-test
   (spec-test-syms
    [`eq/armor-level->stats
-    `eq/equipment->mod-stats
+    `eq/equipment->stats
     `eq/gen-basic-equipment
     `eq/gen-equipment-from-level-rarity
     `eq/name-rare

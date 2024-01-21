@@ -20,8 +20,8 @@
 (defn on-adventure? [game]
   (some? (:adventure game)))
 
-(defn game-view-menu [-state]
-  [:div.column.is-2
+(defn lair-view-menu [-state]
+  [:<>
    [:div.level
     [:button.button.is-fullwidth
      {:disabled (= :lair @-state)
@@ -87,15 +87,37 @@
          [:tbody
           [:tr
            (for [element elements]
-             [:th (k/kobold-stat (element->stat element) kobold)])]]]]))])
+             [:th (k/kobold-stat (element->stat element) kobold)])]]]]))
+   (for [slot [:weapon :armor :accessory]
+         :let [obj (get-in kobold [:equipped slot])]
+         :when (some? obj)]
+     [:div.level
+      [:div.level-left
+       [:div.level-item
+        [:span [:em (string/capitalize (name slot))]]
+        [:span (:name obj)]]]
+      [:div.level-right
+       [:div.level-item
+        [:span (string/join ", " (map name (:modifiers obj)))]]]])])
+
+(defn lair-home-view [-game] 
+  [:div.column>div.box>div.content
+   [:h1 (str "Lair of " (:name @-game))]
+   [:p [:em (rand-nth remarks)]]])
+
+(defn lair-kobolds-view [-game]
+  [:div.column>div.box>div.content
+   (for [kobold (map second (sort-by first k/kobolds))]
+     [kobold-view kobold])])
 
 (defn lair-view [-game -state]
-  [:div.column.is-5>div.box>div.content
-   [:h1 (str "Lair of " (:name @-game))]
-   [:p [:em (rand-nth remarks)]]
-   [:hr]
-   (for [[_ kobold] (sort-by first k/kobolds)]
-     [kobold-view kobold])])
+  [:div.columns
+   [:div.column.is-2
+    [lair-view-menu -state]]
+   [:div.column.is-10
+    (case @-state
+      :lair [lair-home-view -game]
+      :kobolds [lair-kobolds-view -game])]])
 
 (defn game-view [-game]
   (cond
@@ -104,7 +126,4 @@
     (on-adventure? @-game)
     'todo
     :else
-    (let [-state (r/atom :lair)]
-      [:div.columns
-       [game-view-menu -state]
-       [lair-view -game -state]])))
+    [lair-view -game (r/atom :kobolds)]))

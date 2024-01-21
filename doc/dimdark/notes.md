@@ -3,9 +3,9 @@
 Five adventures, each with 1-2 monster types and a boss
 
 - 1: The Despot's Crown: Orcs, Goblins; Orc Warlord
-- 2: The Dragon-Tamer: Spiders, Undead; Spider Queen
+- 2: The Dragon-Tamer: Spiders, Demons; Spider Queen
 - 3: Whom the Earth Adores: Slimes, Trolls; Troll King
-- 4: Light and Hate: Adventurers, Demons; Master Inquisitor
+- 4: Light and Hate: Hoomans, Undead; Master Inquisitor
 - 5: Til Death: Mechini; Beryl Agatis the Haunted
 
 Class and skill descriptions often have cool text! Check them while implementing!
@@ -19,3 +19,14 @@ Til Death is unlocked with a journal found at Delving level 30.
 New equipment paradigm:
 - Each dragon has two preferred equipment types, with different implicits.
 - Implicits scale with item level. Each level of each type has a different name. (Spear => Pike => Naginata, etc)
+
+What's the deal with attributes, merits, and stats?
+- Attributes and merits can be included in growth patterns.
+- Merits and stats can be affected by gear.
+- Stats can be affected by effects.
+
+What about a new monster paradigm...
+
+- VULNS: skill traits that double pre-roll magnitude. vuln:fire, vuln:physical, etc.; but also resist:physical...?
+
+hmm...
