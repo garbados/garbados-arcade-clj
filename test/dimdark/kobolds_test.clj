@@ -8,7 +8,7 @@
   (spec-test-syms
    [`k/equipment-stats
     `k/equippable?
-    `k/kobold-stat
+    `k/kobold->creature
     `k/kobold->stats
     `k/kobold?]))
 
@@ -21,7 +21,8 @@
   (testing "Kobolds can equip their own starting gear."
     (doseq [kobold (vals k/kobolds)
             :let [equipped (vals (:equipped kobold))]]
-      (doseq [equipment equipped]
+      (doseq [equipment equipped
+              :when (some? equipment)]
         (is (k/equippable? kobold equipment))))))
 
 (deftest class-growth-test

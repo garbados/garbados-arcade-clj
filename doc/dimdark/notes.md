@@ -27,6 +27,14 @@ What's the deal with attributes, merits, and stats?
 
 What about a new monster paradigm...
 
-- VULNS: skill traits that double pre-roll magnitude. vuln:fire, vuln:physical, etc.; but also resist:physical...?
+- VULNS: skill traits that double pre-roll magnitude. vuln:fire, vuln:physical, etc.; but also resist:physical...? maybe defense is always zero against effects with the given trait. a gaseous monster might even be vuln:area...!
 
 hmm...
+
+some ability trait ideas:
+
+- physical: uses attack and defense
+- spell: uses aptitude and resistance
+- skill: uses focus v focus!!
+
+elemental resists always apply when their trait comes up

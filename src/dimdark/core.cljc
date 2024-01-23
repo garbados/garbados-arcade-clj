@@ -2,7 +2,6 @@
   (:require [clojure.spec.alpha :as s]))
 
 (s/def ::name keyword?)
-(s/def ::class keyword?)
 (def rows #{:front :back})
 (s/def ::row rows)
 (s/def ::level (s/int-in 1 6))
@@ -19,7 +18,7 @@
    :brat :mental})
 (s/def ::merit merits)
 (s/def ::merits (s/map-of ::merit nat-int?))
-(s/def ::abilities (s/coll-of keyword?))
+(s/def ::abilities (s/coll-of keyword? :kind set?))
 
 (def ordered-stats
   [:health
@@ -41,17 +40,21 @@
 (def stats (set ordered-stats))
 (s/def ::stat stats)
 (s/def ::health nat-int?)
-(s/def ::attack nat-int?)
-(s/def ::defense nat-int?)
-(s/def ::armor nat-int?)
-(s/def ::initiative nat-int?)
-(s/def ::fortune nat-int?)
-(s/def ::aptitude nat-int?)
-(s/def ::resistance nat-int?)
-(s/def ::aptitudes (s/map-of ::element nat-int?))
-(s/def ::resistances (s/map-of ::element nat-int?))
+(s/def ::max-health ::health)
+(s/def ::attack int?)
+(s/def ::defense int?)
+(s/def ::armor int?)
+(s/def ::initiative int?)
+(s/def ::fortune int?)
+(s/def ::aptitude int?)
+(s/def ::resistance int?)
+(s/def ::aptitudes (s/map-of ::element int?))
+(s/def ::resistances (s/map-of ::element int?))
 (s/def ::stats
-  (s/keys :req-un [::health
+  (s/keys :opt-un [::row
+                   ::name
+                   ::max-health
+                   ::health
                    ::attack
                    ::defense
                    ::armor
@@ -89,112 +92,51 @@
 (s/def ::effect effects)
 (s/def ::effects (s/map-of ::effect pos-int?))
 
-(s/def ::creature
-  (s/keys :req-un [::name
-                   ::level
-                   ::class
-                   ::row
-                   ::attributes
-                   ::merits
-                   ::abilities]
-          :opt-un [::stats
-                   ::effects]))
-
 (s/def ::attr-or-merit
   (s/or :attr ::attribute
         :merit ::merit))
 (s/def ::stat-or-merit
   (s/or :stat ::stat
         :merit ::merit))
-(defmulti creature-stat (fn [stat _] stat))
-(s/fdef creature-stat
-  :args (s/cat :stat ::stat-or-merit
-               :creature ::creature)
-  :ret nat-int?)
-(defmethod creature-stat :health [_ creature]
-  (* 3
-     (+ (get-in creature [:attributes :prowess] 0)
-        (get-in creature [:attributes :vigor] 0))))
-(defmethod creature-stat :attack [_ creature]
-  (get-in creature [:attributes :prowess] 0))
-(defmethod creature-stat :defense [_ creature]
-  (get-in creature [:attributes :alacrity] 0))
-(defmethod creature-stat :armor [_ _]
-  0)
-(defmethod creature-stat :initiative [_ creature]
-  (+ (get-in creature [:attributes :alacrity] 0)
-     (get-in creature [:attributes :vigor] 0)))
-(defmethod creature-stat :fortune [_ _]
-  0)
-(defmethod creature-stat :aptitude [_ creature]
-  (get-in creature [:attributes :focus] 0))
-(defmethod creature-stat :fire-aptitude [_ creature]
-  (get-in creature [:aptitudes :fire] 0))
-(defmethod creature-stat :frost-aptitude [_ creature]
-  (get-in creature [:aptitudes :frost] 0))
-(defmethod creature-stat :poison-aptitude [_ creature]
-  (get-in creature [:aptitudes :poison] 0))
-(defmethod creature-stat :mental-aptitude [_ creature]
-  (get-in creature [:aptitudes :mental] 0))
-(defmethod creature-stat :resistance [_ creature]
-  (get-in creature [:attributes :spirit] 0))
-(defmethod creature-stat :fire-resistance [_ creature]
-  (get-in creature [:resistances :fire] 0))
-(defmethod creature-stat :frost-resistance [_ creature]
-  (get-in creature [:resistances :frost] 0))
-(defmethod creature-stat :poison-resistance [_ creature]
-  (get-in creature [:resistances :poison] 0))
-(defmethod creature-stat :mental-resistance [_ creature]
-  (get-in creature [:resistances :mental] 0))
-(defmethod creature-stat :scales [_ creature]
-  (get-in creature [:merits :scales] 0))
-(defmethod creature-stat :squish [_ creature]
-  (get-in creature [:merits :squish] 0))
-(defmethod creature-stat :stink [_ creature]
-  (get-in creature [:merits :stink] 0))
-(defmethod creature-stat :brat [_ creature]
-  (get-in creature [:merits :brat] 0))
-(defn creature->stats [creature]
-  (->> stats
-       (map #(vec [% (creature-stat % creature)]))
-       (reduce #(assoc %1 (first %2) (second %2)) {})))
-(s/fdef creature->stats
-  :args (s/cat :creature ::creature)
-  :ret (s/map-of ::stat nat-int?))
 
-(defn reset-creature [creature]
-  (assoc creature
-         :stats (creature->stats creature)
-         :effects {}))
+(defn merge-stats [stats1 stats2]
+  (merge-with (fn [x1 x2] (cond (map? x1) (merge-with + x1 x2)
+                                :else     (+ x1 x2)))
+              stats1
+              stats2))
 
-(s/fdef reset-creature
-  :args (s/cat :creature ::creature)
-  :ret ::creature)
-
-(defn attributes->stats
-  [{:keys [prowess alacrity vigor spirit focus luck
-           scales squish stink brat]
+(defn attributes+merits->stats
+  [{:keys [prowess alacrity vigor spirit focus luck]
     :or {prowess 0
          alacrity 0
          vigor 0
          spirit 0
          focus 0
-         scales 0
+         luck 0}}
+   {:keys [scales squish stink brat]
+    :or {scales 0
          squish 0
          stink 0
          brat 0}}]
-  {:health (+ prowess vigor)
-   :attack prowess
-   :defense alacrity
-   :armor 0
-   :initiative (+ alacrity vigor)
-   :aptitude focus
-   :aptitudes {:fire scales :frost squish :poison stink :mental brat}
-   :resistance spirit
-   :resistances {:fire scales :frost squish :poison stink :mental brat}
-   :fortune luck})
+  (let [max-health (+ prowess vigor)]
+    {:max-health max-health
+     :health max-health
+     :attack prowess
+     :defense alacrity
+     :armor 0
+     :initiative (+ alacrity vigor)
+     :aptitude focus
+     :aptitudes {:fire scales :frost squish :poison stink :mental brat}
+     :resistance spirit
+     :resistances {:fire scales :frost squish :poison stink :mental brat}
+     :fortune luck}))
 
-(defn stats+effects=>stats
+(s/fdef attributes+merits->stats
+  :args (s/cat :attributes ::attributes
+               :merits ::merits)
+  :ret ::stats)
+
+(defn stats+effects->stats
   [{:keys [health attack defense armor initiative aptitude aptitudes resistance resistances fortune]}
    {:keys [sharpened quickened reinforced blessed focused laden
            scorched chilled nauseous charmed]
@@ -216,14 +158,25 @@
    :aptitude (+ aptitude focused)
    :aptitudes aptitudes
    :resistance (+ resistance blessed)
-   :resistances (let [{:keys [fire frost poison mental]} resistances]
+   :resistances (let [{:keys [fire frost poison mental]
+                       :or {fire 0 frost 0 poison 0 mental 0}} resistances]
                   {:fire (- fire scorched)
                    :frost (- frost chilled)
                    :poison (- poison nauseous)
-                   :brat (- mental charmed)})
+                   :mental (- mental charmed)})
    :fortune (+ fortune laden)})
 
-(s/fdef stats+effects=>stats
+(s/fdef stats+effects->stats
   :args (s/cat :stats ::stats
                :effects ::effects)
   :ret ::stats)
+
+;; a creature is an instance of a being, prepped for combat!
+(s/def ::preferred-row ::row)
+(s/def ::creature
+  (s/keys :req-un [::name
+                   ::abilities
+                   ::stats
+                   ::effects
+                   ::row
+                   ::preferred-row]))

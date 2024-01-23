@@ -33,56 +33,17 @@
 ;; kobold growth apportions 20 growth points per level
 (def kobold-class-growth
   {:mage
-   {:prowess 3
-    :alacrity 3
-    :vigor 2
-    :spirit 4
-    :focus 5
-    :luck 1
-    :scales 2}
+   {:prowess 3 :alacrity 3 :vigor 2 :spirit 4 :focus 5 :luck 1 :scales 2}
    :druid
-   {:prowess 1
-    :alacrity 2
-    :vigor 4
-    :spirit 5
-    :focus 3
-    :luck 3
-    :stink 1
-    :squish 1}
+   {:prowess 1 :alacrity 2 :vigor 3 :spirit 5 :focus 4 :luck 3 :stink 1 :squish 1}
    :ranger
-   {:prowess 3
-    :alacrity 5
-    :vigor 2
-    :spirit 3
-    :focus 1
-    :luck 4
-    :stink 1
-    :brat 1}
+   {:prowess 3 :alacrity 5 :vigor 2 :spirit 3 :focus 1 :luck 4 :stink 2}
    :warrior
-   {:prowess 5
-    :alacrity 1
-    :vigor 4
-    :spirit 3
-    :focus 2
-    :luck 3
-    :squish 1
-    :brat 1}
+   {:prowess 5 :alacrity 1 :vigor 4 :spirit 3 :focus 2 :luck 3 :squish 1 :brat 1}
    :sneak
-   {:prowess 2
-    :alacrity 4
-    :vigor 2
-    :spirit 2
-    :focus 3
-    :luck 5
-    :brat 2}
+   {:prowess 2 :alacrity 4 :vigor 2 :spirit 2 :focus 3 :luck 5 :brat 2}
    :guardian
-   {:prowess 4
-    :alacrity 1
-    :vigor 5
-    :spirit 3
-    :focus 2
-    :luck 3
-    :scales 2}})
+   {:prowess 4 :alacrity 1 :vigor 5 :spirit 3 :focus 2 :luck 3 :scales 1 :squish 1}})
 
 (s/def ::growth
   (s/with-gen
@@ -97,6 +58,8 @@
    #(assoc %1 %2 2)
    {}
    d/attributes))
+
+(s/def ::equipped (s/map-of ::eq/slot (s/nilable ::eq/equipment)))
 
 (def starting-weapons
   {:drg (eq/gen-basic-equipment :tome)
@@ -114,36 +77,90 @@
    :yap (eq/gen-basic-equipment :leather)
    :yip (eq/gen-basic-equipment :splint)})
 
+(s/def ::all-abilities (s/coll-of (s/coll-of keyword? :count 3) :count 5))
+
+(def class->abilities
+  {:mage
+   [[:dragon-blooded :firebolt :empower-spell]
+    [:magic-missile :mage-armor :extend-spell]
+    [:soaring-strike :flame-breath :blink]
+    [:rend-and-tear :blood-rite :flame-wall]
+    [:inferno :devour :master-arcanist]]
+   :druid
+   [[:restore :tanglefoot :frostbolt]
+    [:protect :swarm :rejuvenate]
+    [:cleanse :skunkspray :nullify]
+    [:contain :hailstorm :snake-bite]
+    [:augment :bury :slither-form]]
+   :guardian
+   [[:shield-wall :shield-bash :defensive-stance]
+    [:armor-break :spirit-break :goad]
+    [:dragon-heart :fire-slash :ice-slash]
+    [:dragon-tail :giantslayer :radiant-stance]
+    [:grim-cleave :dread-roar :juggernaut]]
+   :warrior
+   [[:weapon-master :precise-strike :shove]
+    [:trip :disarm :wolf-stance]
+    [:frostbite :sweep :knockdown]
+    [:cold-snap :sunder :shatter]
+    [:wintertide :eviscerate :lacerate]]
+   :ranger
+   [[:scout :poison-shot :jawtrap]
+    [:aimed-shot :stinkbomb :field-medicine]
+    [:toxic-rain :flashbang :camouflage]
+    [:flurry-shot :hunters-mark :precision]
+    [:trick-shot :exploding-shot :mawtrap]]
+   :sneak
+   [[:fade :backstab :feint]
+    [:pickpocket :steal-magic :trapsense]
+    [:skewer :hamstring :sabotage]
+    [:brute :phase-bolt :evasion]
+    [:barrel-roll :panache :arcane-trickster]]})
+
+(def class->row
+  {:mage :back
+   :druid :back
+   :ranger :back
+   :sneak :front
+   :warrior :front
+   :guardian :front})
+
 (def kobolds
   (reduce
    (fn [kobolds kobold-name]
      (let [klass (kobold-name kobold-name->class)
            growth (klass kobold-class-growth)
            attr-growth (into {} (filter #(contains? d/attributes (first %)) growth))
-           merit-growth (into {} (filter #(contains? d/merits (first %)) growth))]
+           merit-growth (into {} (filter #(contains? d/merits (first %)) growth))
+           all-abilities (klass class->abilities)]
        (assoc kobolds kobold-name
               {:name kobold-name
                :level 1
                :class klass
-               :abilities []
+               :abilities (set (first all-abilities))
+               :all-abilities all-abilities
                :growth growth
+               :row (klass class->row)
                :attributes (merge-with + base-attributes attr-growth)
                :merits merit-growth
-               :aptitudes (reduce #(assoc %1 %2 0) {} d/elements)
-               :resistances (reduce #(assoc %1 %2 0) {} d/elements)
                :equipped {:weapon (kobold-name starting-weapons)
-                          :armor (kobold-name starting-armor)}})))
+                          :armor (kobold-name starting-armor)
+                          :accessory nil}})))
    {}
    kobold-names))
 
 (s/def ::kobold
   (s/with-gen
-    (s/and
-     ::d/creature
-     (s/keys :req-un [::name
-                      ::class
-                      ::growth
-                      ::equipped]))
+    (s/keys :req-un [::name
+                     ::d/level
+                     ::class
+                     ::d/abilities
+                     ::all-abilities
+                     ::growth
+                     ::d/row
+                     ::d/attributes
+                     ::d/merits
+                     ::equipped])
     #(g/fmap
       (fn [kobold-name]
         (kobold-name kobolds))
@@ -152,50 +169,26 @@
 (s/def ::kobolds
   (s/map-of ::name ::kobold))
 
-;; this function runs often so cache it
-(defn- -equipment-stats [equipped]
-  (merge-with
-   +
-   (let [{:keys [type level]} (:weapon equipped)]
-     (eq/weapon-level->stats type level))
-   (let [{:keys [type level]} (:armor equipped)]
-     (eq/armor-level->stats type level))
-   (->> (vals equipped)
-        (map eq/equipment->mod-stats)
-        (apply merge-with +))))
-(def ^:private -eq-stat-cache (atom nil))
-(defn- cache-equipment-stats [equipped]
-  (let [result (-equipment-stats equipped)]
-    (reset! -eq-stat-cache [equipped result])
-    result))
-(defn equipment-stats [{:keys [equipped]}] 
-  (if-let [[prev-equipped prev-result] @-eq-stat-cache]
-    (if (= equipped prev-equipped)
-      prev-result
-      (cache-equipment-stats equipped))
-    (cache-equipment-stats equipped)))
+(defn equipment-stats [equipped]
+  (reduce
+   #(d/merge-stats %1 (eq/equipment->stats %2))
+   {}
+   (filter some? (vals equipped))))
 
 (s/fdef equipment-stats
-  :args (s/cat :kobold ::kobold)
-  :ret (s/map-of ::d/stat-or-merit nat-int?))
+  :args (s/cat :equipped ::equipped)
+  :ret ::d/stats)
 
-(defn kobold-stat [stat kobold]
-  (+ (d/creature-stat stat kobold)
-     (stat (equipment-stats kobold) 0)))
-
-(s/fdef kobold-stat
-  :args (s/cat :stat ::d/stat-or-merit
-               :kobold ::kobold)
-  :ret nat-int?)
-
-(defn kobold->stats [kobold]
-  (->> d/stats
-       (map #(vec [% (kobold-stat % kobold)]))
-       (reduce #(assoc %1 (first %2) (second %2)) {})))
+(defn kobold->stats [{:keys [name attributes merits equipped row]}]
+  (merge-with (fn [x y] (cond (number? x) (+ x y)
+                              :else       (merge-with + x y)))
+              (d/attributes+merits->stats attributes merits)
+              (equipment-stats equipped)
+              {:row row :name name}))
 
 (s/fdef kobold->stats
   :args (s/cat :kobold ::kobold)
-  :ret (s/map-of ::d/stat-or-merit nat-int?))
+  :ret ::d/stats)
 
 (def proficiencies
   {:drg {:weapons #{:tome :orb}
@@ -232,3 +225,15 @@
   :args (s/cat :thing (s/or :? any?
                             :kobold ::kobold))
   :ret boolean?)
+
+(defn kobold->creature [kobold]
+  {:name (:name kobold)
+   :stats (kobold->stats kobold)
+   :effects {}
+   :abilities (:abilities kobold)
+   :row (:row kobold)
+   :preferred-row (:row kobold)})
+
+(s/fdef kobold->creature
+  :args (s/cat :kobold ::kobold)
+  :ret ::d/creature)

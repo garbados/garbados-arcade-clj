@@ -1,6 +1,9 @@
 (ns dimdark.monsters 
   (:require [clojure.spec.alpha :as s]
-            [dimdark.core :as d]))
+            [dimdark.core :as d]
+            [dimdark.abilities :as a]))
+
+(s/def ::vulns ::a/traits)
 
 (def cultures #{:orc :mechini :spider :undead :demon :hooman :goblin :slime :troll})
 (s/def ::culture cultures)
@@ -19,25 +22,37 @@
 (def monster-classes
   {:goblin
    {:raider
-    {:skills [:attack :net :trample :razor-pilum :plunderer]
+    {:abilities [:hew :net :trample :razor-pilum :plunderer]
      :growth {}
      :vulns #{:frost}
      :row :front}
     :warg
-    {:skills [:attack :takedown :flank :rend :howl]
+    {:abilities [:bite :takedown :flank :rend :howl]
      :growth {}
      :vulns #{:mental}
      :row :front}
     :mancer
-    {:skills [:poison-dart :knit-flesh :putrefy :flesh-offering :???]
+    {:abilities [:poison-dart :knit-flesh :putrefy :flesh-offering :???]
      :growth {}
      :vulns #{:physical}
      :row :back}
     :junker
-    {:skills [:blunderblast :tinker-tailor :oil-bomb :war-machine :???]
+    {:abilities [:blunderblast :tinker-tailor :oil-bomb :war-machine :???]
      :growth {}
      :vulns #{:fire}
      :row :back}}})
+
+(def classes (flatten (map keys (vals monster-classes))))
+(s/def ::class classes)
+
+(def abilities
+  (set
+   (flatten
+    (for [class->details (vals monster-classes)]
+      (for [{:keys [abilities]} (vals class->details)]
+        abilities)))))
+(s/def ::ability abilities)
+(s/def ::abilities (s/coll-of ::ability))
 
 (defn gen-monster
   ([level]
@@ -45,12 +60,25 @@
   ([level culture]
    (gen-monster level culture (rand-nth (keys (culture monster-classes)))))
   ([level culture klass]
-   (let [{:keys [growth vulns skills row]} (klass (culture monster-classes))
-         attributes (map
-                     (fn [[attr x]] [attr (* x level)])
-                     (merge-with + (culture monster-growth) growth))]
-     {:stats (d/attributes->stats attributes)
-      :skills (set (subvec skills 0 (inc level)))
+   (let [{:keys [growth vulns abilities row]} (klass (culture monster-classes))
+         leveled-growth (map
+                         (fn [[attr x]] [attr (* x level)])
+                         (merge-with + (culture monster-growth) growth))
+         attributes (into {} (filter #(contains? d/attributes (first %)) leveled-growth))
+         merits (into {} (filter #(contains? d/merits (first %)) leveled-growth))]
+     {:stats (d/attributes+merits->stats attributes merits)
+      :abilities (set (subvec abilities 0 (inc level)))
       :effects {}
       :vulns vulns
-      :row row})))
+      :row row
+      :preferred-row row})))
+
+(s/fdef gen-monster
+  :args (s/cat :level ::d/level
+               :culture (s/? ::culture)
+               :class (s/? ::class))
+  :ret ::d/creature)
+
+(s/def ::monster
+  (s/merge ::d/creature
+           (s/keys :req-un [::vulns])))

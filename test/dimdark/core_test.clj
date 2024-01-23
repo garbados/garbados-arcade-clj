@@ -5,8 +5,5 @@
 
 (deftest fspec-test
   (spec-test-syms
-   [`d/attributes->stats
-    `d/creature-stat
-    `d/creature->stats
-    `d/reset-creature
-    `d/stats+effects=>stats]))
+   [`d/attributes+merits->stats
+    `d/stats+effects->stats]))

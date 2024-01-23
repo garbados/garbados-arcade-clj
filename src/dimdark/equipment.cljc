@@ -82,7 +82,7 @@
    :initiative [:nimble :swift :fleet :spry :sprightly]
    :fortune [:lucky :favored :blessed :auspicious :prosperous]
    :aptitude [:skilled :adept :proficient :adroit :accomplished]
-   :fire-aptitude [:singed :burned :smolde:ring :seared :scalded]
+   :fire-aptitude [:singed :burned :smolderring :seared :scalded]
    :frost-aptitude [:chilly :cold :frigid :frozen :glacial]
    :poison-aptitude [:septic :pernicious :noxious :baleful :virulent]
    :mental-aptitude [:charming :persuasive :eloquent :allu:ring :seductive]
@@ -194,18 +194,29 @@
   :ret (s/map-of #{:armor :initiative} nat-int?))
 
 (defn equipment->stats [{:keys [slot type level modifiers]}]
-  (merge-with +
-              (case slot
-                :weapon (weapon-level->stats type level)
-                :armor (armor-level->stats type level)
-                :accessory {})
-              (->> (map modifier->details modifiers)
-                   (map #(into {} [%]))
-                   (reduce (partial merge-with +) {}))))
+  (into
+   {}
+   (reduce
+    (fn [stats [stat value]]
+      (if-let [matches (re-matches #"^(.+)-(.+)$" (name stat))]
+        (let [[element attr] (map keyword (drop 1 matches))]
+          (case attr
+            :resistance (assoc-in stats [:resistances element] value)
+            :aptitude (assoc-in stats [:aptitudes element] value)))
+        (assoc stats stat value)))
+    {}
+    (merge-with +
+                (case slot
+                  :weapon (weapon-level->stats type level)
+                  :armor (armor-level->stats type level)
+                  :accessory {})
+                (->> (map modifier->details modifiers)
+                     (map #(into {} [%]))
+                     (reduce (partial merge-with +) {}))))))
 
 (s/fdef equipment->stats
   :args (s/cat :equipment ::equipment)
-  :ret (s/map-of ::d/stat-or-merit pos-int?))
+  :ret ::d/stats)
 
 (def rare-first-word
   ["Agony"
