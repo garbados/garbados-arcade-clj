@@ -30,7 +30,7 @@
   {:goblin
    {:raider
     {:abilities [:hew :net :trample :razor-pilum :plunderer]
-     :growth {}
+     :growth {:prowess HIGH :alacrity HIGH :vigor MEDIUM :spirit LOW :focus LOW :scales LOW}
      :vulns #{:frost}
      :row :front}
     :warg
