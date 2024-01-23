@@ -40,9 +40,22 @@
     {:abilities [:blunderblast :tinker-tailor :oil-bomb :war-machine :???]
      :growth {}
      :vulns #{:fire}
-     :row :back}}})
+     :row :back}}
+   :orc
+   {:berserker
+    {:abilities [:attack :blitz :battlecry :rampage :do-and-die]
+     :growth {}
+     :vulns #{:mental}
+     :row :front}
+    :warhead
+    {:abilities [:augment :organize :rally :browbeat :master-tactician]
+     :growth {}
+     :vulns #{:frost}
+     :row :back}
+    :bloodmucker
+    {:abilities [:essence-bolt :searing-lash :devitalize :bloodlust :sacrifice]}}})
 
-(def classes (flatten (map keys (vals monster-classes))))
+(def classes (set (flatten (map keys (vals monster-classes)))))
 (s/def ::class classes)
 
 (def abilities
