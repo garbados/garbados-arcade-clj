@@ -169,7 +169,7 @@
 (s/fdef weapon-level->stats
   :args (s/cat :type :weapon/type
                :level ::level)
-  :ret (s/map-of ::d/stat pos-int?))
+  :ret ::d/stats)
 
 (def armor-type->stats
   {:padded  {:armor 0

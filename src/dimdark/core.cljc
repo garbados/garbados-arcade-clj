@@ -20,25 +20,6 @@
 (s/def ::merits (s/map-of ::merit nat-int?))
 (s/def ::abilities (s/coll-of keyword? :kind set?))
 
-(def ordered-stats
-  [:health
-   :attack
-   :defense
-   :armor
-   :initiative
-   :fortune
-   :aptitude
-   :resistance
-   :fire-aptitude
-   :fire-resistance
-   :frost-aptitude
-   :frost-resistance
-   :poison-aptitude
-   :poison-resistance
-   :mental-aptitude
-   :mental-resistance])
-(def stats (set ordered-stats))
-(s/def ::stat stats)
 (s/def ::health nat-int?)
 (s/def ::max-health ::health)
 (s/def ::attack int?)
@@ -50,6 +31,8 @@
 (s/def ::resistance int?)
 (s/def ::aptitudes (s/map-of ::element int?))
 (s/def ::resistances (s/map-of ::element int?))
+(s/def ::stat #{:health :attack :defense :armor :initiative :aptitude :resistance :fortune
+                :aptitudes :resistances})
 (s/def ::stats
   (s/keys :opt-un [::row
                    ::name
@@ -137,7 +120,18 @@
   :ret ::stats)
 
 (defn stats+effects->stats
-  [{:keys [health attack defense armor initiative aptitude aptitudes resistance resistances fortune]}
+  [{:keys [health attack defense armor initiative aptitude aptitudes resistance resistances fortune]
+    :or {health 0
+         attack 0
+         defense 0
+         armor 0
+         initiative 0
+         aptitude 0
+         aptitudes {}
+         resistance 0
+         resistances {}
+         fortune 0}
+    :as stats}
    {:keys [sharpened quickened reinforced blessed focused laden
            scorched chilled nauseous charmed]
     :or {sharpened 0
@@ -150,21 +144,22 @@
          chilled 0
          nauseous 0
          charmed 0}}]
-  {:health health
-   :attack (+ attack sharpened)
-   :defense (+ defense quickened)
-   :armor (+ armor reinforced)
-   :initiative (+ initiative quickened)
-   :aptitude (+ aptitude focused)
-   :aptitudes aptitudes
-   :resistance (+ resistance blessed)
-   :resistances (let [{:keys [fire frost poison mental]
-                       :or {fire 0 frost 0 poison 0 mental 0}} resistances]
-                  {:fire (- fire scorched)
-                   :frost (- frost chilled)
-                   :poison (- poison nauseous)
-                   :mental (- mental charmed)})
-   :fortune (+ fortune laden)})
+  (merge stats
+         {:health health
+          :attack (+ attack sharpened)
+          :defense (+ defense quickened)
+          :armor (+ armor reinforced)
+          :initiative (+ initiative quickened)
+          :aptitude (+ aptitude focused)
+          :aptitudes aptitudes
+          :resistance (+ resistance blessed)
+          :resistances (let [{:keys [fire frost poison mental]
+                              :or {fire 0 frost 0 poison 0 mental 0}} resistances]
+                         {:fire (- fire scorched)
+                          :frost (- frost chilled)
+                          :poison (- poison nauseous)
+                          :mental (- mental charmed)})
+          :fortune (+ fortune laden)}))
 
 (s/fdef stats+effects->stats
   :args (s/cat :stats ::stats
