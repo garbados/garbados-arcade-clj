@@ -247,7 +247,7 @@
          attributes (into {} (filter #(contains? d/attributes (first %)) leveled-growth))
          merits (into {} (filter #(contains? d/merits (first %)) leveled-growth))]
      {:name (keyword (string/join "-" (map (comp string/capitalize name) [klass culture])))
-      :stats (d/attributes+merits->stats attributes merits)
+      :stats (assoc (d/attributes+merits->stats attributes merits) :row row)
       :abilities (set (subvec abilities 0 (min (inc level) (count abilities))))
       :effects {}
       :vulns vulns

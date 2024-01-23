@@ -35,7 +35,6 @@
                 :aptitudes :resistances})
 (s/def ::stats
   (s/keys :opt-un [::row
-                   ::name
                    ::max-health
                    ::health
                    ::attack
@@ -167,11 +166,9 @@
   :ret ::stats)
 
 ;; a creature is an instance of a being, prepped for combat!
-(s/def ::preferred-row ::row)
 (s/def ::creature
   (s/keys :req-un [::name
                    ::abilities
                    ::stats
                    ::effects
-                   ::row
-                   ::preferred-row]))
+                   ::row]))
