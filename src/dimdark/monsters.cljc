@@ -35,17 +35,17 @@
      :row :front}
     :warg
     {:abilities [:bite :takedown :flank :rend :howl]
-     :growth {}
+     :growth {:prowess MEDIUM :alacrity HIGH :vigor MEDIUM :spirit LOW :focus MEDIUM :squish LOW}
      :vulns #{:mental}
      :row :front}
     :mancer
-    {:abilities [:poison-dart :knit-flesh :putrefy :flesh-offering :???]
-     :growth {}
+    {:abilities [:poison-dart :knit-flesh :putrefy :flesh-offering :spirit-offering]
+     :growth {:prowess LOW :alacrity MEDIUM :vigor LOW :spirit HIGH :focus MEDIUM :stink MEDIUM}
      :vulns #{:physical}
      :row :back}
     :junker
-    {:abilities [:blunderblast :tinker-tailor :oil-bomb :war-machine :???]
-     :growth {}
+    {:abilities [:spark-bomb :blunderblast :tinker-tailor :oil-bomb :war-machine]
+     :growth {:prowess HIGH :alacrity LOW :vigor MEDIUM :spirit MEDIUM :focus MEDIUM :scales LOW}
      :vulns #{:fire}
      :row :back}}
    :orc
@@ -181,10 +181,10 @@
      :vulns #{:frost}
      :row :front}
     :steelfly
-    {:abilities [:fire-nail :??? :??? :??? :???]
+    {:abilities [:attack :fire-nail :alarming-buzz :fiery-sting :overheat]
      :growth {}
      :vulns #{:physical}
-     :row :back}
+     :row :front}
     :manufacterist
     {:abilities [:repair :overdrive :upgrade :construct-ally :industrialist]
      :growth {}
@@ -209,12 +209,12 @@
     :wizard
     {:abilities [:frostbolt :fireball :force-shield :center-the-eye :master-arcanist]
      :growth {}
-     :vulns #{:poison}
+     :vulns #{:physical}
      :row :back}
     :bard
     {:abilities [:rousing-anthem :intimidating-chant :grave-dirge :shocking-aria :maestro]
      :growth {}
-     :vulns #{:mental}
+     :vulns #{:physical}
      :row :back}
     :gladiator
     {:abilities [:attack :assault :leap-slam :whirlwind :shrug-off]
@@ -225,12 +225,7 @@
 (def classes (set (flatten (map keys (vals monster-classes)))))
 (s/def ::class classes)
 
-(def abilities
-  (set
-   (flatten
-    (for [class->details (vals monster-classes)]
-      (for [{:keys [abilities]} (vals class->details)]
-        abilities)))))
+(def abilities (set (flatten (map :abilities (flatten (map vals (vals monster-classes)))))))
 (s/def ::ability abilities)
 (s/def ::abilities (s/coll-of ::ability :max-count 5))
 

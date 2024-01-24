@@ -8,6 +8,7 @@
   #?(:clj (/ (Math/log x) clj-log2)
      :cljs (js/Math.log2 x)))
 
+(s/def ::description string?)
 (def traits
   #{:close
     :ranged
@@ -39,6 +40,7 @@
 (s/def ::self-effects ::effects)
 (s/def ::ability-details
   (s/keys :req-un [::d/name
+                   ::description
                    ::traits]
           :opt-un [::uses
                    ::effects
@@ -47,15 +49,22 @@
 (def ability->details
   {:attack
    {:name :attack
+    :description "Strike at an enemy with your weapon!"
     :traits #{:direct :close :hostile :physical}
     :effects {:damage 1}}
    :shield-bash
    {:name :shield-bash
+    :description "Slam your shield into an enemy, delaying their next turn."
     :traits #{:direct :close :hostile :physical}
-    :uses {:armor 0.5}
-    :effects {:damage 0.5 :delayed 1}}})
+    :uses {:armor 2}
+    :effects {:damage 0.5 :delayed 1}}
+   :firebolt
+   {:name :firebolt
+    :description "Conjure a ball of oily fire and lob it at a foe."
+    :traits #{:direct :ranged :hostile :fire :spell}
+    :effects {:damage 0.8 :burning 1}}})
 
-(def abilities (keys ability->details))
+(def abilities (set (keys ability->details)))
 (s/def ::ability abilities)
 
 (defn get-user-magnitude [ability creature]
@@ -67,15 +76,15 @@
              (fn [sum [stat coefficient]]
                (+ sum
                   (* coefficient
-                     (get-in creature [:stats stat]))))
+                     (get-in creature [:stats stat] 0))))
              0
              uses)
       (contains? traits :physical) (+ attack)
       (contains? traits :spell) (+ aptitude)
-      (contains? traits :fire) (+ (:fire aptitudes))
-      (contains? traits :frost) (+ (:frost aptitudes))
-      (contains? traits :poison) (+ (:poison aptitudes))
-      (contains? traits :mental) (+ (:mental aptitudes)))))
+      (contains? traits :fire) (+ (:fire aptitudes 0))
+      (contains? traits :frost) (+ (:frost aptitudes 0))
+      (contains? traits :poison) (+ (:poison aptitudes 0))
+      (contains? traits :mental) (+ (:mental aptitudes 0)))))
 
 (s/fdef get-user-magnitude
   :args (s/cat :ability ::ability
@@ -91,10 +100,10 @@
       (cond-> 0
         (contains? traits :physical) (+ defense)
         (contains? traits :spell) (+ resistance)
-        (contains? traits :fire) (+ (:fire resistances))
-        (contains? traits :frost) (+ (:frost resistances))
-        (contains? traits :poison) (+ (:poison resistances))
-        (contains? traits :mental) (+ (:mental resistances))))))
+        (contains? traits :fire) (+ (:fire resistances 0))
+        (contains? traits :frost) (+ (:frost resistances 0))
+        (contains? traits :poison) (+ (:poison resistances 0))
+        (contains? traits :mental) (+ (:mental resistances 0))))))
 
 (s/fdef get-target-magnitude
   :args (s/cat :ability ::ability
@@ -119,8 +128,7 @@
 
 (s/fdef friendly-ability-hits?
   :args (s/cat :ability ::ability
-               :user ::d/creature
-               :target ::d/creature)
+               :user ::d/creature)
   :ret nat-int?)
 
 (defn hostile-ability-hits? [ability user target]
@@ -141,10 +149,12 @@
   :ret int?)
 
 (defn resolve-effects [effects margin]
-  (into {} (for [[effect coefficient] effects]
-             [effect (int (* margin coefficient))])))
+  (into {} (for [[effect coefficient] effects
+                 :let [value (int (* margin coefficient))]
+                 :when (pos-int? value)]
+             [effect value])))
 
 (s/fdef resolve-effects
   :args (s/cat :effects ::effects
                :margin number?)
-  :ret ::effects)
+  :ret (s/map-of ::d/effect nat-int?))

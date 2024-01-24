@@ -183,10 +183,11 @@
    :plate   {:armor 3}})
 
 (defn armor-level->stats [type level]
-  (let [stats (type armor-type->stats)]
-    (if (= 1 (:initiative stats 0))
-      (assoc stats :initiative level)
-      stats)))
+  (let [stats (armor-type->stats type)
+        weight (.indexOf [:light :medium :heavy] (armor->class type))]
+    (cond-> stats
+      (= 1 (:initiative stats 0)) (assoc :initiative level)
+      (pos-int? weight) (assoc :defense (- weight)))))
 
 (s/fdef armor-level->stats
   :args (s/cat :type :armor/type

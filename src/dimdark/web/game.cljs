@@ -2,7 +2,13 @@
   (:require [arcade.text :refer-macros [inline-slurp]]
             [dimdark.kobolds :as k]
             [reagent.core :as r]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [dimdark.core :as d]
+            [dimdark.equipment :as eq]
+            [dimdark.abilities :as a]))
+
+(defn color-text [color x]
+  [:span {:style {:color color}} x])
 
 (def remarks
   (filter
@@ -51,62 +57,121 @@
       [:h3 (:name kobold)]]]
     [:div.level-right
      [:div.level-item
-      [:h5 (name (:class kobold))]]]]
-   [:p "Attributes"]
-   (let [attributes [:prowess :alacrity :vigor :spirit :focus :luck]]
+      [:h4 (name (:class kobold))]]]]
+   [:div.columns
+    [:div.column.is-6
+     [:h5 "Attributes"]
+     (let [attributes [:prowess :alacrity :vigor :spirit :focus :luck]]
+       [:table.table
+        [:thead
+         [:tr
+          (for [attribute attributes]
+            [:th (string/capitalize (name attribute))])]]
+        [:tbody
+         [:tr
+          (for [value (map #(get-in kobold [:attributes %]) attributes)]
+            [:th value])]]])
+     [:h5 "Merits"]
+     (let [merits [:scales :squish :stink :brat]]
+       [:table.table
+        [:thead
+         [:tr
+          (for [merit merits]
+            [:th (string/capitalize (name merit))])]]
+        [:tbody
+         [:tr
+          (for [merit merits]
+            #_[[merit color] [[:scales :red]
+                              [:squish :blue]
+                              [:stink :green]
+                              [:brat :purple]]]
+            [:th (get-in kobold [:merits merit] 0)])]]])
+     [:h5 "Equipment"]
      [:table.table
-      [:thead
-       [:tr
-        (for [attribute attributes]
-          [:th (string/capitalize (name attribute))])]]
       [:tbody
-       [:tr
-        (for [value (map #(get-in kobold [:attributes %]) attributes)]
-          [:th value])]]])
-   [:p "Merits"]
-   (let [merits [:scales :squish :stink :brat]]
-     [:table.table
-      [:thead
-       [:tr
-        (for [merit merits]
-          [:th (string/capitalize (name merit))])]]
-      [:tbody
-       [:tr
-        (for [merit merits]
-          [:th (k/kobold-stat merit kobold)])]]])
-   (for [stat [:aptitude :resistance]]
-     (let [elements [:fire :frost :poison :mental]
-           element->stat #(keyword (str (name %) "-" (name stat)))]
+       (for [slot [:weapon :armor :accessory]
+             :let [obj (get-in kobold [:equipped slot])]
+             :when (some? obj)]
+         [:tr
+          [:td.is-narrow [:em (string/capitalize (name slot))]]
+          [:td
+           [:div.level
+            [:div.level-left
+             [:div.level-item
+              [:span]]
+             [:div.level-item
+              [:span (:name obj)]]]
+            [:div.level-right
+             [:div.level-item
+              [:span
+               (string/join
+                "; "
+                (for [[stat value] (eq/equipment->stats obj)
+                      :when (pos-int? value)]
+                  (str (string/capitalize (name stat)) ": " value)))]]]]]])]]]
+    [:div.column.is-6
+     (let [printable-stats
+           (reduce
+            (fn [stats [stat value]]
+              (if (map? value)
+                (reduce
+                 (fn [stats [element value]]
+                   (assoc stats
+                          (string/join ": " (map (comp string/capitalize name) [stat element]))
+                          value))
+                 stats
+                 value)
+                (assoc stats (string/capitalize (name stat)) value)))
+            {}
+            (k/kobold->stats kobold))]
        [:<>
-        [:p (str (string/capitalize (name stat)) "s")]
+        [:h5 "Stats"]
         [:table.table
-         [:thead
-          [:tr
-           (for [element elements]
-             [:th (string/capitalize (name element))])]]
          [:tbody
-          [:tr
-           (for [element elements]
-             [:th (k/kobold-stat (element->stat element) kobold)])]]]]))
-   (for [slot [:weapon :armor :accessory]
-         :let [obj (get-in kobold [:equipped slot])]
-         :when (some? obj)]
-     [:div.level
-      [:div.level-left
-       [:div.level-item
-        [:span [:em (string/capitalize (name slot))]]
-        [:span (:name obj)]]]
-      [:div.level-right
-       [:div.level-item
-        [:span (string/join ", " (map name (:modifiers obj)))]]]])])
+          (for [stat ["Health" "Attack" "Defense" "Armor" "Initiative" "Fortune"
+                      "Aptitude"
+                      "Aptitudes: Fire"
+                      "Aptitudes: Frost"
+                      "Aptitudes: Poison"
+                      "Aptitudes: Mental"
+                      "Resistance"
+                      "Resistances: Fire"
+                      "Resistances: Frost"
+                      "Resistances: Poison"
+                      "Resistances: Mental"]
+                :let [value (get printable-stats stat)]
+                :when (pos-int? value)]
+            [:tr
+             [:td stat]
+             [:td value]])]]])]]
+   [:<>
+    [:h5 "Abilities"]
+    (for [ability (:abilities kobold)
+          :let [details (a/ability->details ability)]
+          :when (some? details)]
+      [:div.level
+       [:div.level-left
+        [:div.level-item
+         [:p 
+          (string/join
+           ": "
+           [(string/join " " (map string/capitalize (string/split (name ability) "-")))
+            (:description details)])]]]
+       [:div.level-right
+        [:div.level-item
+         [:p (string/join ", " (map (comp (partial string/join " ")
+                                          #(map string/capitalize %)
+                                          #(string/split % "-")
+                                          name)
+                                    (:traits details)))]]]])]])
 
 (defn lair-home-view [-game] 
-  [:div.column>div.box>div.content
+  [:div.box>div.content
    [:h1 (str "Lair of " (:name @-game))]
    [:p [:em (rand-nth remarks)]]])
 
 (defn lair-kobolds-view [-game]
-  [:div.column>div.box>div.content
+  [:div.box
    (for [kobold (map second (sort-by first k/kobolds))]
      [kobold-view kobold])])
 

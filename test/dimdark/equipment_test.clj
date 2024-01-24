@@ -2,7 +2,6 @@
   (:require [arcade.test-util :refer [spec-test-syms]]
             [clojure.spec.alpha :as s]
             [clojure.test :refer [deftest is testing]]
-            [dimdark.core :as d]
             [dimdark.equipment :as eq]))
 
 (deftest fspec-test

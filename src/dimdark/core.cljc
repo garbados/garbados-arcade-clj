@@ -11,11 +11,11 @@
 (def elements #{:fire :frost :poison :mental})
 (s/def ::element elements)
 (def merits #{:scales :squish :stink :brat})
-(def merit->element
-  {:scales :fire
-   :squish :frost
-   :stink :poison
-   :brat :mental})
+(def element->merit
+  {:fire :scales
+   :frost :squish
+   :poison :stink
+   :mental :brat})
 (s/def ::merit merits)
 (s/def ::merits (s/map-of ::merit nat-int?))
 (s/def ::abilities (s/coll-of keyword? :kind set?))
