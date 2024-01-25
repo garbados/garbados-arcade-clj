@@ -1,0 +1,23 @@
+{:name :knz
+ :class :ranger
+ :row :back
+ :growth
+ {:prowess 3
+  :alacrity 5
+  :vigor 2
+  :spirit 3
+  :focus 1
+  :luck 4
+  :stink 2}
+ :proficiencies
+ {:weapons #{:bow :crossbow}
+  :armor #{:light}}
+ :equipped
+ {:weapon :bow
+  :armor :leather}
+ :abilities
+ [[:scout :poison-shot :jawtrap]
+  [:aimed-shot :stinkbomb :field-medicine]
+  [:toxic-rain :flashbang :camouflage]
+  [:flurry-shot :hunters-mark :precision]
+  [:trick-shot :exploding-shot :mawtrap]]}

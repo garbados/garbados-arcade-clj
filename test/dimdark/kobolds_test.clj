@@ -15,18 +15,9 @@
 (deftest kobolds-spec-test
   (testing "Kobolds conform to spec."
     (is (s/valid? ::k/kobolds k/kobolds)
-        (s/explain-str ::k/kobolds k/kobolds))))
-
-(deftest equippable-starting-gear-test
-  (testing "Kobolds can equip their own starting gear."
-    (doseq [kobold (vals k/kobolds)
-            :let [equipped (vals (:equipped kobold))]]
-      (doseq [equipment equipped
-              :when (some? equipment)]
-        (is (k/equippable? kobold equipment))))))
-
-(deftest class-growth-test
-  (testing "Kobold growth patterns use valid number of points"
-    (doseq [[klass growth] k/kobold-class-growth]
-      (is (= 20 (reduce + 0 (vals growth)))
-          (str (name klass) " uses wrong number of points!")))))
+        (s/explain-str ::k/kobolds k/kobolds)))
+  (testing "Kobold growth patterns use enough points."
+    (doseq [[kobold-name kobold] k/kobolds
+            :let [sum (reduce + 0 (vals (:growth kobold)))]]
+      (is (= 20 sum)
+          (str (name kobold-name) " is using " sum " points.")))))

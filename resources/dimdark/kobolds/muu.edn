@@ -1,0 +1,24 @@
+{:name :muu
+ :class :warrior
+ :row :front
+ :growth
+ {:prowess 5
+  :alacrity 3
+  :vigor 3
+  :spirit 3
+  :focus 1
+  :luck 3
+  :squish 1
+  :brat 1}
+ :proficiencies
+ {:weapons #{:spear :polearm}
+  :armor #{:light :medium}}
+ :equipped
+ {:weapon :spear
+  :armor :chain}
+ :abilities
+ [[:weapon-master :precise-strike :shove]
+  [:trip :disarm :wolf-stance]
+  [:frostbite :sweep :knockdown]
+  [:cold-snap :sunder :shatter]
+  [:wintertide :eviscerate :lacerate]]}

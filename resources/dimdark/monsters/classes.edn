@@ -1,22 +1,22 @@
 {:goblin
  {:raider
   {:abilities [:hew :net :trample :razor-pilum :plunderer]
-   :growth {:prowess :high :alacrity :high :vigor :medium :spirit :low :focus :low :scales :low}
+   :growth {:prowess 3 :alacrity 3 :vigor 2 :spirit 1 :focus 1 :scales 1}
    :vulns #{:frost}
    :row :front}
   :warg
   {:abilities [:bite :takedown :flank :rend :howl]
-   :growth {:prowess :medium :alacrity :high :vigor :medium :spirit :low :focus :medium :squish :low}
+   :growth {:prowess 2 :alacrity 3 :vigor 2 :spirit 1 :focus 2 :squish 1}
    :vulns #{:mental}
    :row :front}
   :mancer
   {:abilities [:poison-dart :knit-flesh :putrefy :flesh-offering :spirit-offering]
-   :growth {:prowess :low :alacrity :medium :vigor :low :spirit :high :focus :medium :stink :medium}
+   :growth {:prowess 1 :alacrity 2 :vigor 1 :spirit 3 :focus 2 :stink 2}
    :vulns #{:physical}
    :row :back}
   :junker
   {:abilities [:spark-bomb :blunderblast :tinker-tailor :oil-bomb :war-machine]
-   :growth {:prowess :high :alacrity :low :vigor :medium :spirit :medium :focus :medium :scales :low}
+   :growth {:prowess 3 :alacrity 1 :vigor 2 :spirit 2 :focus 2 :scales 1}
    :vulns #{:fire}
    :row :back}}
  :orc
@@ -115,7 +115,7 @@
    :vulns #{:frost}
    :row :front}
   :vengeful
-  {:abilities [:attack :brutal-envy :mad-rage :doom :so-be:low]
+  {:abilities [:attack :brutal-envy :mad-rage :doom :so-be1]
    :growth {}
    :vulns #{:frost}
    :row :front}
@@ -168,7 +168,7 @@
    :row :front}}
  :hooman
  {:paladin
-  {:abilities [:attack :judgment :holy-shield :penitent-b:low :lay-on-hands]
+  {:abilities [:attack :judgment :holy-shield :penitent-b1 :lay-on-hands]
    :growth {}
    :vulns #{:poison}
    :row :front}

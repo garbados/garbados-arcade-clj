@@ -1,0 +1,23 @@
+{:name :yap
+ :class :sneak
+ :row :front
+ :growth
+ {:prowess 2
+  :alacrity 4
+  :vigor 2
+  :spirit 2
+  :focus 3
+  :luck 5
+  :brat 2}
+ :proficiencies
+ {:weapons #{:dagger :claws}
+  :armor #{:light}}
+ :equipped
+ {:weapon :dagger
+  :armor :leather}
+ :abilities
+ [[:fade :backstab :feint]
+  [:pickpocket :steal-magic :trapsense]
+  [:skewer :hamstring :sabotage]
+  [:brute :phase-bolt :evasion]
+  [:barrel-roll :panache :arcane-trickster]]}

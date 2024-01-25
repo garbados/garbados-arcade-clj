@@ -1,0 +1,24 @@
+{:name :yip
+ :class :guardian
+ :row :front
+ :growth
+ {:prowess 4
+  :alacrity 1
+  :vigor 5
+  :spirit 3
+  :focus 2
+  :luck 3
+  :scales 1
+  :squish 1}
+ :proficiencies
+ {:weapons #{:sword :axe}
+  :armor #{:medium :heavy}}
+ :equipped
+ {:weapon :sword
+  :armor :splint}
+ :abilities
+ [[:shield-wall :shield-bash :defensive-stance]
+  [:armor-break :spirit-break :goad]
+  [:dragon-heart :fire-slash :ice-slash]
+  [:dragon-tail :giantslayer :radiant-stance]
+  [:grim-cleave :dread-roar :juggernaut]]}

@@ -189,10 +189,7 @@
                    ::effects
                    ::row]))
 
-(def scale->n
-  {:low 1
-   :medium 2
-   :high 3})
+(s/def ::growth (s/map-of ::attr-or-merit pos-int?))
 
 (defn parse-growth [growth]
   (reduce
@@ -204,8 +201,7 @@
          (contains? possible attr) (assoc group attr n)
          :else group)))
    [{} {}]
-   (for [[attr scale] growth]
-     [attr (scale scale->n)])))
+   growth))
 
 (s/fdef parse-growth
   :args (s/cat :growth ::growth)

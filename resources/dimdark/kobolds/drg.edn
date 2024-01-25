@@ -1,0 +1,23 @@
+{:name :drg
+ :class :mage
+ :row :back
+ :growth
+ {:prowess 3
+  :alacrity 3
+  :vigor 2
+  :spirit 4
+  :focus 5
+  :luck 1
+  :scales 2}
+ :proficiencies
+ {:weapons #{:tome :orb}
+  :armor #{:light}}
+ :equipped
+ {:weapon :tome
+  :armor :padded}
+ :abilities
+ [[:dragon-blooded :firebolt :empower-spell]
+  [:magic-missile :mage-armor :extend-spell]
+  [:soaring-strike :flame-breath :blink]
+  [:rend-and-tear :blood-rite :flame-wall]
+  [:implode :devour :master-arcanist]]}
