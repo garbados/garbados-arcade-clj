@@ -59,7 +59,7 @@
      [:div.level-item
       [:h4 (name (:class kobold))]]]]
    [:div.columns
-    [:div.column.is-6
+    [:div.column.is-8
      [:h5 "Attributes"]
      (let [attributes [:prowess :alacrity :vigor :spirit :focus :luck]]
        [:table.table
@@ -98,8 +98,6 @@
            [:div.level
             [:div.level-left
              [:div.level-item
-              [:span]]
-             [:div.level-item
               [:span (:name obj)]]]
             [:div.level-right
              [:div.level-item
@@ -109,7 +107,7 @@
                 (for [[stat value] (eq/equipment->stats obj)
                       :when (pos-int? value)]
                   (str (string/capitalize (name stat)) ": " value)))]]]]]])]]]
-    [:div.column.is-6
+    [:div.column.is-4
      (let [printable-stats
            (reduce
             (fn [stats [stat value]]
@@ -152,11 +150,10 @@
       [:div.level
        [:div.level-left
         [:div.level-item
-         [:p 
-          (string/join
-           ": "
-           [(string/join " " (map string/capitalize (string/split (name ability) "-")))
-            (:description details)])]]]
+         [:p
+          [:span [:strong (string/join " " (map string/capitalize (string/split (name ability) "-")))]]
+          ": "
+          (:description details)]]]
        [:div.level-right
         [:div.level-item
          [:p (string/join ", " (map (comp (partial string/join " ")
@@ -170,19 +167,29 @@
    [:h1 (str "Lair of " (:name @-game))]
    [:p [:em (rand-nth remarks)]]])
 
-(defn lair-kobolds-view [-game]
-  [:div.box
-   (for [kobold (map second (sort-by first k/kobolds))]
-     [kobold-view kobold])])
+(defn lair-kobolds-view [-game -kobold]
+  [:<>
+   [:div.columns
+    (for [kobold-name (map first (sort-by first k/kobolds))]
+      [:div.column.is-2
+       [:button.button.is-info.is-fullwidth
+        {:on-click #(reset! -kobold kobold-name)
+         :disabled (= kobold-name @-kobold)}
+        (string/capitalize (name kobold-name))]])]
+   (when @-kobold
+     [kobold-view (get k/kobolds @-kobold)])])
 
 (defn lair-view [-game -state]
   [:div.columns
    [:div.column.is-2
     [lair-view-menu -state]]
-   [:div.column.is-10
+   [:div.column.is-8
     (case @-state
       :lair [lair-home-view -game]
-      :kobolds [lair-kobolds-view -game])]])
+      :kobolds [lair-kobolds-view -game (r/atom :drg)])]
+   [:div.column.is-2
+    [:div.box>div.content
+     [:p "Experience: 20"]]]])
 
 (defn game-view [-game]
   (cond

@@ -90,8 +90,8 @@
    [[:restore :tanglefoot :frostbolt]
     [:protect :swarm :rejuvenate]
     [:cleanse :skunkspray :nullify]
-    [:contain :hailstorm :snake-bite]
-    [:augment :bury :elder-druid]]
+    [:healing-roots :hailstorm :snake-bite]
+    [:true-strike :bury-alive :elder-druid]]
    :guardian
    [[:shield-wall :shield-bash :defensive-stance]
     [:armor-break :spirit-break :goad]

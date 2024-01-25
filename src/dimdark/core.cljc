@@ -117,18 +117,16 @@
          squish 0
          stink 0
          brat 0}}]
-  (let [max-health (+ prowess vigor)]
-    {:max-health max-health
-     :health max-health
-     :attack prowess
-     :defense alacrity
-     :armor 0
-     :initiative (+ alacrity vigor)
-     :aptitude focus
-     :aptitudes {:fire scales :frost squish :poison stink :mental brat}
-     :resistance spirit
-     :resistances {:fire scales :frost squish :poison stink :mental brat}
-     :fortune luck}))
+  {:health (+ prowess vigor)
+   :attack prowess
+   :defense alacrity
+   :armor 0
+   :initiative (+ alacrity vigor)
+   :aptitude focus
+   :aptitudes {:fire scales :frost squish :poison stink :mental brat}
+   :resistance spirit
+   :resistances {:fire scales :frost squish :poison stink :mental brat}
+   :fortune luck})
 
 (s/fdef attributes+merits->stats
   :args (s/cat :attributes ::attributes
@@ -149,7 +147,7 @@
          fortune 0}
     :as stats}
    {:keys [sharpened quickened reinforced blessed focused laden
-           scorched chilled nauseous charmed]
+           scorched chilled frozen nauseous charmed]
     :or {sharpened 0
          quickened 0
          reinforced 0
@@ -158,15 +156,16 @@
          laden 0
          scorched 0
          chilled 0
+         frozen 0
          nauseous 0
          charmed 0}}]
   (merge stats
          {:health health
-          :attack (+ attack sharpened)
-          :defense (+ defense quickened)
-          :armor (+ armor reinforced)
-          :initiative (+ initiative quickened)
-          :aptitude (+ aptitude focused)
+          :attack (+ attack sharpened (- charmed))
+          :defense (+ defense quickened (- nauseous))
+          :armor (+ armor reinforced (- frozen))
+          :initiative (+ initiative quickened (- chilled))
+          :aptitude (+ aptitude focused (- scorched))
           :aptitudes aptitudes
           :resistance (+ resistance blessed)
           :resistances (let [{:keys [fire frost poison mental]
@@ -189,3 +188,25 @@
                    ::stats
                    ::effects
                    ::row]))
+
+(def scale->n
+  {:low 1
+   :medium 2
+   :high 3})
+
+(defn parse-growth [growth]
+  (reduce
+   (fn [[attrs* merits*] [attr n]]
+     (for [[group possible] [[attrs* attributes]
+                             [merits* merits]]]
+       (cond
+         (contains? group attr) (update group attr + n)
+         (contains? possible attr) (assoc group attr n)
+         :else group)))
+   [{} {}]
+   (for [[attr scale] growth]
+     [attr (scale scale->n)])))
+
+(s/fdef parse-growth
+  :args (s/cat :growth ::growth)
+  :ret (s/tuple ::attributes ::merits))

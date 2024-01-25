@@ -18,16 +18,16 @@
 (s/def ::rolls (s/coll-of (s/int-in 1 5)))
 
 (defn roll-damage
-  "Roll 1d4 x magnitude"
+  "Roll 1d6 x magnitude"
   [n]
-  (take n (repeatedly #(inc (rand-int 4)))))
+  (take n (repeatedly #(inc (rand-int 6)))))
 
 (s/fdef roll-damage
   :args (s/cat :n pos-int?)
   :ret ::rolls)
 
 (defn rolls+armor=>damage [rolls armor]
-  (max 0 (- (reduce + 0 rolls) armor)))
+  (max 0 (reduce (partial + (- armor)) 0 rolls)))
 
 (s/fdef rolls+armor=>damage
   :args (s/cat :rolls ::rolls

@@ -1,0 +1,9 @@
+{:goblin  {:prowess :low    :alacrity :medium :vigor :low    :spirit :high   :focus :medium :stink :low :brat :low}
+ :orc     {:prowess :high   :alacrity :medium :vigor :medium :spirit :low    :focus :low    :stink :low :squish :low}
+ :spider  {:prowess :low    :alacrity :high   :vigor :medium :spirit :low    :focus :medium :brat :medium}
+ :demon   {:prowess :medium :alacrity :medium :vigor :low    :spirit :low    :focus :high   :scales :low :brat :low}
+ :undead  {:prowess :medium :alacrity :low    :vigor :high   :spirit :medium :focus :low    :stink :medium}
+ :slime   {:prowess :low    :alacrity :medium :vigor :high   :spirit :medium :focus :high}
+ :troll   {:prowess :high   :alacrity :low    :vigor :high   :spirit :low    :focus :low    :squish :medium}
+ :hooman  {:prowess :medium :alacrity :medium :vigor :medium :spirit :medium :focus :medium :brat :low}
+ :mechini {:prowess :medium :alacrity :low    :vigor :medium :spirit :medium :focus :high   :scales :low}}

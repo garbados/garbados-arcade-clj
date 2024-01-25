@@ -1,11 +1,9 @@
 (ns dimdark.abilities
-  (:require [clojure.set :as set]
+  (:require [arcade.text :refer-macros [inline-slurp]]
+            [clojure.set :as set]
             [clojure.spec.alpha :as s]
-            [dimdark.abilities.druid :as druid]
-            [dimdark.abilities.guardian :as guardian]
-            [dimdark.abilities.mage :as mage]
-            [dimdark.abilities.ranger :as ranger]
-            [dimdark.core :as d]))
+            [dimdark.core :as d]
+            [clojure.edn :as edn]))
 
 (def clj-log2 #?(:clj (Math/log 2) :cljs nil))
 (defn math-log2 [x]
@@ -67,13 +65,31 @@
     :traits #{:direct :close :hostile :physical}
     :effects {:damage 1}}})
 
+(def class-abilities
+  (->> [(inline-slurp "resources/dimdark/abilities/druid.edn")
+        (inline-slurp "resources/dimdark/abilities/guardian.edn")
+        (inline-slurp "resources/dimdark/abilities/mage.edn")
+        (inline-slurp "resources/dimdark/abilities/ranger.edn")
+        #_(inline-slurp "resources/dimdark/abilities/sneak.edn")
+        #_(inline-slurp "resources/dimdark/abilities/warrior.edn")]
+       (map edn/read-string)
+       (reduce merge {})))
+
+(def monster-abilities
+  (->> [#_(inline-slurp "resources/dimdark/abilities/goblin.edn")
+        #_(inline-slurp "resources/dimdark/abilities/orc.edn")
+        #_(inline-slurp "resources/dimdark/abilities/undead.edn")
+        #_(inline-slurp "resources/dimdark/abilities/demon.edn")
+        #_(inline-slurp "resources/dimdark/abilities/hooman.edn")
+        #_(inline-slurp "resources/dimdark/abilities/spider.edn")
+        #_(inline-slurp "resources/dimdark/abilities/mechini.edn")
+        #_(inline-slurp "resources/dimdark/abilities/slime.edn")
+        #_(inline-slurp "resources/dimdark/abilities/troll.edn")]
+       (map edn/read-string)
+       (reduce merge {})))
+
 (def ability->details
-  (merge
-   universal-abilities
-   druid/abilities
-   guardian/abilities
-   mage/abilities
-   ranger/abilities))
+  (merge universal-abilities class-abilities monster-abilities ))
 
 (def abilities (set (keys ability->details)))
 (s/def ::ability abilities)
@@ -160,12 +176,14 @@
   :ret int?)
 
 (defn resolve-effects [effects margin]
-  (into {} (for [[effect coefficient] effects
-                 :let [value (int (* margin coefficient))]
-                 :when (pos-int? value)]
-             [effect value])))
+  (into
+   {}
+   (for [[effect coefficient] effects
+         :let [value (int (* margin coefficient))]
+         :when (pos-int? value)]
+     [effect value])))
 
 (s/fdef resolve-effects
   :args (s/cat :effects ::effects
-               :margin number?)
+               :margin int?)
   :ret (s/map-of ::d/effect nat-int?))
