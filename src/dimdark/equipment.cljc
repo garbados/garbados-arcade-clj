@@ -192,7 +192,7 @@
 (s/fdef armor-level->stats
   :args (s/cat :type :armor/type
                :level ::level)
-  :ret (s/map-of #{:armor :initiative} nat-int?))
+  :ret (s/map-of ::d/stat int?))
 
 (defn equipment->stats [{:keys [slot type level modifiers]}]
   (into
@@ -484,24 +484,5 @@
 
 (s/fdef gen-equipment-from-level-rarity
   :args (s/cat :level ::d/level
-               :rarity ::rarity))
-
-#_(defn summarize-equipment [equipment]
-  (let [rarity-tier (count (:modifiers equipment))]
-    (cond
-      (> 1 rarity-tier)
-      (str (:name equipment)
-           " ( level "
-           (:level equipment)
-           " "
-           (:type equipment)
-           "; "
-           (string/join ", "
-                        (map name (:modifiers equipment)))
-           ")")
-      (= 1 rarity-tier)
-      (str (:name equipment)
-           " ("
-           (string/join ", "
-                        (map name (:modifiers equipment)))
-           ")"))))
+               :rarity ::rarity)
+  :ret ::equipment)

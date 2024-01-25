@@ -1,7 +1,11 @@
 (ns dimdark.abilities
-  (:require [clojure.spec.alpha :as s]
-            [dimdark.core :as d]
-            [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [clojure.spec.alpha :as s]
+            [dimdark.abilities.druid :as druid]
+            [dimdark.abilities.guardian :as guardian]
+            [dimdark.abilities.mage :as mage]
+            [dimdark.abilities.ranger :as ranger]
+            [dimdark.core :as d]))
 
 (def clj-log2 #?(:clj (Math/log 2) :cljs nil))
 (defn math-log2 [x]
@@ -17,6 +21,7 @@
     :friendly
     :direct
     :area
+    :environmental
     :self
     :other
     :front-row
@@ -26,43 +31,49 @@
     :poison
     :mental
     :spell
-    :physical})
+    :physical
+    :passive})
 (s/def ::trait traits)
 (s/def ::traits (s/coll-of ::trait :kind set?))
 (s/def ::coefficient
-  (s/or :int (s/int-in 1 3)
-        :float (s/double-in :min 0 :max 2 :infinite? false :NaN? false)))
+  (s/or :int (s/int-in -2 3)
+        :float (s/double-in :min -2 :max 2 :infinite? false :NaN? false)))
 (s/def ::stat-expr
-  (s/or :one ::d/stat
-        :many (s/coll-of ::d/stat :kind set? :min-count 1)))
+  (s/or :one ::d/stat-or-merit
+        :many (s/coll-of ::d/stat-or-merit :kind set? :min-count 1)))
 (s/def ::uses (s/map-of ::stat-expr ::coefficient))
+(s/def ::affects (s/map-of ::d/stat-or-merit ::coefficient))
+(s/def ::party-affects ::affects)
+(s/def ::move-to ::d/row)
 (s/def ::effects (s/map-of ::d/effect ::coefficient))
 (s/def ::self-effects ::effects)
+(s/def ::env-effects (s/map-of ::d/env-effect ::coefficient))
 (s/def ::ability-details
   (s/keys :req-un [::d/name
                    ::description
                    ::traits]
           :opt-un [::uses
                    ::effects
-                   ::self-effects]))
+                   ::self-effects
+                   ::env-effects
+                   ::affects
+                   ::party-affects
+                   ::move-to]))
 
-(def ability->details
+(def universal-abilities
   {:attack
    {:name :attack
     :description "Strike at an enemy with your weapon!"
     :traits #{:direct :close :hostile :physical}
-    :effects {:damage 1}}
-   :shield-bash
-   {:name :shield-bash
-    :description "Slam your shield into an enemy, delaying their next turn."
-    :traits #{:direct :close :hostile :physical}
-    :uses {:armor 2}
-    :effects {:damage 0.5 :delayed 1}}
-   :firebolt
-   {:name :firebolt
-    :description "Conjure a ball of oily fire and lob it at a foe."
-    :traits #{:direct :ranged :hostile :fire :spell}
-    :effects {:damage 0.8 :burning 1}}})
+    :effects {:damage 1}}})
+
+(def ability->details
+  (merge
+   universal-abilities
+   druid/abilities
+   guardian/abilities
+   mage/abilities
+   ranger/abilities))
 
 (def abilities (set (keys ability->details)))
 (s/def ::ability abilities)

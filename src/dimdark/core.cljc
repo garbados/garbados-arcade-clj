@@ -51,6 +51,14 @@
   #{:damage
     :healing
     :mending
+    :taunted
+    :hidden
+    :empowered
+    :extended
+    :contained
+    :cleansed
+    :purged
+    :marked
     :delayed
     :bleeding
     :poisoned
@@ -60,19 +68,28 @@
     :chilled
     :frozen
     :sharpened
-    :disarmed
     :focused
-    :distracted
     :reinforced
-    :exposed
     :blessed
-    :cursed
     :quickened
-    :slowed
-    :laden
-    :robbed})
+    :laden})
 (s/def ::effect effects)
 (s/def ::effects (s/map-of ::effect pos-int?))
+
+(def env-effects
+  #{:jawtrapped
+    :mawtrapped})
+(s/def ::env-effect env-effects)
+(s/def ::env-effects (s/map-of ::env-effect pos-int?))
+
+;; when an effect is negative, it uses a name deref'd from here
+(def inverted-effects
+  {:sharpened :disarmed
+   :reinforced :exposed
+   :quickened :slowed
+   :focused :distracted
+   :blessed :cursed
+   :laden :robbed})
 
 (s/def ::attr-or-merit
   (s/or :attr ::attribute

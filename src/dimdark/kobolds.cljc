@@ -85,13 +85,13 @@
     [:magic-missile :mage-armor :extend-spell]
     [:soaring-strike :flame-breath :blink]
     [:rend-and-tear :blood-rite :flame-wall]
-    [:inferno :devour :master-arcanist]]
+    [:implode :devour :master-arcanist]]
    :druid
    [[:restore :tanglefoot :frostbolt]
     [:protect :swarm :rejuvenate]
     [:cleanse :skunkspray :nullify]
     [:contain :hailstorm :snake-bite]
-    [:augment :bury :slither-form]]
+    [:augment :bury :elder-druid]]
    :guardian
    [[:shield-wall :shield-bash :defensive-stance]
     [:armor-break :spirit-break :goad]

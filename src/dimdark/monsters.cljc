@@ -207,7 +207,7 @@
      :vulns #{:mental}
      :row :back}
     :wizard
-    {:abilities [:frostbolt :fireball :force-shield :center-the-eye :master-arcanist]
+    {:abilities [:ice-knife :fireball :force-shield :center-the-eye :greater-magi]
      :growth {}
      :vulns #{:physical}
      :row :back}

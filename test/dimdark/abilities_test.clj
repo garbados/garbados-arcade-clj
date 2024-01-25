@@ -16,4 +16,8 @@
 (deftest ability-details-spec-test
   (doseq [details (vals a/ability->details)]
     (testing (name (:name details))
-      (is (s/valid? ::a/ability-details details)))))
+      (is (s/valid? ::a/ability-details details)
+          (s/explain-str ::a/ability-details details))))
+  (doseq [[name details] a/ability->details]
+    (testing (str "name matches for " name)
+      (is (= name (:name details))))))

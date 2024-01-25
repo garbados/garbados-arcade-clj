@@ -27,7 +27,7 @@
   :ret ::rolls)
 
 (defn rolls+armor=>damage [rolls armor]
-  (reduce + 0 (map #(max 0 (- % armor)) rolls)))
+  (max 0 (- (reduce + 0 rolls) armor)))
 
 (s/fdef rolls+armor=>damage
   :args (s/cat :rolls ::rolls
