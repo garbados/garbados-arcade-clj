@@ -29,3 +29,15 @@
         (let [total (reduce + 0 (vals growth))]
           (is (= 11 total)
               (str (name klass) " " (name culture) " is using " total " points!")))))))
+
+(deftest monster-instance-spec-test
+  (testing "Initialized monsters pass spec."
+    (let [monsters
+          (flatten
+           (for [culture m/cultures
+                 :let [classes (keys (culture m/monster-classes))]]
+             (for [klass classes]
+               (m/gen-monster 1 culture klass))))]
+      (doseq [monster monsters]
+        (is (s/valid? ::m/monster monster)
+            (s/explain-str ::m/monster monster))))))

@@ -17,7 +17,7 @@
   :armor :leather}
  :abilities
  [[:fade :backstab :feint]
-  [:pickpocket :steal-magic :trapsense]
-  [:skewer :hamstring :sabotage]
+  [:pickpocket :steal-magic :debilitate]
+  [:lacerate :hamstring :sabotage]
   [:brute :phase-bolt :evasion]
-  [:barrel-roll :panache :arcane-trickster]]}
+  [:barrel-roll :browbeat :arcane-trickster]]}

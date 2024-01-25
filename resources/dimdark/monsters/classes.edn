@@ -22,85 +22,85 @@
  :orc
  {:berserker
   {:abilities [:attack :blitz :battlecry :rampage :do-and-die]
-   :growth {}
+   :growth {:prowess 3 :alacrity 3 :vigor 1 :spirit 2 :focus 1 :brat 1}
    :vulns #{:fire}
    :row :front}
   :warhead
   {:abilities [:augment :organize :rally :browbeat :master-tactician]
-   :growth {}
+   :growth {:prowess 1 :alacrity 2 :vigor 2 :spirit 3 :focus 3}
    :vulns #{:poison}
    :row :back}
   :bloodmucker
   {:abilities [:essence-bolt :searing-lash :devitalize :bloodlust :sacrifice]
-   :growth {}
+   :growth {:prowess 1 :alacrity 1 :vigor 3 :spirit 2 :focus 3 :scales 1}
    :vulns #{:frost}
    :row :back}
   :grunt
   {:abilities [:attack :bash :bully :soldier :first-aid]
-   :growth {}
+   :growth {:prowess 3 :alacrity 2 :vigor 3 :spirit 1 :focus 1 :squish 1}
    :vulns #{:mental}
    :row :front}}
  :spider
  {:myrmidon
   {:abilities [:attack :mandible-crush :grapple :steelskin :eight-leg-assault]
-   :growth {}
+   :growth {:prowess 2 :alacrity 3 :vigor 2 :spirit 2 :focus 2}
    :vulns #{:mental}
    :row :front}
   :weaver
   {:abilities [:dream-eater :mesmerize :ennervate :sleep :???]
-   :growth {}
+   :growth {:prowess 1 :alacrity 3 :vigor 1 :spirit 3 :focus 3}
    :vulns #{:fire}
    :row :back}
   :trapper
   {:abilities [:attack :string-shot :drag :lay-web :feed]
-   :growth {}
+   :growth {:prowess 2 :alacrity 3 :vigor 1 :spirit 2 :focus 2 :stink 1}
    :vulns #{:frost}
    :row :front}
   :widow
   {:abilities [:attack :poison-bite :acid-spray :concentrated-bile :virulent-climax]
-   :growth {}
+   :growth {:prowess 3 :alacrity 2 :vigor 2 :spirit 2 :focus 2}
    :vulns #{:frost}
    :row :front}}
  :troll
  {:cave
   {:abilities [:attack :smash :regeneration :hurl-rock :rage]
-   :growth {}
+   :growth {:prowess 3 :alacrity 2 :vigor 3 :spirit 2 :focus 1}
    :vulns #{:fire}
    :row :front}
   :ancient
   {:abilities [:attack :regeneration :crush :venerable :revitalize]
-   :growth {}
+   :growth {:prowess 2 :alacrity 2 :vigor 3 :spirit 3 :focus 1}
    :vulns #{:mental}
    :row :front}
   :forest
   {:abilities [:vine-lash :spore-burst :regeneration :root-swarm :moss-grave]
-   :growth {}
+   :growth {:prowess 1 :alacrity 2 :vigor 2 :spirit 3 :focus 1 :stink 2}
    :vulns #{:fire}
    :row :back}
   :grizzly
   {:abilities [:attack :ravage :regeneration :devour :roar]
-   :growth {}
+   :growth {:prowess 3 :alacrity 3 :vigor 3 :spirit 1 :focus 1}
    :vulns #{:mental}
    :row :front}}
  :undead
  {:banshee
   {:abilities [:haunt :scream :chilling-touch :reverie :vanish]
-   :growth {}
+   :growth {:prowess 1 :alacrity 3 :vigor 1 :spirit 2 :focus 3 :brat 1}
    :vulns #{:fire}
    :row :back}
   :awoken
   {:abilities [:attack :fetid-bite :jagged-nail :consume-corpse :dire-ghoul]
-   :growth {}
+   :growth {:prowess 3 :alacrity 1 :vigor 3 :spirit 2 :focus 1 :stink 1}
    :vulns #{:fire}
    :row :front}
   :shadow
   {:abilities [:attack :paralyze :umbra-slash :darkness-falls :vantablack]
-   :growth {}
+   :growth {:prowess 3 :alacrity 3 :vigor 1 :spirit 3 :focus 1}
    :vulns #{:fire}
    :row :front}
   :necromancer
   {:abilities [:spirit-link :horrify :drink-terror :necrotize :sacrifice]
-   :growth {}
+   :growth {:prowess 1 :alacrity 1 :vigor 2 :spirit 3 :focus 3 :brat 1}
    :vulns #{:physical}
    :row :back}}
  :demon

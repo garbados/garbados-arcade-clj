@@ -34,9 +34,13 @@
     :passive})
 (s/def ::trait traits)
 (s/def ::traits (s/coll-of ::trait :kind set?))
+(def coefficient-max 3)
 (s/def ::coefficient
-  (s/or :int (s/int-in -2 3)
-        :float (s/double-in :min -2 :max 2 :infinite? false :NaN? false)))
+  (s/or :int (s/int-in (- coefficient-max) (inc coefficient-max))
+        :float (s/double-in :min (- coefficient-max)
+                            :max coefficient-max
+                            :infinite? false
+                            :NaN? false)))
 (s/def ::stat-expr
   (s/or :one ::d/stat-or-merit
         :many (s/coll-of ::d/stat-or-merit :kind set? :min-count 1)))
@@ -49,6 +53,7 @@
 (s/def ::self-effects ::effects)
 (s/def ::env-effects (s/map-of ::d/env-effect ::coefficient))
 (s/def ::requires (s/coll-of ::d/effect :kind set?))
+(s/def ::self-requires (s/coll-of ::d/effect :kind set?))
 (s/def ::ability-details
   (s/keys :req-un [::d/name
                    ::description
@@ -61,7 +66,8 @@
                    ::party-affects
                    ::move-to
                    ::move-target-to
-                   ::requires]))
+                   ::requires
+                   ::self-requires]))
 
 (def universal-abilities
   {:attack
@@ -70,13 +76,13 @@
     :traits #{:direct :close :hostile :physical}
     :effects {:damage 1}}})
 
-(def class-abilities
+(def kobold-abilities
   (->> [(inline-slurp "resources/dimdark/abilities/druid.edn")
         (inline-slurp "resources/dimdark/abilities/guardian.edn")
         (inline-slurp "resources/dimdark/abilities/mage.edn")
         (inline-slurp "resources/dimdark/abilities/ranger.edn")
-        #_(inline-slurp "resources/dimdark/abilities/sneak.edn")
-        #_(inline-slurp "resources/dimdark/abilities/warrior.edn")]
+        (inline-slurp "resources/dimdark/abilities/sneak.edn")
+        (inline-slurp "resources/dimdark/abilities/warrior.edn")]
        (map edn/read-string)
        (reduce merge {})))
 
@@ -94,7 +100,7 @@
        (reduce merge {})))
 
 (def ability->details
-  (merge universal-abilities class-abilities monster-abilities ))
+  (merge universal-abilities kobold-abilities monster-abilities ))
 
 (def abilities (set (keys ability->details)))
 (s/def ::ability abilities)

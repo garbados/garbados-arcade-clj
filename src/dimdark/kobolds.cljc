@@ -99,12 +99,12 @@
   :args (s/cat :equipped ::equipped)
   :ret ::d/stats)
 
-(defn kobold->stats [{:keys [name attributes merits equipped row]}]
+(defn kobold->stats [{:keys [attributes merits equipped row]}]
   (merge-with (fn [x y] (cond (number? x) (+ x y)
                               :else       (merge-with + x y)))
               (d/attributes+merits->stats attributes merits)
               (equipment-stats equipped)
-              {:row row :name name}))
+              {:row row}))
 
 (s/fdef kobold->stats
   :args (s/cat :kobold ::kobold)
@@ -132,12 +132,14 @@
                             :kobold ::kobold))
   :ret boolean?)
 
-(defn kobold->creature [kobold]
-  {:name (:name kobold)
-   :stats (kobold->stats kobold)
-   :effects {}
-   :abilities (:abilities kobold)
-   :row (:row kobold)})
+(defn kobold->creature [{:keys [name abilities row] :as kobold}]
+  (let [{:keys [health] :as stats} (kobold->stats kobold)]
+    {:name name
+     :stats stats
+     :effects {}
+     :abilities abilities
+     :health health
+     :row row}))
 
 (s/fdef kobold->creature
   :args (s/cat :kobold ::kobold)

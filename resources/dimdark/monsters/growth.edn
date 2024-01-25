@@ -1,9 +1,9 @@
-{:goblin  {:prowess :low    :alacrity :medium :vigor :low    :spirit :high   :focus :medium :stink :low :brat :low}
- :orc     {:prowess :high   :alacrity :medium :vigor :medium :spirit :low    :focus :low    :stink :low :squish :low}
- :spider  {:prowess :low    :alacrity :high   :vigor :medium :spirit :low    :focus :medium :brat :medium}
- :demon   {:prowess :medium :alacrity :medium :vigor :low    :spirit :low    :focus :high   :scales :low :brat :low}
- :undead  {:prowess :medium :alacrity :low    :vigor :high   :spirit :medium :focus :low    :stink :medium}
- :slime   {:prowess :low    :alacrity :medium :vigor :high   :spirit :medium :focus :high}
- :troll   {:prowess :high   :alacrity :low    :vigor :high   :spirit :low    :focus :low    :squish :medium}
- :hooman  {:prowess :medium :alacrity :medium :vigor :medium :spirit :medium :focus :medium :brat :low}
- :mechini {:prowess :medium :alacrity :low    :vigor :medium :spirit :medium :focus :high   :scales :low}}
+{:goblin  {:prowess 1 :alacrity 2 :vigor 1 :spirit 3 :focus 2 :stink 1 :brat 1}
+ :orc     {:prowess 3 :alacrity 2 :vigor 2 :spirit 1 :focus 1 :stink 1 :squish 1}
+ :spider  {:prowess 1 :alacrity 3 :vigor 2 :spirit 1 :focus 2 :brat 2}
+ :demon   {:prowess 2 :alacrity 2 :vigor 1 :spirit 1 :focus 3 :scales 1 :brat 1}
+ :undead  {:prowess 2 :alacrity 1 :vigor 3 :spirit 2 :focus 1 :stink 2}
+ :slime   {:prowess 1 :alacrity 2 :vigor 3 :spirit 2 :focus 3}
+ :troll   {:prowess 3 :alacrity 1 :vigor 3 :spirit 1 :focus 1 :squish 2}
+ :hooman  {:prowess 2 :alacrity 2 :vigor 2 :spirit 2 :focus 2 :brat 1}
+ :mechini {:prowess 2 :alacrity 1 :vigor 2 :spirit 2 :focus 3 :scales 1}}

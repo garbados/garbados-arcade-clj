@@ -66,6 +66,7 @@
     :scorched
     :chilled
     :frozen
+    :charmed
     :sharpened
     :focused
     :reinforced
