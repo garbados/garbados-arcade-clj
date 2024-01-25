@@ -187,9 +187,14 @@
     (case @-state
       :lair [lair-home-view -game]
       :kobolds [lair-kobolds-view -game (r/atom :drg)])]
+   ;; this needs to get templated and everything
    [:div.column.is-2
     [:div.box>div.content
-     [:p "Experience: 20"]]]])
+     [:p "Experience: 20"]
+     [:p "Relics:"]
+     [:ul
+      [:li "Despot's Crown"]
+      [:li "Ring of Binding"]]]]])
 
 (defn game-view [-game]
   (cond

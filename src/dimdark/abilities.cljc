@@ -1,9 +1,10 @@
 (ns dimdark.abilities
-  (:require [arcade.text :refer-macros [inline-slurp]]
-            [clojure.set :as set]
+  (:require [clojure.set :as set]
             [clojure.spec.alpha :as s]
             [dimdark.core :as d]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            #?(:clj [arcade.text :refer [inline-slurp]]
+               :cljs [arcade.text :refer-macros [inline-slurp]])))
 
 (def clj-log2 #?(:clj (Math/log 2) :cljs nil))
 (defn math-log2 [x]
@@ -43,9 +44,11 @@
 (s/def ::affects (s/map-of ::d/stat-or-merit ::coefficient))
 (s/def ::party-affects ::affects)
 (s/def ::move-to ::d/row)
+(s/def ::move-target-to ::move-to)
 (s/def ::effects (s/map-of ::d/effect ::coefficient))
 (s/def ::self-effects ::effects)
 (s/def ::env-effects (s/map-of ::d/env-effect ::coefficient))
+(s/def ::requires (s/coll-of ::d/effect :kind set?))
 (s/def ::ability-details
   (s/keys :req-un [::d/name
                    ::description
@@ -56,7 +59,9 @@
                    ::env-effects
                    ::affects
                    ::party-affects
-                   ::move-to]))
+                   ::move-to
+                   ::move-target-to
+                   ::requires]))
 
 (def universal-abilities
   {:attack

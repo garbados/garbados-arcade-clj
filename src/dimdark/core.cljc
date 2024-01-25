@@ -21,7 +21,6 @@
 (s/def ::abilities (s/coll-of keyword? :kind set?))
 
 (s/def ::health nat-int?)
-(s/def ::max-health ::health)
 (s/def ::attack int?)
 (s/def ::defense int?)
 (s/def ::armor int?)
@@ -33,9 +32,9 @@
 (s/def ::resistances (s/map-of ::element int?))
 (s/def ::stat #{:health :attack :defense :armor :initiative :aptitude :resistance :fortune
                 :aptitudes :resistances})
+
 (s/def ::stats
   (s/keys :opt-un [::row
-                   ::max-health
                    ::health
                    ::attack
                    ::defense
@@ -187,7 +186,8 @@
                    ::abilities
                    ::stats
                    ::effects
-                   ::row]))
+                   ::row
+                   ::health]))
 
 (s/def ::growth (s/map-of ::attr-or-merit pos-int?))
 

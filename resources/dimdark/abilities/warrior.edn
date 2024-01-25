@@ -1,0 +1,77 @@
+{:weapon-master
+ {:name :weapon-master
+  :description "Your worldly adventures have taught you much about war and grace."
+  :traits #{:passive}
+  :affects {:attack 1 :defense 1}}
+ :precise-strike
+ {:name :precise-strike
+  :description "Weave your weapon through the enemy ranks to hit just so."
+  :traits #{:direct :hostile :piercing :physical}
+  :effects {:damage 1}}
+ :shove
+ {:name :shove
+  :description "Push a frontline enemy into the rear guard."
+  :traits #{:direct :close :hostile :physical :mental}
+  :effects {:delayed 1}
+  :move-target-to :back}
+ :trip
+ {:name :trip
+  :description "Trip up an enemy's footing, leaving their offense in tatters."
+  :traits #{:direct :close :hostile :physical :mental}
+  :effects {:quickened -1 :reinforced -1}}
+ :disarm
+ {:name :disarm
+  :description "Knock the weapon from an enemy's grip!"
+  :traits #{:direct :close :hostile :physical :mental}
+  :effects {:sharpened -1 :focused -1}}
+ :wolf-stance
+ {:name :wolf-stance
+  :description "Assume the loping, snatching posture of a wolf."
+  :traits #{:self :spell :frost :mental}
+  :effects {:sharpened 1}}
+ :frostbite
+ {:name :frostbite
+  :description "With a chilling blow, bring a foe to an icy halt."
+  :traits #{:direct :close :hostile :physical :frost}
+  :effects {:damage 0.5 :frozen 1}}
+ :sweep
+ {:name :sweep
+  :description "Make a wide swing that catches all nearby enemies."
+  :traits #{:close :area :hostile :physical}
+  :effects {:damage 1}}
+ :knockdown
+ {:name :knockdown
+  :description "With uncommon quickness, throw a challenger to the ground."
+  :traits #{:direct :close :hostile :physical}
+  :effects {:quickened -1 :delayed 1}}
+ :cold-snap
+ {:name :cold-snap
+  :description "With a snap of your fingers, bring the worst of winter to an unfortunate foe."
+  :traits #{:spell :direct :hostile :frost}
+  :effects {:chilled 1 :frozen 1}}
+ :sunder
+ {:name :sunder
+  :description "Strike with such frigid fury that even steel shatters!"
+  :traits #{:direct :close :hostile :physical :frost}
+  :effects {:damage 0.5 :reinforced -0.5 :frozen 0.5}}
+ :eviscerate
+ {:name :eviscerate
+  :description "Puncture a foe and leave them to bleed out."
+  :traits #{:direct :close :hostile :physical}
+  :effects {:damage 0.5 :bleeding 1}}
+ :shatter
+ {:name :shatter
+  :description "Crush the forms of your frozen foes, channeling your strength through the ice."
+  :traits #{:direct :close :hostile :physical :frost}
+  :effects {:damage 2}
+  :requires #{:frozen}}
+ :wintertide
+ {:name :wintertide
+  :description "Cold desolation sweeps the enemy's ranks!"
+  :traits #{:hostile :area :spell :frost}
+  :effects {:chilled 1 :blessed -1}}
+ :paragon
+ {:name :paragon
+  :description "A kobold left young and returned powerful."
+  :traits #{:passive}
+  :affects {:attack 1 :defense 1 :initiative 1}}}
