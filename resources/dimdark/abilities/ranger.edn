@@ -29,12 +29,11 @@
   :description "Apply herbal remedies to mend the wounds of allies."
   :traits #{:friendly :direct :spell :poison}
   :effects {:mending 1}}
- :flurry-shot
+ :multi-shot
  {:name :flurry-shot
-  :description "Fire a flurry of arrows at a target, likely to hit but unlikely to hit hard."
-  :traits #{:direct :ranged :hostile :physical}
-  :uses {:attack 1}
-  :effects {:damage 0.25}}
+  :description "Fire a flurry of arrows at several targets."
+  :traits #{:front-row :ranged :hostile :physical}
+  :effects {:damage 1}}
  :flashbang
  {:name :flashbang
   :description "Hurl a device that bursts with light and sound, disorienting your foes."
@@ -54,4 +53,9 @@
  {:name :hunters-mark
   :description "Illuminate a foe's weakspots. The next attack against them deals extra damage!"
   :traits #{:hostile :direct :ranged :spell :mental}
-  :effects {:marked 1}}}
+  :effects {:marked 1}}
+ :precision
+ {:name :precision
+  :description "TODO ???"
+  :traits #{:passive}
+  :affects {:attack 2}}}
