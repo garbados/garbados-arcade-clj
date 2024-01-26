@@ -28,4 +28,15 @@
  {:name :field-medicine
   :description "Apply herbal remedies to mend the wounds of allies."
   :traits #{:friendly :direct :spell :poison}
-  :effects {:mending 1}}}
+  :effects {:mending 1}}
+ :camouflage
+ {:name :camouflage
+  :description "Melt into the filth and brush, to prepare unseen."
+  :traits #{:self :spell :poison}
+  :self-effects {:hidden 1}}
+ :flurry-shot
+ {:name :flurry-shot
+  :description "Fire a flurry of arrows at a target, likely to hit but unlikely to hit hard."
+  :traits #{:direct :ranged :hostile :physical}
+  :uses {:attack 1}
+  :effects {:damage 0.25}}}
