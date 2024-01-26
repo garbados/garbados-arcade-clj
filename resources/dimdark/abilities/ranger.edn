@@ -29,14 +29,29 @@
   :description "Apply herbal remedies to mend the wounds of allies."
   :traits #{:friendly :direct :spell :poison}
   :effects {:mending 1}}
- :camouflage
- {:name :camouflage
-  :description "Melt into the filth and brush, to prepare unseen."
-  :traits #{:self :spell :poison}
-  :self-effects {:hidden 1}}
  :flurry-shot
  {:name :flurry-shot
   :description "Fire a flurry of arrows at a target, likely to hit but unlikely to hit hard."
   :traits #{:direct :ranged :hostile :physical}
   :uses {:attack 1}
-  :effects {:damage 0.25}}}
+  :effects {:damage 0.25}}
+ :flashbang
+ {:name :flashbang
+  :description "Hurl a device that bursts with light and sound, disorienting your foes."
+  :traits #{:hostile :ranged :area :spell :mental}
+  :effects {:quickened -1 :focused -1}}
+ :camouflage
+ {:name :camouflage
+  :description "Melt into the filth and brush, to prepare unseen."
+  :traits #{:self :spell :poison}
+  :self-effects {:hidden 1}}
+ :toxic-rain
+ {:name :toxic-rain
+  :description "Hail venom upon your foes!"
+  :traits #{:hostile :area :ranged :physical :poison}
+  :effects {:poisoned 1}}
+ :hunters-mark
+ {:name :hunters-mark
+  :description "Illuminate a foe's weakspots. The next attack against them deals extra damage!"
+  :traits #{:hostile :direct :ranged :spell :mental}
+  :effects {:marked 1}}}
