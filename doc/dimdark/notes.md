@@ -38,3 +38,18 @@ some ability trait ideas:
 - skill: uses focus v focus!!
 
 elemental resists always apply when their trait comes up
+
+*Whom the Earth Adores* is about the dragon's friend Drizket who proved unusually sociable, even playful, for an otherwise asocial manner of being. To dragon-kind, they were the emissary of the slimes. Knowing this, the troll king made an example of Drizket to assert dominance. Before he could be doused in dragonfire, he fled into the Dimdark, where he has remained for thousands of years, burrowing deeper into the heart of the world with his throng of loyal trolls. With Drizket's eyes, he wields powers over ancient slimes, and presses them into gruesome servitude. Those grim depths shake with the vicious wailing of the Troll King's faithful.
+
+*Light and Hate* is about that dragon that freed the dragon from the dragon tamer. They fell in love, actually, and together laid a single egg. (What happened to the egg?) Then the empires of humankind went into upheavel, and droves were sent to slay dragons, equipped with terrible weapons. Lands that once accepted dragons as a part of reality now militarized against them, and each other, with greater viciousness than ever before. This other dragon died making a last stand, while the dragon escaped with the egg into the dimdark, where it proved inert despite careful tending. To lose a lover and a child, it is unimaginable grief. Please, retrieve Axuquatl's ashes. I would like to remember her one last time.
+
+*'Til Death* is about the man that fatally wounded the dragon. He was a powerful wizard and artificer, and used enchanted automotons to defeat her majesty. He stole the egg and ground its petrified remains into a dust, to be used in some arcane manufacturing. Basically he started snorting it and it drove him insane, like so many other souls lost in the dimdark. The dragon advises the kobolds not to seek him out, as it would be even more than she could overcome. Nevertheless, the party takes up the quest. In the wizard's laboratory, they find the ani-crystal, which nullifies the dragon's wound and returns her to strength.
+
+TODO
+- Level up kobolds! Fake it to make it show up.
+- Equipment view: list equipment, allow to equip and disenchant.
+- Crafting view: make items for 1 essence each, make equipment for ??? essence.
+- Playground: pick 3 kobolds, fight the other three. kobolds "get tired" when they run out of health. does not yield experience.
+- Lair view: choose to quest or delve
+- Delve...!
+- Quests...!

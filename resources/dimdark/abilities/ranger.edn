@@ -30,7 +30,7 @@
   :traits #{:friendly :direct :spell :poison}
   :effects {:mending 1}}
  :multi-shot
- {:name :flurry-shot
+ {:name :multi-shot
   :description "Fire a flurry of arrows at several targets."
   :traits #{:front-row :ranged :hostile :physical}
   :effects {:damage 1}}
@@ -56,6 +56,22 @@
   :effects {:marked 1}}
  :precision
  {:name :precision
-  :description "TODO ???"
+  :description "With measured breath, let fly the true arrow! Increases attack."
   :traits #{:passive}
-  :affects {:attack 2}}}
+  :affects {:attack 2}}
+ :trick-shot
+ {:name :trick-shot
+  :description "Aim to ricochet your shot, bending around corners to strike with impunity."
+  :traits #{:hostile :direct :piercing :physical :ranged}
+  :uses {:aptitude 1}
+  :effects {:damage 0.5}}
+ :exploding-shot
+ {:name :exploding-shot
+  :description "Launch an arrow with an exploding tip, which bursts into flames!"
+  :traits #{:hostile :area :ranged :physical :fire}
+  :effects {:damage 0.5 :burning 1}}
+ :mawtrap
+ {:name :mawtrap
+  :description "With mystic affect, place a hole that devours unseen."
+  :traits #{:environmental :ranged :hostile :spell}
+  :env-effects {:mawtrapped 1}}}

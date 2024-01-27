@@ -77,6 +77,6 @@
   :effects {:damage 0.5 :focused -1}}
  :arcane-trickster
  {:name :arcane-trickster
-  :description "The arcane swirls about you, leaping from your fingertips."
+  :description "Arcana swirls about you, leaping from your fingertips."
   :traits #{:passive}
   :affects {:aptitude 2 :brat 1}}}

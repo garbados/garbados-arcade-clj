@@ -18,6 +18,6 @@
  :abilities
  [[:scout :poison-shot :jawtrap]
   [:aimed-shot :stinkbomb :field-medicine]
-  [:flurry-shot :flashbang :camouflage]
+  [:multi-shot :flashbang :camouflage]
   [:toxic-rain :hunters-mark :precision]
   [:trick-shot :exploding-shot :mawtrap]]}

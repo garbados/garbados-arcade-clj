@@ -34,8 +34,7 @@
 (def kobolds
   (reduce
    (fn [kobolds text]
-     (let [{:keys [name class abilities proficiencies growth equipped row]}
-           (edn/read-string text)
+     (let [{:keys [name class abilities proficiencies growth equipped row]} (edn/read-string text)
            [attributes merits] (d/parse-growth growth)
            kobold
            {:name name
