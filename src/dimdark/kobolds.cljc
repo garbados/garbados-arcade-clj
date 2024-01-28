@@ -112,9 +112,9 @@
 (defn equippable? [{:keys [name proficiencies]} {:keys [slot type]}]
   (case slot
     :weapon
-    (contains? (get-in proficiencies [name :weapons]) type)
+    (contains? (:weapons proficiencies) type)
     :armor
-    (contains? (get-in proficiencies [name :armor]) (type eq/armor->class))
+    (contains? (:armor proficiencies) (type eq/armor->class))
     :accessory
     true))
 

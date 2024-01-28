@@ -15,44 +15,81 @@
 
 (defn lair-view-menu [-state]
   (let [state @-state]
-    [:<>
-     [:div.level
-      [:button.button.is-fullwidth
-       {:disabled (= :lair state)
-        :on-click #(reset! -state :lair)}
-       "Lair"]]
-     [:div.level
-      [:button.button.is-fullwidth
-       {:disabled (= :kobolds state)
-        :on-click #(reset! -state :kobolds)}
-       "Kobolds"]]
-     [:div.level
-      [:button.button.is-fullwidth
-       {:disabled (= :equipment state)
-        :on-click #(reset! -state :equipment)}
-       "Equipment"]]
-     [:div.level
-      [:button.button.is-fullwidth
-       {:disabled (= :crafting state)
-        :on-click #(reset! -state :crafting)}
-       "Crafting"]]
-     [:div.level
-      [:button.button.is-fullwidth
-       {:disabled (= :playground state)
-        :on-click #(reset! -state :playground)}
-       "Playground"]]]))
+    [:div.columns
+     (for [[name* state*] [["Lair" :lair]
+                           ["Kobolds" :kobolds]
+                           ["Equipment" :equipment]
+                           ["Crafting" :crafting]
+                           ["Playground" :playground]]]
+       [:div.column
+        [:button.button.is-info.is-fullwidth
+         {:disabled (= state* state)
+          :on-click #(reset! -state state*)}
+         name*]])]))
 
+(defn stats-table [stats]
+  [:table.table
+   [:tbody
+    (let [printable-stats
+          (reduce
+           (fn [stats [stat value]]
+             (if (map? value)
+               (reduce
+                (fn [stats [element value]]
+                  (assoc stats
+                         (string/join ": " (map (comp string/capitalize name) [stat element]))
+                         value))
+                stats
+                value)
+               (assoc stats (string/capitalize (name stat)) value)))
+           {}
+           stats)]
+      (for [stat ["Health" "Attack" "Defense" "Armor" "Initiative" "Fortune"
+                  "Aptitude"
+                  "Aptitudes: Fire"
+                  "Aptitudes: Frost"
+                  "Aptitudes: Poison"
+                  "Aptitudes: Mental"
+                  "Resistance"
+                  "Resistances: Fire"
+                  "Resistances: Frost"
+                  "Resistances: Poison"
+                  "Resistances: Mental"]
+            :let [value (get printable-stats stat)]
+            :when (pos-int? value)]
+        [:tr
+         [:td stat]
+         [:td value]]))]])
 
+(defn equipment-view [equipment]
+  [:div.level
+   [:div.level-left
+    [:div.level-item
+     [:span [:strong (:name equipment)]]]
+    [:div.level-item
+     [:span [:em (string/join ", "
+                              [(name (:type equipment))
+                               (str "lvl " (:level equipment))])]]]]
+   [:div.level-right
+    [:div.level-item
+     [:span
+      (string/join
+       "; "
+       (for [[stat value] (eq/equipment->stats equipment)
+             :when (pos-int? value)]
+         (str (string/capitalize (name stat)) ": " value)))]]]])
 
 (defn kobold-view [kobold]
   [:div.box>div.content
    [:div.level
     [:div.level-left
      [:div.level-item
-      [:h3 (:name kobold)]]]
+      [:h3 (:name kobold)]]
+     [:div.level-item
+      [:h5 (name (:class kobold))]]]
     [:div.level-right
      [:div.level-item
-      [:h4 (name (:class kobold))]]]]
+      [:h5 (:row kobold)]]]]
    [:div.columns
     [:div.column.is-8
      [:h5 "Attributes"]
@@ -103,40 +140,10 @@
                       :when (pos-int? value)]
                   (str (string/capitalize (name stat)) ": " value)))]]]]]])]]]
     [:div.column.is-4
-     (let [printable-stats
-           (reduce
-            (fn [stats [stat value]]
-              (if (map? value)
-                (reduce
-                 (fn [stats [element value]]
-                   (assoc stats
-                          (string/join ": " (map (comp string/capitalize name) [stat element]))
-                          value))
-                 stats
-                 value)
-                (assoc stats (string/capitalize (name stat)) value)))
-            {}
-            (k/kobold->stats kobold))]
+     (let [stats (k/kobold->stats kobold)]
        [:<>
         [:h5 "Stats"]
-        [:table.table
-         [:tbody
-          (for [stat ["Health" "Attack" "Defense" "Armor" "Initiative" "Fortune"
-                      "Aptitude"
-                      "Aptitudes: Fire"
-                      "Aptitudes: Frost"
-                      "Aptitudes: Poison"
-                      "Aptitudes: Mental"
-                      "Resistance"
-                      "Resistances: Fire"
-                      "Resistances: Frost"
-                      "Resistances: Poison"
-                      "Resistances: Mental"]
-                :let [value (get printable-stats stat)]
-                :when (pos-int? value)]
-            [:tr
-             [:td stat]
-             [:td value]])]]])]]
+        [stats-table stats]])]]
    [:<>
     [:h5 "Abilities"]
     (for [ability (:abilities kobold)
@@ -159,23 +166,61 @@
 
 (defn lair-home-view [-game]
   [:div.box>div.content
-   [:h1 (str "Lair of " (:name @-game))]
+   [:h2 (str "Lair of " (:name @-game))]
    [:p [:em (rand-nth remarks)]]])
 
 (defn lair-kobolds-view [_ -kobold]
-  [:<>
-   [:div.columns
+  [:div.columns
+   [:div.column.is-2
     (for [kobold-name (map first (sort-by first k/kobolds))]
-      [:div.column.is-2
-       [:button.button.is-info.is-fullwidth
+      [:div.block
+       [:button.button.is-link.is-fullwidth
         {:on-click #(reset! -kobold kobold-name)
          :disabled (= kobold-name @-kobold)}
         (string/capitalize (name kobold-name))]])]
-   (when @-kobold
-     [kobold-view (get k/kobolds @-kobold)])])
+   [:div.column.is-10
+    (when @-kobold
+      [kobold-view (get k/kobolds @-kobold)])]])
 
 (defn lair-equipment-view [-game]
-  [:h3 "UNIMPLEMENTED"])
+  (let [game-equipment
+        (take 10 (repeatedly #(eq/gen-equipment-from-level-rarity (inc (rand-int 5)) (rand-nth eq/rarities))))
+        #_(:equipment @-game)
+        slot->equipment
+        (reduce
+         (fn [slots equipment]
+           (update slots (:slot equipment) conj equipment))
+         {:weapon [] :armor [] :accessory []}
+         game-equipment)]
+    [:div.box>div.content
+     [:div.columns
+      [:div.column.is-6
+       [:h2 "Equipment"]]
+      [:div.column.is-4
+       {:style {:text-align :center}}
+       [:h4 "Equippable by..."]]
+      [:div.column.is-2
+       {:style {:text-align :center}}
+       [:h5 "Disenchant"]]]
+     (for [slot [:weapon :armor :accessory]
+           :let [equipment (seq (slot slot->equipment))]
+           :when (some? equipment)]
+       [:<>
+        [:h3 (string/capitalize (name slot))]
+        (for [equipment equipment]
+          [:div.columns
+           [:div.column.is-6
+            [equipment-view equipment]]
+           [:div.column.is-4
+            [:div.level
+             (for [kobold (vals (:kobolds @-game))]
+               [:div.level-item
+                [:button.button.is-info
+                 {:disabled (not (k/equippable? kobold equipment))}
+                 (:name kobold)]])]]
+           [:div.column.is-2
+            [:button.button.is-danger.is-fullwidth
+             "🐲✨🗑️"]]])])]))
 
 (defn lair-crafting-view [-game]
   [:h3 "UNIMPLEMENTED"])
@@ -183,30 +228,28 @@
 (defn lair-playground-view [-game]
   [:h3 "UNIMPLEMENTED"])
 
-(defn lair-view [-game -state]
-  [:div.columns
-   [:div.column.is-2
-    [lair-view-menu -state]]
-   [:div.column.is-8
-    (case @-state
-      :lair [lair-home-view -game]
-      :kobolds [lair-kobolds-view -game (r/atom :drg)]
-      :equipment [lair-equipment-view -game]
-      :crafting [lair-crafting-view -game]
-      :playground [lair-playground-view -game]
-      )]
+(defn lair-side-view [-game]
    (let [{:keys [essence experience max-depth relics]} @-game]
-     (when (or (pos? experience) (pos? essence) (pos? max-depth))
-       [:div.column.is-2
-        [:div.box>div.content
-         (when (pos? experience)
-           [:p (str "Experience: " experience)])
-         (when (pos? essence)
-           [:p (str "Essence: " essence)])
-         (when (pos? max-depth)
-           [:p (str "Delve Depth: " max-depth)])
-         (when (seq relics)
-           [:p "Relics:"]
-           [:ul
-            (for [relic relics]
-              [:li (string/join " " (map string/capitalize (string/split (name relic) #"-")))])])]]))])
+     (when (some pos-int? [experience essence max-depth])
+       [:div.box>div.content
+        (when (pos-int? experience)
+          [:p (str "Experience: " experience)])
+        (when (pos-int? essence)
+          [:p (str "Essence: " essence)])
+        (when (pos-int? max-depth)
+          [:p (str "Delve Depth: " max-depth)])
+        (when (seq relics)
+          [:p "Relics:"]
+          [:ul
+           (for [relic relics]
+             [:li (string/join " " (map string/capitalize (string/split (name relic) #"-")))])])])))
+
+(defn lair-view [-game -state]
+  [:<>
+   [lair-view-menu -state]
+   (case @-state
+     :lair [lair-home-view -game]
+     :kobolds [lair-kobolds-view -game (r/atom :drg)]
+     :equipment [lair-equipment-view -game]
+     :crafting [lair-crafting-view -game]
+     :playground [lair-playground-view -game])])

@@ -54,6 +54,10 @@
         :armor :armor/type
         :accessory :accessory/type))
 
+#_(def type-tiers
+    {:padded ["Padded Armor" "Heavy Cloak" "Armored Coat" "Sentinel Robes" "Moonweave Gown"]
+     :leather []})
+
 (def type->slot
   (merge
    (reduce
@@ -459,10 +463,14 @@
         modifiers
         (take i (distinct (repeatedly #(rand-modifier level))))
         type*
-        (case (rand-int 3)
-          0 (rand-nth (seq weapons))
-          1 (rand-nth (seq armors))
-          2 (rand-nth (seq accessories)))
+        (if (zero? i)
+          (case (rand-int 2)
+            0 (rand-nth (seq weapons))
+            1 (rand-nth (seq armors)))
+          (case (rand-int 3)
+            0 (rand-nth (seq weapons))
+            1 (rand-nth (seq armors))
+            2 (rand-nth (seq accessories))))
         armor? (= :armor (type* type->slot))
         name*
         (cond
