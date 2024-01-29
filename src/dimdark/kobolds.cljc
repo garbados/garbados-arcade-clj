@@ -109,7 +109,7 @@
   :args (s/cat :kobold ::kobold)
   :ret ::d/stats)
 
-(defn equippable? [{:keys [name proficiencies]} {:keys [slot type]}]
+(defn equippable? [{:keys [proficiencies]} {:keys [slot type]}]
   (case slot
     :weapon
     (contains? (:weapons proficiencies) type)

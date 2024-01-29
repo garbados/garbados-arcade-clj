@@ -9,4 +9,4 @@
 (defn game-view [-game]
   (if (some? (:adventure @-game))
     [adventure-view -game]
-    [lair-view -game (r/atom :equipment)]))
+    [lair-view -game (r/atom :lair)]))

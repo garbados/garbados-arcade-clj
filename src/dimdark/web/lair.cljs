@@ -1,11 +1,12 @@
 (ns dimdark.web.lair
   (:require [arcade.text :refer-macros [inline-slurp]]
-            [dimdark.kobolds :as k]
-            [reagent.core :as r]
             [clojure.string :as string]
-            [dimdark.core :as d]
+            [dimdark.abilities :as a]
             [dimdark.equipment :as eq]
-            [dimdark.abilities :as a]))
+            [dimdark.games :as dg]
+            [dimdark.kobolds :as k]
+            [dimdark.web.encounter :as encounter]
+            [reagent.core :as r]))
 
 (def remarks
   (filter
@@ -14,18 +15,19 @@
     (inline-slurp "resources/dimdark/remarks.txt"))))
 
 (defn lair-view-menu [-state]
-  (let [state @-state]
-    [:div.columns
-     (for [[name* state*] [["Lair" :lair]
-                           ["Kobolds" :kobolds]
-                           ["Equipment" :equipment]
-                           ["Crafting" :crafting]
-                           ["Playground" :playground]]]
-       [:div.column
-        [:button.button.is-info.is-fullwidth
-         {:disabled (= state* state)
-          :on-click #(reset! -state state*)}
-         name*]])]))
+  [:div.columns>div.column.is-6.is-offset-3
+   (let [state @-state]
+     [:div.columns
+      (for [[name* state*] [["Lair" :lair]
+                            ["Kobolds" :kobolds]
+                            ["Equipment" :equipment]
+                            ["Crafting" :crafting]
+                            ["Playground" :playground]]]
+        [:div.column
+         [:button.button.is-info.is-fullwidth
+          {:disabled (= state* state)
+           :on-click #(reset! -state state*)}
+          name*]])])])
 
 (defn stats-table [stats]
   [:table.table
@@ -122,23 +124,12 @@
      [:table.table
       [:tbody
        (for [slot [:weapon :armor :accessory]
-             :let [obj (get-in kobold [:equipped slot])]
-             :when (some? obj)]
+             :let [equipped (get-in kobold [:equipped slot])]
+             :when (some? equipped)]
          [:tr
           [:td.is-narrow [:em (string/capitalize (name slot))]]
           [:td
-           [:div.level
-            [:div.level-left
-             [:div.level-item
-              [:span (:name obj)]]]
-            [:div.level-right
-             [:div.level-item
-              [:span
-               (string/join
-                "; "
-                (for [[stat value] (eq/equipment->stats obj)
-                      :when (pos-int? value)]
-                  (str (string/capitalize (name stat)) ": " value)))]]]]]])]]]
+           [equipment-view equipped]]])]]]
     [:div.column.is-4
      (let [stats (k/kobold->stats kobold)]
        [:<>
@@ -165,41 +156,68 @@
                                     (:traits details)))]]]])]])
 
 (defn lair-home-view [-game]
-  [:div.box>div.content
+  [:div.columns>div.column.is-6.is-offset-3>div.box>div.content
    [:h2 (str "Lair of " (:name @-game))]
-   [:p [:em (rand-nth remarks)]]])
+   [:p [:em (rand-nth remarks)]]
+   [:p "What will you do now?"]
+   [:p
+    [:button.button.is-primary.is-fullwidth
+     "Quests"]]
+   [:p
+    [:button.button.is-secondary.is-fullwidth
+     "Delving"]]])
 
-(defn lair-kobolds-view [_ -kobold]
-  [:div.columns
-   [:div.column.is-2
-    (for [kobold-name (map first (sort-by first k/kobolds))]
-      [:div.block
-       [:button.button.is-link.is-fullwidth
-        {:on-click #(reset! -kobold kobold-name)
-         :disabled (= kobold-name @-kobold)}
-        (string/capitalize (name kobold-name))]])]
-   [:div.column.is-10
-    (when @-kobold
-      [kobold-view (get k/kobolds @-kobold)])]])
+(defn lair-kobolds-view [-game -kobold]
+  (let [kobolds (:kobolds @-game)]
+    [:div.columns>div.column.is-10.is-offset-1
+     [:div.columns
+      [:div.column.is-2
+       (for [kobold-name (map first (sort-by first kobolds))]
+         [:div.block
+          [:button.button.is-link.is-fullwidth
+           {:on-click #(reset! -kobold kobold-name)
+            :disabled (= kobold-name @-kobold)}
+           (string/capitalize (name kobold-name))]])]
+      [:div.column.is-10
+       (when @-kobold
+         [kobold-view (get kobolds @-kobold)])]]]))
+
+(defn equipping-button [kobold equipment equipped -game]
+  (let [kobold-name (:name kobold)
+        equippable (k/equippable? kobold equipment)
+        tooltip? (and equippable (some? equipped))]
+    [:button.button.is-info.is-fullwidth
+     {:disabled (not equippable)
+      :class (if tooltip? "has-tooltip-arrow" "is-outlined")
+      :on-click
+      (when equippable
+        #(do
+           (swap! -game assoc-in [:kobolds kobold-name :equipped (:slot equipment)] equipment)
+           (swap! -game update :equipment conj equipped)))
+      :data-tooltip
+      (when tooltip?
+        (string/join
+         "; "
+         (for [[stat value] (eq/equipment->stats equipped)
+               :when (pos-int? value)]
+           (str (string/capitalize (name stat)) ": " value))))}
+     (:name kobold)]))
 
 (defn lair-equipment-view [-game]
-  (let [game-equipment
-        (take 10 (repeatedly #(eq/gen-equipment-from-level-rarity (inc (rand-int 5)) (rand-nth eq/rarities))))
-        #_(:equipment @-game)
-        slot->equipment
+  (let [slot->equipment
         (reduce
          (fn [slots equipment]
            (update slots (:slot equipment) conj equipment))
          {:weapon [] :armor [] :accessory []}
-         game-equipment)]
+         (:equipment @-game))]
     [:div.box>div.content
      [:div.columns
-      [:div.column.is-6
+      [:div.column
        [:h2 "Equipment"]]
       [:div.column.is-4
        {:style {:text-align :center}}
        [:h4 "Equippable by..."]]
-      [:div.column.is-2
+      [:div.column.is-1
        {:style {:text-align :center}}
        [:h5 "Disenchant"]]]
      (for [slot [:weapon :armor :accessory]
@@ -209,24 +227,64 @@
         [:h3 (string/capitalize (name slot))]
         (for [equipment equipment]
           [:div.columns
-           [:div.column.is-6
+           [:div.column
             [equipment-view equipment]]
            [:div.column.is-4
-            [:div.level
-             (for [kobold (vals (:kobolds @-game))]
-               [:div.level-item
-                [:button.button.is-info
-                 {:disabled (not (k/equippable? kobold equipment))}
-                 (:name kobold)]])]]
-           [:div.column.is-2
-            [:button.button.is-danger.is-fullwidth
+            [:div.columns
+             (for [[kobold-name kobold] (:kobolds @-game)
+                   :let [equipped (get-in kobold [:equipped slot])]]
+               ^{:key kobold-name}
+               [:div.column
+                [equipping-button kobold equipment equipped -game]])]]
+           [:div.column.is-1
+            [:button.button.is-danger.is-fullwidth.is-outlined
              "🐲✨🗑️"]]])])]))
 
 (defn lair-crafting-view [-game]
   [:h3 "UNIMPLEMENTED"])
 
-(defn lair-playground-view [-game]
-  [:h3 "UNIMPLEMENTED"])
+(defn lair-playground-view [-game -team -encounter]
+  (if (some? @-encounter)
+    [:div.columns>div.column.is-10.is-offset-1
+     [encounter/encounter-view -game -encounter]]
+    [:div.columns>div.column.is-6.is-offset-3>div.box>div.content
+     [:h3 "Playground"]
+     [:p "The kobolds want to do some rough-housing. Who do you pick for your team?"]
+     (let [team @-team]
+       [:<>
+        [:div.columns
+         (for [kobold-name (keys (:kobolds @-game))
+               :let [on-team? (contains? team kobold-name)]]
+           [:div.column
+            [:button.button.is-outlined.is-fullwidth
+             {:class (if on-team?
+                       :is-success
+                       :is-info)
+              :disabled (= 3 (count team))
+              :on-click #(if on-team?
+                           (swap! -team disj kobold-name)
+                           (swap! -team conj kobold-name))}
+             (name kobold-name)]])]
+        (when (= 3 (count team))
+          [:div.columns
+           [:div.column
+            [:button.button.is-success.is-fullwidth
+             {:on-click
+              #(let [[kobolds1 kobolds2]
+                     (reduce
+                      (fn [[kobolds1 kobolds2] kobold-name]
+                        (let [kobold (k/kobold->creature (get-in @-game [:kobolds kobold-name]))]
+                          (if (contains? team kobold-name)
+                            [(conj kobolds1 kobold) kobolds2]
+                            [kobolds1 (conj kobolds2 kobold)])))
+                      [[] []]
+                      k/kobold-names)]
+                 (reset! -encounter (dg/init-playground-encounter kobolds1 kobolds2)))}
+             "Begin!"]]
+           [:div.column
+            [:button.button.is-warning.is-fullwidth
+             {:on-click #(reset! -team #{})}
+             "Reset!"]]])])]))
 
 (defn lair-side-view [-game]
    (let [{:keys [essence experience max-depth relics]} @-game]
@@ -252,4 +310,4 @@
      :kobolds [lair-kobolds-view -game (r/atom :drg)]
      :equipment [lair-equipment-view -game]
      :crafting [lair-crafting-view -game]
-     :playground [lair-playground-view -game])])
+     :playground [lair-playground-view -game (r/atom #{}) (r/atom nil)])])

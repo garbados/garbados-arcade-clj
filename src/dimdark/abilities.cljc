@@ -124,6 +124,15 @@
       (contains? traits :poison) (+ (:poison aptitudes 0))
       (contains? traits :mental) (+ (:mental aptitudes 0)))))
 
+(defn get-synergy-magnitude [ability creature]
+  (let [{:keys [traits]} (ability ability->details)
+        {:keys [aptitudes]} (d/stats+effects->stats (:stats creature) (:effects creature))]
+    (cond-> 0
+      (contains? traits :fire) (+ (:fire aptitudes 0))
+      (contains? traits :frost) (+ (:frost aptitudes 0))
+      (contains? traits :poison) (+ (:poison aptitudes 0))
+      (contains? traits :mental) (+ (:mental aptitudes 0)))))
+
 (s/fdef get-user-magnitude
   :args (s/cat :ability ::ability
                :creature ::d/creature)
@@ -158,8 +167,9 @@
   :args (s/cat :ability ::ability-details)
   :ret boolean?)
 
-(defn friendly-ability-hits? [ability user]
-  (let [magnitude (get-user-magnitude ability user)]
+(defn friendly-ability-hits? [ability user target]
+  (let [magnitude (+ (get-user-magnitude ability user)
+                     (get-synergy-magnitude ability target))]
     (if (zero? magnitude)
       0
       (int (math-log2 magnitude)))))

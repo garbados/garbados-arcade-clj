@@ -80,7 +80,7 @@
   #{:jawtrapped
     :mawtrapped})
 (s/def ::env-effect env-effects)
-(s/def ::env-effects (s/map-of ::env-effect pos-int?))
+(s/def ::environment (s/map-of ::env-effect pos-int?))
 
 ;; when an effect is negative, it uses a name deref'd from here
 (def inverted-effects

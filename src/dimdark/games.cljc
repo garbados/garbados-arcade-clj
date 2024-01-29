@@ -41,6 +41,7 @@
         :encounter
         (s/keys :req-un [::kobolds
                          ::monsters
+                         ::d/environment
                          ::turn-order
                          ::turn
                          ::round])))
@@ -60,6 +61,7 @@
          turn-order (c/get-turn-order kobolds monsters)]
      {:kobolds kobolds
       :monsters monsters
+      :encounter {}
       :turn-order (drop 1 turn-order)
       :turn (first turn-order)
       :round 1})))
@@ -69,6 +71,7 @@
   (let [turn-order (c/get-turn-order kobolds1 kobolds2)]
     {:kobolds kobolds1
      :monsters kobolds2
+     :encounter {}
      :turn-order (drop 1 turn-order)
      :turn (first turn-order)
      :round 1}))
