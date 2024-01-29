@@ -115,15 +115,14 @@
              [:button.button.is-warning.is-fullwidth.is-outlined
               (:name monster)]])]])]
      [:div.columns
-      [:div.column.is-2>div.box>div.content
+      [:div.column.is-narrow>div.box>div.content
        [:h3 (str "Round " (:round encounter))]
        [:p "Next up:"]
        [:ul
         (for [creature (:turn-order encounter)]
           ^{:key (:name creature)}
           [:li (text/normalize-name (:name creature))])]]
-      [:div.column.is-10]
-      [:div.column.is-8
+      [:div.column
        (let [creature (:turn encounter)]
          [:div.box>div.content
           [:h2 (str (text/normalize-name (:name creature)) "'s turn!")]
