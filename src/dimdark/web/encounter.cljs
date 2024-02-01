@@ -7,16 +7,27 @@
 
 (defn do-ability [creature ability target]
   (let [{:keys [traits effects self-effects env-effects]} (a/ability->details ability)
-        magnitude (cond
-                    (contains? traits :hostile)
-                    (a/hostile-ability-hits? ability creature target)
-                    (contains? traits :friendly)
-                    (a/friendly-ability-hits? ability creature target))]
-    (when (pos-int? magnitude)
-      (cond-> {}
-        (seq effects) (assoc :effects (a/resolve-effects effects magnitude))
-        (seq self-effects) (assoc :self-effects (a/resolve-effects effects magnitude))
-        (seq env-effects) (assoc :env-effects (a/resolve-effects effects magnitude))))))
+        roll-magnitude
+        (fn [target]
+          (cond
+            (contains? traits :hostile)
+            (a/hostile-ability-hits? ability creature target)
+            (contains? traits :friendly)
+            (a/friendly-ability-hits? ability creature target)))]
+    (if (seq? target)
+      (let [magnitudes (->> (map #(vec [% (roll-magnitude %)]) target)
+                            (filter (comp pos-int? second)))]
+        (if (seq magnitudes)
+          (reduce
+           (fn [effects [target magnitude]])
+           {}
+           magnitudes)))
+      (let [magnitude (roll-magnitude target)]
+        (when (pos-int? magnitude)
+          (cond-> {}
+            (seq effects) (assoc-in [:effects target] (a/resolve-effects effects magnitude))
+            (seq self-effects) (assoc :self-effects (a/resolve-effects self-effects magnitude))
+            (seq env-effects) (assoc :env-effects (a/resolve-effects env-effects magnitude))))))))
 
 (defn kobold-turn-view [-game -encounter kobold -ability -target]
   (let [ability @-ability
@@ -28,7 +39,7 @@
        (let [{:keys [effects self-effects env-effects]
               :or {effects {} self-effects {} env-effects {}}} impacts]
          [:<>
-          [:h1 "Hit!"]
+          [:h1 [:strong "Hit!"]]
           [:h5 "Effects"]
           [:ul
            (for [[effect amt] effects]
@@ -57,19 +68,56 @@
      (let [{:keys [traits]} (ability a/ability->details)]
        (cond
          (contains? traits :self)
-        ;;  TODO button applies state change. present possible targets
-         (do
-           (reset! -target kobold)
-           [:<>])
+         [:<>
+          [:p "This ability will only affect " (:name kobold)]
+          [:div.columns
+           [:div.column
+            [:button.button.is-primary.is-fullwidth
+             {:on-click #(reset! -target kobold)}
+             "Proceed"]]
+           [:div.column
+            [:button.button.is-secondary.is-fullwidth
+             {:on-click #(reset! -ability nil)}
+             "Reset"]]]]
          (and (contains? traits :hostile)
               (contains? traits :area))
-         (do
-           (reset! -target (:monsters @-encounter))
-           [:<>])
+         [:<>
+          [:p "This ability will affect:"]
+          [:ul
+           (for [name (map (comp text/normalize-name :name)
+                           (:monsters @-encounter))]
+             ^{:key name}
+             [:li name])]
+          [:div.columns
+           [:div.column
+            [:button.button.is-primary.is-fullwidth
+             {:on-click #(reset! -target (:monsters @-encounter))}
+             "Proceed"]]
+           [:div.column
+            [:button.button.is-secondary.is-fullwidth
+             {:on-click #(reset! -ability nil)}
+             "Reset"]]]]
          (and (contains? traits :friendly)
-              (contains? traits :area)) (reset! -target (:kobolds @-encounter))
+              (contains? traits :area))
+         [:<>
+          [:p "This ability will affect:"]
+          [:ul
+           (for [name (map (comp text/normalize-name :name)
+                           (:kobolds @-encounter))]
+             ^{:key name}
+             [:li name])]
+          [:div.columns
+           [:div.column
+            [:button.button.is-primary.is-fullwidth
+             {:on-click #(reset! -target (:kobolds @-encounter))}
+             "Proceed"]]
+           [:div.column
+            [:button.button.is-secondary.is-fullwidth
+             {:on-click #(reset! -ability nil)}
+             "Reset"]]]]
          :else
-         ())))))
+         ()
+         #_(let [possible-targets (a/get-possible-targets ...)]))))))
 
 (defn monster-turn-view [-game -encounter monster]
   )
@@ -85,7 +133,6 @@
         [:h5 "Health"]]
        [:div.column.is-5.has-text-centered
         [:h5 "Monsters"]]]
-      [:hr]
       (for [i (range 4)
             :let [kobold (get-in encounter [:kobolds i])
                   monster (get-in encounter [:monsters i])]

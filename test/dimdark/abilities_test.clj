@@ -7,6 +7,7 @@
 (deftest fspec-test
   (spec-test-syms
    [`a/get-user-magnitude
+    `a/get-synergy-magnitude
     `a/get-target-magnitude
     `a/needs-target?
     `a/friendly-ability-hits?
