@@ -192,7 +192,8 @@
          fortune 0}
     :as stats}
    {:keys [sharpened quickened reinforced blessed focused laden
-           scorched chilled frozen nauseous charmed]
+           scorched chilled frozen nauseous charmed
+           delayed]
     :or {sharpened 0
          quickened 0
          reinforced 0
@@ -203,13 +204,14 @@
          chilled 0
          frozen 0
          nauseous 0
-         charmed 0}}]
+         charmed 0
+         delayed 0}}]
   (merge stats
          {:health health
           :attack (+ attack sharpened (- charmed))
           :defense (+ defense quickened (- nauseous) (- frozen))
           :armor (+ armor reinforced (- frozen))
-          :initiative (+ initiative quickened (- chilled))
+          :initiative (+ initiative quickened (- chilled) (- delayed))
           :aptitude (+ aptitude focused (- scorched))
           :aptitudes aptitudes
           :resistance (+ resistance blessed)

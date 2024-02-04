@@ -165,7 +165,17 @@
 (defn round-effects-tick
   "Diminishes and disjoins effects that apply when a round begins."
   [encounter]
-  'todo)
+  (let [update-effects
+        (fn [{:keys [effects] :as creature}]
+          (cond-> creature
+            (contains? effects :delayed) (update :effects disj :delayed)))]
+    (-> encounter
+        (update :kobolds (partial map update-effects))
+        (update :monsters (partial map update-effects)))))
+
+(s/fdef round-effects-tick
+  :args (s/cat :encounter ::encounter)
+  :ret ::encounter)
 
 (defn turn-effects-tick [{:keys [effects] :as creature}]
   (cond->
