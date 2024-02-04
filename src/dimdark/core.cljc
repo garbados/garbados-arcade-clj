@@ -52,9 +52,10 @@
     :mending
     :taunted
     :hidden
+    :pushed
+    :pulled
     :empowered
     :extended
-    :contained
     :cleansed
     :purged
     :marked
@@ -75,6 +76,50 @@
     :laden})
 (s/def ::effect effects)
 (s/def ::effects (s/map-of ::effect pos-int?))
+
+(def diminishing-effects
+  #{:mending
+    :bleeding
+    :poisoned
+    :nauseous
+    :burning
+    :scorched
+    :chilled
+    :frozen
+    :charmed
+    :sharpened
+    :focused
+    :reinforced
+    :blessed
+    :quickened
+    :laden})
+
+(def stat-effects
+  #{:sharpened
+    :focused
+    :reinforced
+    :blessed
+    :quickened
+    :laden})
+
+(def positive-effects
+  #{:mending
+    :hidden
+    :empowered
+    :extended})
+
+(def negative-effects
+  #{:taunted
+    :marked
+    :delayed
+    :bleeding
+    :poisoned
+    :nauseous
+    :burning
+    :scorched
+    :chilled
+    :frozen
+    :charmed})
 
 (def env-effects
   #{:jawtrapped
@@ -162,7 +207,7 @@
   (merge stats
          {:health health
           :attack (+ attack sharpened (- charmed))
-          :defense (+ defense quickened (- nauseous))
+          :defense (+ defense quickened (- nauseous) (- frozen))
           :armor (+ armor reinforced (- frozen))
           :initiative (+ initiative quickened (- chilled))
           :aptitude (+ aptitude focused (- scorched))

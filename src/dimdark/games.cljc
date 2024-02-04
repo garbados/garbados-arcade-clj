@@ -3,6 +3,7 @@
             [dimdark.equipment :as eq]
             [dimdark.combat :as c]
             [dimdark.core :as d]
+            [dimdark.encounters :as e]
             [dimdark.kobolds :as k]
             [dimdark.quests :as q]
             [dimdark.monsters :as m]))
@@ -30,21 +31,9 @@
 (s/def ::items
   (s/map-of ::item nat-int?))
 
-(s/def ::kobolds (s/coll-of ::d/creature :max-count 4))
-(s/def ::monsters (s/coll-of ::d/creature :max-count 4))
-(s/def ::turn-order (s/coll-of ::d/creature :max-count 8))
-(s/def ::turn ::d/creature)
-(s/def ::round pos-int?)
 (s/def ::escapade
-  (s/or :event
-        (s/keys :req-un [:event/name])
-        :encounter
-        (s/keys :req-un [::kobolds
-                         ::monsters
-                         ::d/environment
-                         ::turn-order
-                         ::turn
-                         ::round])))
+  (s/or :event (s/keys :req-un [:event/name])
+        :encounter ::e/encounter))
 
 (defn init-monster-encounter
   ([kobolds level]
@@ -61,6 +50,8 @@
          turn-order (c/get-turn-order kobolds monsters)]
      {:kobolds kobolds
       :monsters monsters
+      :kobolds-env {}
+      :monsters-env {}
       :encounter {}
       :turn-order (drop 1 turn-order)
       :turn (first turn-order)

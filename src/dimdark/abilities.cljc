@@ -1,7 +1,7 @@
 (ns dimdark.abilities
   (:require #?(:clj [arcade.text :refer [inline-slurp]]
                :cljs [arcade.text :refer-macros [inline-slurp]])
-            [arcade.utils :as utils]
+            [arcade.utils :as utils :refer [contains-v?]]
             [clojure.edn :as edn]
             [clojure.set :as set]
             [clojure.spec.alpha :as s]
@@ -65,8 +65,6 @@
                    ::env-effects
                    ::affects
                    ::party-affects
-                   ::move-to
-                   ::move-target-to
                    ::requires
                    ::self-requires]))
 
@@ -164,10 +162,12 @@
   :ret number?)
 
 (defn needs-target? [{:keys [traits]}]
-  (cond
-    (contains? traits :self) false
-    (contains? traits :area) false
-    :else                    true))
+  (not (or (contains? traits :self)
+           (contains? traits :environmental)
+           (contains? traits :area)
+           (contains? traits :front-row)
+           (contains? traits :back-row)
+           (not (contains? traits :direct)))))
 
 (s/fdef needs-target?
   :args (s/cat :ability ::ability-details)
@@ -176,6 +176,17 @@
 (defn friendly-ability-hits? [ability user target]
   (let [magnitude (+ (get-user-magnitude ability user)
                      (get-synergy-magnitude ability target))]
+    (if (zero? magnitude)
+      0
+      (int (math-log2 magnitude)))))
+
+(s/fdef friendly-ability-hits?
+  :args (s/cat :ability ::ability
+               :user ::d/creature)
+  :ret nat-int?)
+
+(defn self-ability-magnitude [ability user]
+  (let [magnitude (get-user-magnitude ability user)]
     (if (zero? magnitude)
       0
       (int (math-log2 magnitude)))))
@@ -216,39 +227,8 @@
   :ret (s/map-of ::d/effect nat-int?))
 
 (defn filter-active [abilities]
-  (filter
-   #(-> % ability->details :traits (contains? :passive) not)
-   abilities))
+  (filter #(-> % ability->details :traits (contains? :passive) not) abilities))
 
-(defn get-possible-targets [{:keys [traits]} creature {:keys [kobolds monsters]}]
-  (let [monster? (utils/contains-v? monsters creature)]
-    (if (or
-         (contains? traits :passive)
-         (and
-          (contains? traits :close)
-          (= :back (:row creature)))
-         (and
-          (contains? traits :ranged)
-          (= :front (:row creature))))
-      []
-      (cond-> []
-        (contains? traits :self)
-        (conj creature)
-        (or
-         (and monster?
-              (contains? traits :friendly))
-         (and (not monster?)
-              (contains? traits :hostile)))
-        (into monsters)
-        (or
-         (and (not monster?)
-              (contains? traits :friendly))
-         (and monster?
-              (contains? traits :hostile)))
-        (into kobolds)
-        (and monster?
-             (contains? traits :close))
-        (into (filter #(= :front (:row %)) kobolds))
-        (and (not monster?)
-             (contains? traits :close))
-        (into (filter #(= :front (:row %)) monsters))))))
+(s/fdef filter-active
+  :args (s/cat :abilities (s/coll-of ::ability))
+  :ret (s/coll-of ::ability))

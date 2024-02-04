@@ -3,14 +3,13 @@
   :description "Disappear into the shadows."
   :traits #{:self :spell :mental}
   :uses {:initiative 0.5}
-  :self-effects {:hidden 1}
-  :move-to :back}
+  :self-effects {:hidden 1 :pushed 1}}
  :backstab
  {:name :backstab
   :description "Strike from the shadows for massive damage!"
   :traits #{:ranged :hostile :direct :piercing :physical}
   :effects {:damage 2}
-  :move-to :front
+  :self-effects {:pulled 1}
   :self-requires #{:hidden}}
  :feint
  {:name :feint

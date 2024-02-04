@@ -47,9 +47,26 @@ elemental resists always apply when their trait comes up
 
 TODO
 - Level up kobolds! Fake it to make it show up.
-- Equipment view: list equipment, allow to equip and disenchant.
+- [DONE] Equipment view: list equipment, allow to equip and disenchant.
 - Crafting view: make items for 1 essence each, make equipment for ??? essence.
 - Playground: pick 3 kobolds, fight the other three. kobolds "get tired" when they run out of health. does not yield experience.
 - Lair view: choose to quest or delve
 - Delve...!
 - Quests...!
+
+Armor changes:
+- Increases defense, lowers initiative NO WAIT ARMOR IS FINE
+- Only three kinds of armor, with different names for different tiers
+- NO WAIT. SIX KINDS. three provide armor. three provide resists. (three provide both...???)
+
+Phases of a turn:
+- ... Each phase affects the creature
+- Setup: Some effects tick, like poison, burning, bleeding, marked...
+    - Aborts by returning nil
+    - effects-tick
+- Selection: Select action. (UI, AI really handles this)
+- Pre-Action: Some effects apply, like hidden, empowered, extended.
+- Action: Final magnitude is computed into impacts.
+- Expand Effects: Roll damage and healing.
+- Post-Action: Impacts update targets.
+- Teardown: Passives with effects apply

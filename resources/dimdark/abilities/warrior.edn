@@ -12,8 +12,7 @@
  {:name :shove
   :description "Push a frontline enemy into the rear guard."
   :traits #{:direct :close :hostile :physical :mental}
-  :effects {:delayed 1}
-  :move-target-to :back}
+  :effects {:delayed 1 :pushed 1}}
  :trip
  {:name :trip
   :description "Trip up an enemy's footing, leaving their offense in tatters."

@@ -23,6 +23,7 @@
                             ["Equipment" :equipment]
                             ["Crafting" :crafting]
                             ["Playground" :playground]]]
+        ^{:key name*}
         [:div.column
          [:button.button.is-info.is-fullwidth
           {:disabled (= state* state)
@@ -59,6 +60,7 @@
                   "Resistances: Mental"]
             :let [value (get printable-stats stat)]
             :when (pos-int? value)]
+        ^{:key stat}
         [:tr
          [:td stat]
          [:td value]]))]])
@@ -100,10 +102,13 @@
         [:thead
          [:tr
           (for [attribute attributes]
+            ^{:key attribute}
             [:th (string/capitalize (name attribute))])]]
         [:tbody
          [:tr
-          (for [value (map #(get-in kobold [:attributes %]) attributes)]
+          (for [attribute attributes
+                :let [value (get-in kobold [:attributes attribute])]]
+            ^{:key attribute}
             [:th value])]]])
      [:h5 "Merits"]
      (let [merits [:scales :squish :stink :brat]]
@@ -111,6 +116,7 @@
         [:thead
          [:tr
           (for [merit merits]
+            ^{:key merit}
             [:th (string/capitalize (name merit))])]]
         [:tbody
          [:tr
@@ -119,6 +125,7 @@
                               [:squish :blue]
                               [:stink :green]
                               [:brat :purple]]]
+            ^{:key merit}
             [:th (get-in kobold [:merits merit] 0)])]]])
      [:h5 "Equipment"]
      [:table.table
@@ -126,6 +133,7 @@
        (for [slot [:weapon :armor :accessory]
              :let [equipped (get-in kobold [:equipped slot])]
              :when (some? equipped)]
+         ^{:key slot}
          [:tr
           [:td.is-narrow [:em (string/capitalize (name slot))]]
           [:td
@@ -140,6 +148,7 @@
     (for [ability (:abilities kobold)
           :let [details (a/ability->details ability)]
           :when (some? details)]
+      ^{:key ability}
       [:div.level
        [:div.level-left
         [:div.level-item
@@ -173,6 +182,7 @@
      [:div.columns
       [:div.column.is-2
        (for [kobold-name (map first (sort-by first kobolds))]
+         ^{:key kobold-name}
          [:div.block
           [:button.button.is-link.is-fullwidth
            {:on-click #(reset! -kobold kobold-name)
@@ -223,9 +233,11 @@
      (for [slot [:weapon :armor :accessory]
            :let [equipment (seq (slot slot->equipment))]
            :when (some? equipment)]
+       ^{:key slot}
        [:<>
         [:h3 (string/capitalize (name slot))]
         (for [equipment equipment]
+          ^{:key equipment}
           [:div.columns
            [:div.column
             [equipment-view equipment]]
@@ -246,7 +258,7 @@
 (defn lair-playground-view [-game -team -encounter]
   (if (some? @-encounter)
     [:div.columns>div.column.is-10.is-offset-1
-     [encounter/encounter-view -game -encounter]]
+     [encounter/encounter-view -encounter]]
     [:div.columns>div.column.is-6.is-offset-3>div.box>div.content
      [:h3 "Playground"]
      [:p "The kobolds want to do some rough-housing. Who do you pick for your team?"]
@@ -255,6 +267,7 @@
         [:div.columns
          (for [kobold-name (keys (:kobolds @-game))
                :let [on-team? (contains? team kobold-name)]]
+           ^{:key kobold-name}
            [:div.column
             [:button.button.is-outlined.is-fullwidth
              {:class (if on-team?
@@ -278,8 +291,9 @@
                             [(conj kobolds1 kobold) kobolds2]
                             [kobolds1 (conj kobolds2 kobold)])))
                       [[] []]
-                      k/kobold-names)]
-                 (reset! -encounter (dg/init-playground-encounter kobolds1 kobolds2)))}
+                      k/kobold-names)
+                     encounter (dg/init-playground-encounter kobolds1 kobolds2)]
+                 (reset! -encounter encounter))}
              "Begin!"]]
            [:div.column
             [:button.button.is-warning.is-fullwidth

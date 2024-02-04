@@ -6,5 +6,5 @@
 (deftest fspec-test
   (spec-test-syms
    [`c/get-turn-order
-    `c/roll-damage
+    `c/roll-nd6
     `c/rolls+armor=>damage]))

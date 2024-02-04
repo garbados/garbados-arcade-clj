@@ -86,7 +86,7 @@
    :initiative [:nimble :swift :fleet :spry :sprightly]
    :fortune [:lucky :favored :blessed :auspicious :prosperous]
    :aptitude [:skilled :adept :proficient :adroit :accomplished]
-   :fire-aptitude [:singed :burned :smolderring :seared :scalded]
+   :fire-aptitude [:singed :burned :smoldering :seared :scalded]
    :frost-aptitude [:chilly :cold :frigid :frozen :glacial]
    :poison-aptitude [:septic :pernicious :noxious :baleful :virulent]
    :mental-aptitude [:charming :persuasive :eloquent :allu:ring :seductive]
