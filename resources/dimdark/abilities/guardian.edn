@@ -26,9 +26,9 @@
   :effects {:damage 0.5 :blessed -1}}
  :goad
  {:name :goad
-  :description "Taunt a foe into attacking you."
+  :description "Tease and taunt your foe, sapping their resolve."
   :traits #{:close :direct :hostile :spell :mental}
-  :effects {:taunted 1}}
+  :effects {:charmed 2}}
  :dragon-heart
  {:name :dragon-heart
   :description "Draw from a spiritual reservoir to close your own wounds."

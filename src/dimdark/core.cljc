@@ -50,7 +50,6 @@
   #{:damage
     :healing
     :mending
-    :taunted
     :hidden
     :pushed
     :pulled
@@ -109,8 +108,7 @@
     :extended})
 
 (def negative-effects
-  #{:taunted
-    :marked
+  #{:marked
     :delayed
     :bleeding
     :poisoned

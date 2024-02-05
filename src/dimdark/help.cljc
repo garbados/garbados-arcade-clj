@@ -8,8 +8,6 @@
     #(str %1 " gained " %2 " hit points!")
     :mending
     #(str "The wounds of " %1 " begin to mend, for " %2 " hit points each turn.")
-    :taunted
-    #(str "The next foe " %1 " targets must be " %2 "!")
     :hidden
     #(str "Melding into the shadows, " %1 " cannot be targeted until after their next action.")
     :pushed

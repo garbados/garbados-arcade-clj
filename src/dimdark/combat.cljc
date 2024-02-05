@@ -5,10 +5,13 @@
 (s/def ::party (s/coll-of ::d/creature :kind seq? :max-count 4))
 
 (defn get-turn-order [kobolds monsters]
-  (sort-by
-   (fn [{:keys [stats effects]}]
-     (:initiative (d/stats+effects->stats stats effects)))
-   (into kobolds monsters)))
+  (->> (into kobolds monsters)
+       (filter
+        (fn [{:keys [health]}]
+          (pos-int? health)))
+       (sort-by
+        (fn [{:keys [stats effects]}]
+          (:initiative (d/stats+effects->stats stats effects))))))
 
 (s/fdef get-turn-order
   :args (s/cat :kobolds ::party
@@ -17,12 +20,16 @@
 
 (s/def ::rolls (s/coll-of (s/int-in 1 5)))
 
-(defn roll-nd6
-  "Roll 1d6 x magnitude"
-  [n]
-  (take n (repeatedly #(inc (rand-int 6)))))
+(defn roll
+  "Roll NdM. Roll d6 by default."
+  ([]
+   (roll 1 6))
+  ([n]
+   (roll n 6))
+  ([n m]
+   (take n (repeatedly #(inc (rand-int m))))))
 
-(s/fdef roll-nd6
+(s/fdef roll
   :args (s/cat :n pos-int?)
   :ret ::rolls)
 

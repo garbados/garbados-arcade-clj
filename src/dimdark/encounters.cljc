@@ -149,7 +149,7 @@
     (reduce
      (fn [creature effect]
        (update-in creature [:effects effect] merge-effect (get effects effect)))
-     $ [:mending :taunted :hidden :purged :cleansed :delayed
+     $ [:mending :hidden :purged :cleansed :delayed
         :bleeding :nauseous :burning :scorched :charmed
         :sharpened :focused :reinforced :blessed :quickened :laden])
     (reduce
@@ -163,7 +163,7 @@
   :ret ::d/creature)
 
 (defn round-effects-tick
-  "Diminishes and disjoins effects that apply when a round begins."
+  "Diminishes and disjoins effects that apply when a round begins, after turn order is decided."
   [encounter]
   (let [update-effects
         (fn [{:keys [effects] :as creature}]
@@ -222,8 +222,8 @@
 (defn expand-rolled-effects [{:keys [stats effects]}]
   (let [{:keys [armor]} (d/stats+effects->stats stats effects)]
     (cond-> effects
-      (contains? effects :damage) (assoc :damage (-> effects :damage c/roll-nd6 (c/rolls+armor->damage armor)))
-      (contains? effects :healing) (assoc :healing (c/roll-nd6 (:healing effects))))))
+      (contains? effects :damage) (assoc :damage (-> effects :damage (c/roll 6) (c/rolls+armor->damage armor)))
+      (contains? effects :healing) (assoc :healing (-> effects :healing (c/roll 4))))))
 
 (s/fdef expand-rolled-effects
   :args (s/cat :creature ::d/creature)
@@ -278,3 +278,57 @@
 (s/fdef resolve-instant-effects
   :args (s/cat :creature ::d/creature)
   :ret ::d/creature)
+
+(defn remove-dead-monsters [{:keys [monsters] :as encounter}]
+  (let [dead-monsters (filter #(-> % :health zero?) monsters)]
+    (reduce
+     (fn [encounter monster]
+       (update encounter :monsters (partial remove #(= % monster))))
+     encounter
+     dead-monsters)))
+
+(s/fdef remove-dead-monsters
+  :args (s/cat :encounter ::encounter)
+  :ret ::encounter)
+
+(defn victory? [{:keys [monsters]}]
+  (empty? monsters))
+
+(s/fdef victory?
+  :args (s/cat :encounter ::encounter)
+  :ret boolean?)
+
+(defn defeat? [{:keys [kobolds]}]
+  (every? #(= 0 (:health %)) kobolds))
+
+(defn front-line-crumples? [creatures]
+  (every? #(= :back (:row %)) creatures))
+
+(s/fdef front-line-crumples?
+  :args (s/cat :creatures (s/coll-of ::d/creature))
+  :ret boolean?)
+
+(defn crumple-front-line [creatures]
+  (map #(assoc % :row :front) creatures))
+
+(s/fdef crumple-front-line
+  :args (s/cat :creatures (s/coll-of ::d/creature))
+  :ret (s/coll-of ::d/creature))
+
+(defn next-round [{:keys [kobolds monsters] :as encounter}]
+  (let [[turn & turn-order] (c/get-turn-order kobolds monsters)]
+    (-> encounter
+        (assoc :turn turn)
+        (assoc :turn-order turn-order)
+        (update :round inc)
+        round-effects-tick)))
+
+(s/fdef next-round
+  :args (s/cat :encounter ::encounter)
+  :ret ::encounter)
+
+(defn next-turn [encounter]
+  (let [[turn & turn-order] (:turn-order encounter)]
+    (-> encounter
+        (assoc :turn-order turn-order)
+        (assoc :turn turn))))

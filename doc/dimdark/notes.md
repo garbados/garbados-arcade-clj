@@ -64,9 +64,10 @@ Phases of a turn:
 - Setup: Some effects tick, like poison, burning, bleeding, marked...
     - Aborts by returning nil
     - effects-tick
-- Selection: Select action. (UI, AI really handles this)
+- Action Selection: Select action. (UI, AI really handles this)
 - Pre-Action: Some effects apply, like hidden, empowered, extended.
+- Target Selection
 - Action: Final magnitude is computed into impacts.
-- Expand Effects: Roll damage and healing.
+- Expand Effects: Roll damage and healing, or other effects that use dice.
 - Post-Action: Impacts update targets.
 - Teardown: Passives with effects apply

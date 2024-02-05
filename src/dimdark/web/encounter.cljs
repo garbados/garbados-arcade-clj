@@ -7,46 +7,41 @@
             [reagent.core :as r]))
 
 (defn impacts-view [-encounter creature ability target]
-  (let [next-turn
-        (fn [& _]
-          (let [next-turn (first (:turn-order @-encounter))]
-            (swap! -encounter update :turn-order (partial drop 1))
-            (swap! -encounter assoc :turn next-turn)))]
-    (if-let [impacts (e/calc-impacts @-encounter creature ability target)]
-      (let [{:keys [kobolds-env monsters-env]} impacts
-            creatures (flatten (filter (fn [[creature _]] (not (keyword? creature))) impacts))
-            effect-lines
-            (sort
-             (flatten
-              (for [creature creatures
-                    :let [effects (get impacts creature)]]
-                (for [[effect magnitude] effects]
-                  (str (text/normalize-name (:name creature)) " <- " (text/normalize-name effect) ": " magnitude)))))]
-        [:div.content
-         [:p (str (text/normalize-name (:name creature)) " used " (text/normalize-name ability) "!")]
-         [:h1 [:strong "Hit!"]]
-         [:h5 "Effects"]
-         [:ul
-          (for [line effect-lines]
-            ^{:key line}
-            [:li line])
-          (when kobolds-env
-            (for [[effect magnitude] kobolds-env]
-              ^{:key effect}
-              [:li "Kobold environs <- " (text/normalize-name effect) ": " magnitude]))
-          (when monsters-env
-            (for [[effect magnitude] monsters-env]
-              ^{:key effect}
-              [:li "Monster environs <- " (text/normalize-name effect) ": " magnitude]))]
-         [:button.button.is-primary
-          {:on-click next-turn}
-          "Proceed"]])
-      [:<>
-       [:h3 "Whiff!"]
-       [:p (str (text/normalize-name (:name creature)) "'s use of " (text/normalize-name ability) " missed.")]
-       [:button.button.is-primary.is-fullwidth
-        {:on-click next-turn}
-        "Proceed"]])))
+  (if-let [impacts (e/calc-impacts @-encounter creature ability target)]
+    (let [{:keys [kobolds-env monsters-env]} impacts
+          creatures (flatten (filter (fn [[creature _]] (not (keyword? creature))) impacts))
+          effect-lines
+          (sort
+           (flatten
+            (for [creature creatures
+                  :let [effects (get impacts creature)]]
+              (for [[effect magnitude] effects]
+                (str (text/normalize-name (:name creature)) " <- " (text/normalize-name effect) ": " magnitude)))))]
+      [:div.content
+       [:p (str (text/normalize-name (:name creature)) " used " (text/normalize-name ability) "!")]
+       [:h1 [:strong "Hit!"]]
+       [:h5 "Effects"]
+       [:ul
+        (for [line effect-lines]
+          ^{:key line}
+          [:li line])
+        (when kobolds-env
+          (for [[effect magnitude] kobolds-env]
+            ^{:key effect}
+            [:li "Kobold environs <- " (text/normalize-name effect) ": " magnitude]))
+        (when monsters-env
+          (for [[effect magnitude] monsters-env]
+            ^{:key effect}
+            [:li "Monster environs <- " (text/normalize-name effect) ": " magnitude]))]
+       [:button.button.is-primary
+        {:on-click #(e/next-turn @-encounter)}
+        "Proceed"]])
+    [:div.content
+     [:h3 "Whiff!"]
+     [:p (str (text/normalize-name (:name creature)) "'s use of " (text/normalize-name ability) " missed.")]
+     [:button.button.is-primary.is-fullwidth
+      {:on-click #(e/next-turn @-encounter)}
+      "Proceed"]]))
 
 (defn kobold-turn-view [-encounter kobold -ability -target]
   (let [ability @-ability
@@ -97,17 +92,21 @@
            (text/normalize-name ability)]])]])))
 
 (defn monster-turn-view [-encounter monster]
-  (let [encounter @-encounter
-        [ability target]
-        (rand-nth
-         (for [ability (e/get-usable-abilities encounter monster)
-               :let [targets (e/get-possible-targets encounter monster ability)
-                     needs-target? (-> ability a/ability->details a/needs-target?)]
-               :when (seq targets)]
-           (if needs-target?
-             [ability (rand-nth targets)]
-             [ability targets])))]
-    [impacts-view -encounter monster ability target]))
+  (let [monster* (e/turn-effects-tick monster)]
+    (if (zero? (:health monster*))
+      [:<>
+       ]
+      (let [encounter @-encounter
+            [ability target]
+            (rand-nth
+             (for [ability (e/get-usable-abilities encounter monster*)
+                   :let [targets (e/get-possible-targets encounter monster* ability)
+                         needs-target? (-> ability a/ability->details a/needs-target?)]
+                   :when (seq targets)]
+               (if needs-target?
+                 [ability (rand-nth targets)]
+                 [ability targets])))]
+        [impacts-view -encounter monster* ability target]))))
 
 (defn encounter-view [-encounter]
   (let [encounter @-encounter]
@@ -128,10 +127,10 @@
         [:div.columns
          [:div.column.is-5
           (when kobold
-            [:div.columns>div.column.is-10
+            [:div.columns>div.column.is-8
              {:class
               (when (= :front (:row kobold))
-                "is-offset-2")}
+                "is-offset-4")}
              [:button.button.is-info.is-fullwidth.is-outlined
               (:name kobold)]])]
          [:div.column.is-1.has-text-centered
@@ -142,10 +141,10 @@
             [:p (str (:health monster) " / " (get-in monster [:stats :health]))])]
          [:div.column.is-5
           (when monster
-            [:div.columns>div.column.is-10
+            [:div.columns>div.column.is-8
              {:class
               (when (= :back (:row monster))
-                "is-offset-2")}
+                "is-offset-4")}
              [:button.button.is-warning.is-fullwidth.is-outlined
               (:name monster)]])]])]
      [:div.columns
@@ -157,9 +156,12 @@
           ^{:key (:name creature)}
           [:li (text/normalize-name (:name creature))])]]
       [:div.column
-       (let [creature (:turn encounter)]
+       (if-let [creature (:turn encounter)]
          [:div.box>div.content
           [:h2 (str (text/normalize-name (:name creature)) "'s turn!")]
           (if (contains-v? (:kobolds encounter) creature)
             [kobold-turn-view -encounter creature (r/atom nil) (r/atom nil)]
-            [monster-turn-view -encounter creature])])]]]))
+            [monster-turn-view -encounter creature])]
+         (do
+           (swap! -encounter e/next-round)
+           [:<>]))]]]))
