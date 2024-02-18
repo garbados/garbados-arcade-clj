@@ -76,6 +76,9 @@
 (s/def ::effect effects)
 (s/def ::effects (s/map-of ::effect pos-int?))
 
+(def burn-damage 3)
+(def bleed-damage 3)
+
 (def diminishing-effects
   #{:mending
     :bleeding

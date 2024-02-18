@@ -1,10 +1,17 @@
 (ns dimdark.encounters
-  (:require [arcade.utils :as u]
+  (:require [arcade.text :refer-macros [inline-slurp]]
+            [arcade.utils :as u]
+            [clojure.edn :as edn]
             [clojure.spec.alpha :as s]
             [clojure.spec.gen.alpha :as g]
             [dimdark.abilities :as a]
-            [dimdark.core :as d]
-            [dimdark.combat :as c]))
+            [dimdark.combat :as c]
+            [dimdark.core :as d]))
+
+(def env-effect->effects
+  (edn/read-string
+   (inline-slurp
+    "resources/dimdark/env-effects.edn")))
 
 (s/def ::kobolds (s/coll-of ::d/creature :max-count 4))
 (s/def ::monsters (s/coll-of ::d/creature :max-count 4))
@@ -21,6 +28,44 @@
                    ::turn-order
                    ::turn
                    ::round]))
+
+(defn update-creature [encounter creature f]
+  (let [{:keys [kobolds monsters turn-order turn]} encounter
+        monster? (u/contains-v? monsters creature)
+        i (if monster?
+            (u/indexOf monsters creature)
+            (u/indexOf kobolds creature))
+        j (u/indexOf turn-order creature)
+        creature* (f creature)]
+    (cond-> encounter
+      monster? (assoc-in [:monsters i] creature*)
+      (not monster?) (assoc-in [:kobolds i] creature*)
+      (= turn creature) (assoc :turn creature*)
+      (nat-int? j) (assoc-in [:turn-order j] creature*))))
+
+(s/fdef update-creature
+  :args (s/cat :encounter ::encounter
+               :creature ::d/creature
+               :f (s/fspec :args (s/cat :creature ::d/creature)
+                           :ret ::d/creature))
+  :ret ::encounter)
+
+(defn assoc-creature [encounter creature creature*]
+  (update-creature encounter creature (constantly creature*)))
+
+(s/fdef assoc-creature
+  :args (s/cat :encounter ::encounter
+               :creature ::d/creature
+               :creature* ::d/creature)
+  :ret ::encounter)
+
+(defn is-monster? [encounter creature]
+  (u/contains-v? (:monsters encounter) creature))
+
+(s/fdef is-monster?
+  :args (s/cat :encounter ::encounter
+               :creature ::d/creature)
+  :ret boolean?)
 
 (s/def ::impacts
   (s/map-of (s/or :env #{:kobolds-env :monsters-env}
@@ -69,66 +114,46 @@
                 [encounter creature ability]))
             (s/gen ::encounter))))
 
-(defn calc-impacts [{:keys [monsters]} creature ability target]
-  (let [{:keys [traits effects self-effects env-effects]} (a/ability->details ability)
-        monster? (u/contains-v? monsters creature)
-        roll-magnitude
-        (fn [target]
-          (cond
-            (contains? traits :hostile) (a/hostile-ability-hits? ability creature target)
-            (contains? traits :friendly) (a/friendly-ability-hits? ability creature target)
-            :else (a/self-ability-magnitude ability creature)))
-        target+magnitude->effects
-        (fn [target magnitude]
-          (cond-> {}
-            (seq effects)
-            (assoc target (into {} (for [[effect coefficient] effects
-                                   :let [impact (int (* coefficient magnitude))]
-                                   :when (pos-int? impact)]
-                                     [effect impact])))))
-        add-misc-effects
-        #(cond-> %
-           (seq self-effects)
-           (assoc creature
-                  (let [self-magnitude (a/self-ability-magnitude ability creature)]
-                    (into {} (for [[effect coefficient] self-effects
-                                   :let [impact (int (* coefficient self-magnitude))]
-                                   :when (pos-int? impact)]
-                               [effect impact]))))
-           (and (seq env-effects)
-                (contains? traits :hostile))
-           (assoc (if monster? :kobolds-env :monsters-env)
-                  (let [env-magnitude (a/self-ability-magnitude ability creature)]
-                    (into {} (for [[effect coefficient] env-effects
-                                   :let [impact (int (* coefficient env-magnitude))]
-                                   :when (pos-int? impact)]
-                               [effect impact])))))]
-    (if (seq? target)
-      (->>
-       (for [target target
-             :let [magnitude (roll-magnitude target)]
-             :when (pos-int? magnitude)]
-         [target (target+magnitude->effects target magnitude)])
-       (into {})
-       add-misc-effects)
-      (let [magnitude (roll-magnitude target)]
-        (add-misc-effects (target+magnitude->effects target magnitude))))))
+(defn effects+magnitude->effects [effects magnitude]
+  (into {} (for [[effect coefficient] effects
+                 :let [impact (int (* coefficient magnitude))]
+                 :when (pos-int? impact)]
+             [effect impact])))
 
-(s/fdef calc-impacts
-  :args (s/with-gen
-          (s/cat :encounter ::encounter
-                 :creature ::d/creature
-                 :ability ::a/ability
-                 :target ::d/creature)
-          #(g/fmap
-            (fn [encounter]
-              (let [group (rand-nth [:kobolds :monsters])
-                    creature (rand-nth (get encounter group))
-                    ability (rand-nth (get-usable-abilities encounter creature))
-                    target (rand-nth (get-possible-targets encounter creature ability))]
-                [encounter creature ability target]))
-            (s/gen ::encounter)))
-  :ret ::impacts)
+(defn clear-magnitude-effects [{:keys [effects] :as creature} ability]
+  (let [{:keys [traits]} (a/ability->details ability)]
+    (cond-> creature
+      (contains? effects :hidden) (update :effects disj :hidden)
+      (and (contains? effects :empowered)
+           (contains? traits :spell)) (update :effects disj :empowered)
+      (and (contains? effects :extended)
+           (contains? traits :spell)) (update :effects disj :extended))))
+
+(s/fdef clear-magnitude-effects
+  :args (s/cat :creature ::d/creature
+               :ability ::a/ability)
+  :ret ::d/creature)
+
+(defn pre-magnitude-effects [{:keys [effects]} ability target]
+  (let [target-effects (:effects target)
+        {:keys [traits]} (a/ability->details ability)]
+    [(cond-> target
+       (contains? target-effects :marked) (update :effects disj :marked))
+     (cond-> 0
+       (contains? effects :hidden)
+       (+ (:hidden effects))
+       (and (contains? effects :empowered)
+            (contains? traits :spell))
+       (+ (:empowered effects))
+       (contains? target-effects :marked)
+       (+ (:marked target-effects)))]))
+
+(s/fdef pre-magnitude-effects
+  :args (s/cat :creature ::d/creature
+               :ability ::a/ability)
+  :ret (s/tuple ::d/creature nat-int?))
+
+
 
 (defn merge-effect [magnitude magnitude*]
   (cond
@@ -162,6 +187,86 @@
                :effects ::d/effects)
   :ret ::d/creature)
 
+(defn expand-rolled-effects [stats effects]
+  (let [{:keys [armor]} (d/stats+effects->stats stats effects)]
+    (cond-> effects
+      (contains? effects :damage) (assoc :damage (-> effects :damage (c/roll 6) (c/rolls+armor->damage armor)))
+      (contains? effects :healing) (assoc :healing (-> effects :healing (c/roll 4))))))
+
+(s/fdef expand-rolled-effects
+  :args (s/cat :stats ::d/stats
+               :effects ::d/effects)
+  :ret ::d/effects)
+
+(defn calc-impacts [encounter creature ability target]
+  (let [{:keys [traits effects self-effects env-effects]} (a/ability->details ability)
+        monster? (is-monster? encounter creature)
+        roll-magnitude
+        (fn [target magnitude]
+          (cond-> magnitude
+            (contains? traits :hostile) (+ (a/hostile-ability-hits? ability creature target))
+            (contains? traits :friendly) (+ (a/friendly-ability-hits? ability creature target))
+            :else (+ (a/self-ability-magnitude ability creature))))
+        target+magnitude->target-impact
+        (fn [{:keys [stats] :as target} magnitude]
+          (cond-> {}
+            (seq effects)
+            (assoc target (into {} (expand-rolled-effects stats (effects+magnitude->effects effects magnitude))))))
+        add-misc-effects
+        #(cond-> %
+           (seq self-effects)
+           (assoc :self-effects
+                  (->> (a/self-ability-magnitude ability creature)
+                       (effects+magnitude->effects self-effects)
+                       (expand-rolled-effects (:stats creature))
+                       (into {})))
+           (and (seq env-effects)
+                (contains? traits :hostile))
+           (assoc (if monster? :kobolds-env :monsters-env)
+                  (->> (a/self-ability-magnitude ability creature)
+                       (effects+magnitude->effects env-effects)
+                       (into {}))))]
+    (if (seq? target)
+      (let [[encounter* target-impacts]
+            (reduce
+             (fn [[encounter target-impacts] target]
+               (let [[target* magnitude] (pre-magnitude-effects creature ability target)
+                     magnitude* (roll-magnitude target* magnitude)]
+                 [(assoc-creature encounter target target*)
+                  (if (pos-int? magnitude*)
+                    (merge target-impacts (target+magnitude->target-impact target* magnitude*))
+                    target-impacts)]))
+             [encounter {}]
+             target)
+            creature* (clear-magnitude-effects creature ability)]
+        [(assoc-creature encounter* creature creature*)
+         (add-misc-effects target-impacts)])
+      (let [[target* magnitude] (pre-magnitude-effects creature ability target)
+            magnitude* (roll-magnitude target* magnitude)
+            creature* (clear-magnitude-effects creature ability)]
+        [(-> encounter
+             (assoc-creature creature creature*)
+             (assoc-creature target target*))
+         (if (pos-int? magnitude*)
+           (add-misc-effects (target+magnitude->target-impact target* magnitude*))
+           {})]))))
+
+(s/fdef calc-impacts
+  :args (s/with-gen
+          (s/cat :encounter ::encounter
+                 :creature ::d/creature
+                 :ability ::a/ability
+                 :target ::d/creature)
+          #(g/fmap
+            (fn [encounter]
+              (let [group (rand-nth [:kobolds :monsters])
+                    creature (rand-nth (get encounter group))
+                    ability (rand-nth (get-usable-abilities encounter creature))
+                    target (rand-nth (get-possible-targets encounter creature ability))]
+                [encounter creature ability target]))
+            (s/gen ::encounter)))
+  :ret (s/tuple ::encounter ::impacts))
+
 (defn round-effects-tick
   "Diminishes and disjoins effects that apply when a round begins, after turn order is decided."
   [encounter]
@@ -170,12 +275,40 @@
           (cond-> creature
             (contains? effects :delayed) (update :effects disj :delayed)))]
     (-> encounter
-        (update :kobolds (partial map update-effects))
-        (update :monsters (partial map update-effects)))))
+        (update :kobolds (comp vec (partial map update-effects)))
+        (update :monsters (comp vec (partial map update-effects))))))
 
 (s/fdef round-effects-tick
   :args (s/cat :encounter ::encounter)
   :ret ::encounter)
+
+(defn env-effects-tick [encounter creature]
+  (let [env-key (if (is-monster? encounter creature)
+                  :monsters-env
+                  :kobolds-env)
+        env-effects (get encounter env-key)
+        env-effects*
+        (cond-> env-effects
+          (contains? env-effects :jawtrapped)
+          (disj :jawtrapped)
+          (contains? env-effects :mawtrapped)
+          (disj :mawtrapped))
+        creature*
+        (reduce
+         (fn [creature [env-effect magnitude]]
+           (let [effects (env-effect->effects env-effect)]
+             (update creature :effects merge-effects (effects+magnitude->effects effects magnitude))))
+         creature
+         env-effects)]
+    [(-> encounter
+         (update env-key env-effects*)
+         (assoc-creature creature creature*))
+     creature*]))
+
+(s/fdef env-effects-tick
+  :args (s/cat :encounter ::encounter
+               :creature ::d/creature)
+  :ret (s/tuple ::encounter ::d/creature))
 
 (defn turn-effects-tick [{:keys [effects] :as creature}]
   (cond->
@@ -183,7 +316,8 @@
         (filter #(contains? effects %))
         (reduce
          (fn [creature effect]
-           (let [magnitude (dec (get effects effect))]
+           (let [magnitude (get effects effect)
+                 magnitude (if (pos-int? magnitude) (dec magnitude) (inc magnitude))]
              (if (zero? magnitude)
                (update creature :effects disj effect)
                (assoc-in creature [:effects effect] magnitude))))
@@ -201,33 +335,68 @@
   :args (s/cat :creature ::d/creature)
   :ret ::d/creature)
 
-(defn pre-magnitude-effects [{:keys [effects] :as creature} ability]
-  (let [{:keys [traits]} (a/ability->details ability)]
-    [(cond-> creature
-       (contains? effects :hidden) (update :effects disj :hidden)
-       (and (contains? effects :empowered)
-            (contains? traits :spell)) (update :effects disj :empowered)
-       (and (contains? effects :extended)
-            (contains? traits :spell)) (update :effects disj :extended))
-     (cond-> 0
-       (contains? effects :hidden) (+ (:hidden effects))
-       (and (contains? effects :empowered)
-            (contains? traits :spell)) (+ (:empowered effects)))]))
+(defn remove-dead-monsters [{:keys [monsters] :as encounter}]
+  (let [dead-monsters (filter #(-> % :health zero?) monsters)]
+    (reduce
+     (fn [encounter monster]
+       (update encounter :monsters (partial remove #(= % monster))))
+     encounter
+     dead-monsters)))
 
-(s/fdef pre-magnitude-effects
-  :args (s/cat :creature ::d/creature
-               :ability ::a/ability)
-  :ret (s/tuple ::d/creature nat-int?))
+(s/fdef remove-dead-monsters
+  :args (s/cat :encounter ::encounter)
+  :ret ::encounter)
 
-(defn expand-rolled-effects [{:keys [stats effects]}]
-  (let [{:keys [armor]} (d/stats+effects->stats stats effects)]
-    (cond-> effects
-      (contains? effects :damage) (assoc :damage (-> effects :damage (c/roll 6) (c/rolls+armor->damage armor)))
-      (contains? effects :healing) (assoc :healing (-> effects :healing (c/roll 4))))))
+(defn victory? [{:keys [monsters]}]
+  (empty? monsters))
 
-(s/fdef expand-rolled-effects
-  :args (s/cat :creature ::d/creature)
-  :ret ::d/effects)
+(s/fdef victory?
+  :args (s/cat :encounter ::encounter)
+  :ret boolean?)
+
+(defn defeat? [{:keys [kobolds]}]
+  (every? #(= 0 (:health %)) kobolds))
+
+(defn front-line-crumples? [creatures]
+  (every? #(= :back (:row %)) creatures))
+
+(s/fdef front-line-crumples?
+  :args (s/cat :creatures (s/coll-of ::d/creature))
+  :ret boolean?)
+
+(defn crumple-front-line [encounter creatures]
+  (reduce
+   (fn [encounter creature]
+     (update-creature encounter creature #(assoc % :row :front)))
+   encounter
+   creatures))
+
+(s/fdef crumple-front-line
+  :args (s/cat :encounter ::encounter
+               :creatures (s/coll-of ::d/creature))
+  :ret (s/coll-of ::d/creature))
+
+(defn next-round [encounter]
+  (let [{:keys [kobolds monsters] :as encounter*} (round-effects-tick encounter)
+        [turn & turn-order] (c/get-turn-order kobolds monsters)]
+    (-> encounter*
+        (assoc :turn turn)
+        (assoc :turn-order turn-order)
+        (update :round inc))))
+
+(s/fdef next-round
+  :args (s/cat :encounter ::encounter)
+  :ret ::encounter)
+
+(defn next-turn [encounter]
+  (let [[turn & turn-order] (:turn-order encounter)]
+    (-> encounter
+        (assoc :turn-order turn-order)
+        (assoc :turn turn))))
+
+(s/fdef next-turn
+  :args (s/cat :encounter ::encounter)
+  :ret ::encounter)
 
 (defn resolve-instant-effects [{:keys [stats effects] :as creature}]
   (cond-> creature
@@ -278,57 +447,3 @@
 (s/fdef resolve-instant-effects
   :args (s/cat :creature ::d/creature)
   :ret ::d/creature)
-
-(defn remove-dead-monsters [{:keys [monsters] :as encounter}]
-  (let [dead-monsters (filter #(-> % :health zero?) monsters)]
-    (reduce
-     (fn [encounter monster]
-       (update encounter :monsters (partial remove #(= % monster))))
-     encounter
-     dead-monsters)))
-
-(s/fdef remove-dead-monsters
-  :args (s/cat :encounter ::encounter)
-  :ret ::encounter)
-
-(defn victory? [{:keys [monsters]}]
-  (empty? monsters))
-
-(s/fdef victory?
-  :args (s/cat :encounter ::encounter)
-  :ret boolean?)
-
-(defn defeat? [{:keys [kobolds]}]
-  (every? #(= 0 (:health %)) kobolds))
-
-(defn front-line-crumples? [creatures]
-  (every? #(= :back (:row %)) creatures))
-
-(s/fdef front-line-crumples?
-  :args (s/cat :creatures (s/coll-of ::d/creature))
-  :ret boolean?)
-
-(defn crumple-front-line [creatures]
-  (map #(assoc % :row :front) creatures))
-
-(s/fdef crumple-front-line
-  :args (s/cat :creatures (s/coll-of ::d/creature))
-  :ret (s/coll-of ::d/creature))
-
-(defn next-round [{:keys [kobolds monsters] :as encounter}]
-  (let [[turn & turn-order] (c/get-turn-order kobolds monsters)]
-    (-> encounter
-        (assoc :turn turn)
-        (assoc :turn-order turn-order)
-        (update :round inc)
-        round-effects-tick)))
-
-(s/fdef next-round
-  :args (s/cat :encounter ::encounter)
-  :ret ::encounter)
-
-(defn next-turn [encounter]
-  (let [[turn & turn-order] (:turn-order encounter)]
-    (-> encounter
-        (assoc :turn-order turn-order)
-        (assoc :turn turn))))
