@@ -63,7 +63,7 @@
     {:kobolds kobolds1
      :monsters kobolds2
      :encounter {}
-     :turn-order (drop 1 turn-order)
+     :turn-order (vec (drop 1 turn-order))
      :turn (first turn-order)
      :round 1}))
 

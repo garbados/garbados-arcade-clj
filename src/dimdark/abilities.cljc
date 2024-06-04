@@ -1,7 +1,6 @@
 (ns dimdark.abilities
   (:require #?(:clj [arcade.text :refer [inline-slurp]]
                :cljs [arcade.text :refer-macros [inline-slurp]])
-            [arcade.utils :as utils :refer [contains-v?]]
             [clojure.edn :as edn]
             [clojure.set :as set]
             [clojure.spec.alpha :as s]
