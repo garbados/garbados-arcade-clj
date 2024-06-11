@@ -283,7 +283,9 @@
   (let [dead-monsters (filter #(-> % :health zero?) monsters)]
     (reduce
      (fn [encounter monster]
-       (update encounter :monsters (partial remove #(= % monster))))
+       (->  encounter
+            (update :monsters (partial remove #(= % monster)))
+            (update :turn-order (partial remove #(= % monster)))))
      encounter
      dead-monsters)))
 

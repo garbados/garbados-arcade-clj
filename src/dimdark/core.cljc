@@ -160,7 +160,7 @@
          squish 0
          stink 0
          brat 0}}]
-  {:health (+ prowess vigor)
+  {:health (* 2 (+ prowess vigor))
    :attack prowess
    :defense alacrity
    :armor 0

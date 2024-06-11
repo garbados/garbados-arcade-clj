@@ -6,6 +6,11 @@
             [dimdark.encounters :as e]
             [reagent.core :as r]))
 
+(defn next-turn-button [-encounter]
+  [:button.button.is-primary.is-fullwidth
+   {:on-click #(swap! -encounter (comp e/next-turn e/remove-dead-monsters))}
+   "Proceed"])
+
 (defn impacts-view [-encounter creature ability target]
   (if-let [impacts (e/calc-impacts @-encounter creature ability target)]
     (let [{:keys [kobolds-env monsters-env]} impacts
@@ -33,15 +38,11 @@
           (for [[effect magnitude] monsters-env]
             ^{:key effect}
             [:li "Monster environs <- " (text/normalize-name effect) ": " magnitude]))]
-       [:button.button.is-primary
-        {:on-click #(e/next-turn @-encounter)}
-        "Proceed"]])
+       [next-turn-button -encounter]])
     [:div.content
      [:h3 "Whiff!"]
      [:p (str (text/normalize-name (:name creature)) "'s use of " (text/normalize-name ability) " missed.")]
-     [:button.button.is-primary.is-fullwidth
-      {:on-click #(e/next-turn @-encounter)}
-      "Proceed"]]))
+     [next-turn-button -encounter]]))
 
 (defn kobold-turn-view [-encounter kobold -ability -target]
   (let [ability @-ability
@@ -94,8 +95,9 @@
 (defn monster-turn-view [-encounter monster]
   (let [monster* (e/turn-effects-tick monster)]
     (if (zero? (:health monster*))
-      [:<>
-       ]
+      [:div.content
+       [:h3 (str (text/normalize-name (:name monster)) " has fainted from status effects!")]
+       [next-turn-button -encounter]]
       (let [encounter @-encounter
             [ability target]
             (rand-nth
