@@ -18,7 +18,8 @@
   :description "Set your sights on an enemy's weak point."
   :traits #{:ranged :hostile :direct :piercing :physical}
   :uses {:aptitude 1}
-  :effects {:marked 2}}
+  :effects {:damage 2}
+  :self-effects {:delayed 1}}
  :stinkbomb
  {:name :stinkbomb
   :description "Hurl a noxious explosive into the ranks of your foes."
@@ -72,6 +73,6 @@
   :effects {:damage 0.5 :burning 1}}
  :mawtrap
  {:name :mawtrap
-  :description "With mystic affect, place a hole that devours unseen."
+  :description "Place a spiked-chain snare that leaves deep gashes."
   :traits #{:environmental :hostile :spell}
   :env-effects {:mawtrapped 1}}}

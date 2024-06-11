@@ -38,5 +38,5 @@
 
 (s/fdef rolls+armor->damage
   :args (s/cat :rolls ::rolls
-               :armor (s/int-in 0 4))
+               :armor int?)
   :ret nat-int?)
