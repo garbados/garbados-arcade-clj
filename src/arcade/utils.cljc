@@ -5,3 +5,9 @@
 
 (defn contains-v? [coll x]
   (nat-int? (indexOf coll x)))
+
+(defn indexOfId [coll x]
+  (indexOf (map :id coll) (:id x)))
+
+(defn contains-id? [coll x]
+  (contains-v? (map :id coll) (:id x)))

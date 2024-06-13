@@ -3,10 +3,10 @@
   :url "http://github.com/garbados/garbados-arcade-clj"
   :license {:name "CC BY-NC-SA 4.0"
             :url "https://creativecommons.org/licenses/by-nc-sa/4.0/"}
-  :dependencies [[org.clojure/clojure "1.10.0"]
-                 [clj-commons/clj-yaml "1.0.26"]]
+  :dependencies [[org.clojure/clojure "1.11.3"]
+                 [clj-commons/clj-yaml "1.0.27"]]
   :repl-options {:init-ns arcade.core}
-  :plugins [[lein-cloverage "1.2.2"]]
+  :plugins [[lein-cloverage "1.2.4"]]
   :profiles
   {:dev {:dependencies [[org.clojure/test.check "1.1.1"]]}
    :cljs

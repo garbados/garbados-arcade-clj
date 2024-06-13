@@ -39,8 +39,11 @@
                [attrs2 merits2] (d/parse-growth (culture monster-growth))]
            [(merge-with + attrs1 attrs2)
             (merge-with + merits1 merits2)])
-         {:keys [health] :as stats} (d/attributes+merits->stats attributes merits)]
-     {:name (keyword (string/join "-" (map name [klass culture])))
+         {:keys [health] :as stats} (d/attributes+merits->stats attributes merits)
+         monster-name (string/join "-" (map (comp string/capitalize name) [klass culture]))]
+     {:name (keyword monster-name)
+      :id (keyword (str monster-name "/" #?(:clj (clojure.core/random-uuid)
+                                            :cljs (cljs.core/random-uuid))))
       :stats (assoc stats :row row)
       :abilities (set (subvec abilities 0 (min (inc level) (count abilities))))
       :effects {}

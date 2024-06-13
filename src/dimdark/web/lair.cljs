@@ -15,7 +15,7 @@
     (inline-slurp "resources/dimdark/remarks.txt"))))
 
 (defn lair-view-menu [-state]
-  [:div.columns>div.column.is-6.is-offset-3
+  [:div.columns>div.column.is-6-desktop.is-offset-3-desktop
    (let [state @-state]
      [:div.columns
       (for [[name* state*] [["Lair" :lair]
@@ -165,7 +165,7 @@
                                     (:traits details)))]]]])]])
 
 (defn lair-home-view [-game]
-  [:div.columns>div.column.is-6.is-offset-3>div.box>div.content
+  [:div.columns>div.column.is-6-desktop.is-offset-3-desktop>div.box>div.content
    [:h2 (str "Lair of " (:name @-game))]
    [:p [:em (rand-nth remarks)]]
    [:p "What will you do now?"]
@@ -257,9 +257,9 @@
 
 (defn lair-playground-view [-game -team -encounter]
   (if (some? @-encounter)
-    [:div.columns>div.column.is-10.is-offset-1
+    [:div.columns>div.column.is-10-desktop.is-offset-1-desktop
      [encounter/encounter-view -encounter]]
-    [:div.columns>div.column.is-6.is-offset-3>div.box>div.content
+    [:div.columns>div.column.is-6-desktop.is-offset-3-desktop>div.box>div.content
      [:h3 "Playground"]
      [:p "The kobolds want to do some rough-housing. Who do you pick for your team?"]
      (let [team @-team]

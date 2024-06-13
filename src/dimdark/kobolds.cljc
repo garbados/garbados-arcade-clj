@@ -134,6 +134,7 @@
 (defn kobold->creature [{:keys [name abilities row] :as kobold}]
   (let [{:keys [health] :as stats} (kobold->stats kobold)]
     {:name name
+     :id name
      :stats stats
      :effects {}
      :abilities abilities

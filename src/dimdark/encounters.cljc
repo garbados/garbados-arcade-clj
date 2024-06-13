@@ -31,17 +31,20 @@
 
 (defn update-creature [encounter creature f]
   (let [{:keys [kobolds monsters turn-order turn]} encounter
-        monster? (u/contains-v? monsters creature)
+        monster? (u/contains-id? monsters creature)
         i (if monster?
-            (u/indexOf monsters creature)
-            (u/indexOf kobolds creature))
-        j (u/indexOf turn-order creature)
+            (u/indexOfId monsters creature)
+            (u/indexOfId kobolds creature))
+        j (u/indexOfId turn-order creature)
         creature* (f creature)]
     (cond-> encounter
       monster? (assoc-in [:monsters i] creature*)
       (not monster?) (assoc-in [:kobolds i] creature*)
       (= turn creature) (assoc :turn creature*)
-      (nat-int? j) (assoc-in [:turn-order j] creature*))))
+      (nat-int? j) (-> (assoc :turn-order (concat
+                                           (take j turn-order)
+                                           [creature*]
+                                           (rest (drop j turn-order))))))))
 
 (s/fdef update-creature
   :args (s/cat :encounter ::encounter
@@ -326,9 +329,8 @@
     (contains? effects :bleeding) (update :health - 3)
     (contains? effects :mending) (update :health + (:mending effects))
     (contains? effects :poisoned) (update :health - (:poisoned effects))
-    (contains? effects :marked) (->
-                                 (update :health - (:marked effects))
-                                 (update :effects disj :marked))
+    (contains? effects :marked) (-> (update :health - (:marked effects))
+                                    (update :effects disj :marked))
     :also (update :health max 0)))
 
 (s/fdef turn-effects-tick
@@ -339,7 +341,9 @@
   (let [dead-monsters (filter #(-> % :health zero?) monsters)]
     (reduce
      (fn [encounter monster]
-       (update encounter :monsters (partial remove #(= % monster))))
+       (-> encounter
+           (update :monsters (partial remove #(= % monster)))
+           (update :turn-order (partial remove #(= % monster)))))
      encounter
      dead-monsters)))
 
@@ -376,13 +380,13 @@
                :creatures (s/coll-of ::d/creature))
   :ret (s/coll-of ::d/creature))
 
-(defn next-round [encounter]
-  (let [{:keys [kobolds monsters] :as encounter*} (round-effects-tick encounter)
-        [turn & turn-order] (c/get-turn-order kobolds monsters)]
-    (-> encounter*
+(defn next-round [{:keys [kobolds monsters] :as encounter}]
+  (let [[turn & turn-order] (c/get-turn-order kobolds monsters)]
+    (-> encounter
         (assoc :turn turn)
         (assoc :turn-order turn-order)
-        (update :round inc))))
+        (update :round inc)
+        round-effects-tick)))
 
 (s/fdef next-round
   :args (s/cat :encounter ::encounter)
@@ -448,62 +452,3 @@
   :args (s/cat :creature ::d/creature)
   :ret ::d/creature)
 
-(defn remove-dead-monsters [{:keys [monsters] :as encounter}]
-  (let [dead-monsters (filter #(-> % :health zero?) monsters)]
-    (reduce
-     (fn [encounter monster]
-       (->  encounter
-            (update :monsters (partial remove #(= % monster)))
-            (update :turn-order (partial remove #(= % monster)))))
-     encounter
-     dead-monsters)))
-
-(s/fdef remove-dead-monsters
-  :args (s/cat :encounter ::encounter)
-  :ret ::encounter)
-
-(defn victory? [{:keys [monsters]}]
-  (empty? monsters))
-
-(s/fdef victory?
-  :args (s/cat :encounter ::encounter)
-  :ret boolean?)
-
-(defn defeat? [{:keys [kobolds]}]
-  (every? #(= 0 (:health %)) kobolds))
-
-(s/fdef defeat?
-  :args (s/cat :encounter ::encounter)
-  :ret boolean?)
-
-(defn front-line-crumples? [creatures]
-  (every? #(= :back (:row %)) creatures))
-
-(s/fdef front-line-crumples?
-  :args (s/cat :creatures (s/coll-of ::d/creature))
-  :ret boolean?)
-
-(defn crumple-front-line [creatures]
-  (map #(assoc % :row :front) creatures))
-
-(s/fdef crumple-front-line
-  :args (s/cat :creatures (s/coll-of ::d/creature))
-  :ret (s/coll-of ::d/creature))
-
-(defn next-round [{:keys [kobolds monsters] :as encounter}]
-  (let [[turn & turn-order] (c/get-turn-order kobolds monsters)]
-    (-> encounter
-        (assoc :turn turn)
-        (assoc :turn-order turn-order)
-        (update :round inc)
-        round-effects-tick)))
-
-(s/fdef next-round
-  :args (s/cat :encounter ::encounter)
-  :ret ::encounter)
-
-(defn next-turn [encounter]
-  (let [[turn & turn-order] (:turn-order encounter)]
-    (-> encounter
-        (assoc :turn-order turn-order)
-        (assoc :turn turn))))

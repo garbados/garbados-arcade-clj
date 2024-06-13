@@ -10,8 +10,10 @@
   :longtime
   {:target :browser
    :output-dir "public/js/longtime"
+   :asset-path "/js/longtime"
    :modules {:main {:entries [longtime.web]}}}
   :dimdark
   {:target :browser
    :output-dir "public/js/dimdark"
+   :asset-path "/js/dimdark"
    :modules {:main {:entries [dimdark.web]}}}}}
