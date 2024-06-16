@@ -508,3 +508,113 @@
 (s/fdef next-turn
   :args (s/cat :encounter ::encounter)
   :ret ::encounter)
+
+(defn resolve-instant-effects [{:keys [stats effects] :as creature}]
+  (cond-> creature
+    (contains? effects :damage)
+    (-> (update :effects disj :damage)
+        (update :health - (:damage effects)))
+    (contains? effects :healing)
+    (-> (update :effects disj :healing)
+        (update :health + (:healing effects))
+        (update :health min (:health stats)))
+    (contains? effects :pushed)
+    (-> (update :effects disj :pushed)
+        (update :row :back))
+    (contains? effects :pulled)
+    (-> (update :effects disj :pulled)
+        (update :row :front))
+    (contains? effects :cleansed)
+    (-> (update :effects disj :cleansed)
+        (update :effects
+                (fn [effects]
+                  (as-> effects $
+                    (reduce disj $ d/negative-effects)
+                    (reduce
+                     (fn [effects effect]
+                       (cond-> effects
+                         (contains? effects effect)
+                         (max (get effects effect 0) 0)))
+                     $ d/stat-effects)))))
+    (contains? effects :purged)
+    (-> (update :effects disj :purged)
+        (update :effects
+                (fn [effects]
+                  (as-> effects $
+                    (reduce disj $ d/positive-effects)
+                    (reduce
+                     (fn [effects effect]
+                       (cond-> effects
+                         (contains? effects effect)
+                         (min (get effects effect 0) 0)))
+                     $ d/stat-effects)
+                    (reduce
+                     (fn [effects effect]
+                       (cond-> effects
+                         (zero? (get effects effect)) (disj effects effect)))
+                     $ d/stat-effects)))))
+    :also (update :health max 0)))
+
+(s/fdef resolve-instant-effects
+  :args (s/cat :creature ::d/creature)
+  :ret ::d/creature)
+
+(defn remove-dead-monsters [{:keys [monsters] :as encounter}]
+  (let [dead-monsters (filter #(-> % :health zero?) monsters)]
+    (reduce
+     (fn [encounter monster]
+       (->  encounter
+            (update :monsters (partial remove #(= % monster)))
+            (update :turn-order (partial remove #(= % monster)))))
+     encounter
+     dead-monsters)))
+
+(s/fdef remove-dead-monsters
+  :args (s/cat :encounter ::encounter)
+  :ret ::encounter)
+
+(defn victory? [{:keys [monsters]}]
+  (empty? monsters))
+
+(s/fdef victory?
+  :args (s/cat :encounter ::encounter)
+  :ret boolean?)
+
+(defn defeat? [{:keys [kobolds]}]
+  (every? #(= 0 (:health %)) kobolds))
+
+(s/fdef defeat?
+  :args (s/cat :encounter ::encounter)
+  :ret boolean?)
+
+(defn front-line-crumples? [creatures]
+  (every? #(= :back (:row %)) creatures))
+
+(s/fdef front-line-crumples?
+  :args (s/cat :creatures (s/coll-of ::d/creature))
+  :ret boolean?)
+
+(defn crumple-front-line [creatures]
+  (map #(assoc % :row :front) creatures))
+
+(s/fdef crumple-front-line
+  :args (s/cat :creatures (s/coll-of ::d/creature))
+  :ret (s/coll-of ::d/creature))
+
+(defn next-round [{:keys [kobolds monsters] :as encounter}]
+  (let [[turn & turn-order] (c/get-turn-order kobolds monsters)]
+    (-> encounter
+        (assoc :turn turn)
+        (assoc :turn-order turn-order)
+        (update :round inc)
+        round-effects-tick)))
+
+(s/fdef next-round
+  :args (s/cat :encounter ::encounter)
+  :ret ::encounter)
+
+(defn next-turn [encounter]
+  (let [[turn & turn-order] (:turn-order encounter)]
+    (-> encounter
+        (assoc :turn-order turn-order)
+        (assoc :turn turn))))

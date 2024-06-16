@@ -184,7 +184,111 @@
                    (reset! -stage :pre-selection)
                    [:<>])))
 
-(defn encounter-view [-encounter -stage]
+(defn next-turn-button [-encounter]
+  [:button.button.is-primary.is-fullwidth
+   {:on-click #(swap! -encounter (comp e/next-turn e/remove-dead-monsters))}
+   "Proceed"])
+
+(defn impacts-view [-encounter creature ability target]
+  (if-let [impacts (e/calc-impacts @-encounter creature ability target)]
+    (let [{:keys [kobolds-env monsters-env]} impacts
+          creatures (flatten (filter (fn [[creature _]] (not (keyword? creature))) impacts))
+          effect-lines
+          (sort
+           (flatten
+            (for [creature creatures
+                  :let [effects (get impacts creature)]]
+              (for [[effect magnitude] effects]
+                (str (text/normalize-name (:name creature)) " <- " (text/normalize-name effect) ": " magnitude)))))]
+      [:div.content
+       [:p (str (text/normalize-name (:name creature)) " used " (text/normalize-name ability) "!")]
+       [:h1 [:strong "Hit!"]]
+       [:h5 "Effects"]
+       [:ul
+        (for [line effect-lines]
+          ^{:key line}
+          [:li line])
+        (when kobolds-env
+          (for [[effect magnitude] kobolds-env]
+            ^{:key effect}
+            [:li "Kobold environs <- " (text/normalize-name effect) ": " magnitude]))
+        (when monsters-env
+          (for [[effect magnitude] monsters-env]
+            ^{:key effect}
+            [:li "Monster environs <- " (text/normalize-name effect) ": " magnitude]))]
+       [next-turn-button -encounter]])
+    [:div.content
+     [:h3 "Whiff!"]
+     [:p (str (text/normalize-name (:name creature)) "'s use of " (text/normalize-name ability) " missed.")]
+     [next-turn-button -encounter]]))
+
+(defn kobold-turn-view [-encounter kobold -ability -target]
+  (let [ability @-ability
+        target @-target]
+   (cond
+     (and ability target)
+     [impacts-view -encounter kobold ability target]
+     (and (some? ability)
+          (nil? target))
+     (let [targets (e/get-possible-targets @-encounter kobold ability)]
+       (if (a/needs-target? (a/ability->details ability))
+         [:<>
+          [:p "Select a target for this ability:"]
+          [:div.columns
+           (for [target targets]
+             ^{:key target}
+             [:div.column
+              [:button.button.is-fullwidth
+               {:on-click #(reset! -target target)}
+               (text/normalize-name (:name target))]])]]
+         [:<>
+          [:p "This ability will affect:"]
+          [:ul
+           (for [target targets]
+             ^{:key target}
+             [:li (text/normalize-name (:name target))])]
+          [:div.columns
+           [:div.column
+            [:button.button.is-primary.is-fullwidth
+             {:on-click #(reset! -target targets)}
+             "Proceed"]]
+           [:div.column
+            [:button.button.is-secondary.is-fullwidth
+             {:on-click #(reset! -ability nil)}
+             "Reset"]]]]))
+     :else
+     [:<>
+      [:h5 "Choose an ability to use:"]
+      [:div.columns
+       (for [ability (e/get-usable-abilities @-encounter kobold)
+             :let [{:keys [description traits]} (a/ability->details ability)]]
+         ^{:key ability}
+         [:div.column
+          [:button.button.is-fullwidth.has-tooltip-arrow
+           {:on-click #(reset! -ability ability)
+            :data-tooltip
+            (string/join "\n" [description (string/join "; " (map text/normalize-name traits))])}
+           (text/normalize-name ability)]])]])))
+
+(defn monster-turn-view [-encounter monster]
+  (let [monster* (e/turn-effects-tick monster)]
+    (if (zero? (:health monster*))
+      [:div.content
+       [:h3 (str (text/normalize-name (:name monster)) " has fainted from status effects!")]
+       [next-turn-button -encounter]]
+      (let [encounter @-encounter
+            [ability target]
+            (rand-nth
+             (for [ability (e/get-usable-abilities encounter monster*)
+                   :let [targets (e/get-possible-targets encounter monster* ability)
+                         needs-target? (-> ability a/ability->details a/needs-target?)]
+                   :when (seq targets)]
+               (if needs-target?
+                 [ability (rand-nth targets)]
+                 [ability targets])))]
+        [impacts-view -encounter monster* ability target]))))
+
+(defn encounter-view [-encounter]
   (let [encounter @-encounter]
     [:<>
      [:div.box
