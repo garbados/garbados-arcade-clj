@@ -255,10 +255,10 @@
 (defn lair-crafting-view [-game]
   [:h3 "UNIMPLEMENTED"])
 
-(defn lair-playground-view [-game -team -encounter]
+(defn lair-playground-view [-game -team -encounter -stage]
   (if (some? @-encounter)
     [:div.columns>div.column.is-10-desktop.is-offset-1-desktop
-     [encounter/encounter-view -encounter]]
+     [encounter/encounter-view -encounter -stage]]
     [:div.columns>div.column.is-6-desktop.is-offset-3-desktop>div.box>div.content
      [:h3 "Playground"]
      [:p "The kobolds want to do some rough-housing. Who do you pick for your team?"]
@@ -324,4 +324,4 @@
      :kobolds [lair-kobolds-view -game (r/atom :drg)]
      :equipment [lair-equipment-view -game]
      :crafting [lair-crafting-view -game]
-     :playground [lair-playground-view -game (r/atom #{}) (r/atom nil)])])
+     :playground [lair-playground-view -game (r/atom #{}) (r/atom nil) (r/atom :pre-selection)])])

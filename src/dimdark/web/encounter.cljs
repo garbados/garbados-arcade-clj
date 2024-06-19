@@ -7,51 +7,57 @@
             [reagent.core :as r]
             [dimdark.core :as d]))
 
-(def turn-stages #{:pre-selection :ability-selection :target-selection :do-ability :process-effects :post-ability :next-turn})
+(def turn-stages #{:pre-selection :ability-selection :target-selection :do-ability :next-turn})
 
 (defn pre-selection-view [-encounter -stage creature]
   (let [encounter @-encounter
         monster? (e/is-monster? encounter creature)
         env-effects (get encounter (if monster? :monsters-env :kobolds-env))
-        [encounter* creature*] (e/env-effects-tick encounter creature)
-        creature** (update creature* :effects e/expand-rolled-effects)
+        [encounter* {:keys [stats] :as creature*}] (e/env-effects-tick encounter creature)
+        creature** (update creature* :effects (partial e/expand-rolled-effects stats))
         effects (:effects creature**)
         {:keys [health] :as creature***} (e/resolve-instant-effects (e/turn-effects-tick creature**))
         effects* (:effects creature***)
-        effects-section
-        [:<>
-         (when (contains? env-effects :jawtrapped)
-           [:p (str "Caught in a jawtrap's bite!")])
-         (when (contains? env-effects :mawtrapped)
-           [:p (str "Caught in a mawtrap's snare!")])
-         (when (contains? effects :damage)
-           [:p (str "Suffered " (:damage effects) " damage from traps!")])
-         (when (contains? effects :burning)
-           [:p (str "Burned for " d/burn-damage " damage!")])
-         (when (contains? effects :bleeding)
-           [:p (str "Bled for " d/bleed-damage " damage!")])
-         (when (contains? effects :mending)
-           [:p (str "Regenerated " (:mending effects) " health!")])
-         (when (contains? effects :poisoned)
-           [:p (str "Suffered " (:poisoned effects) " damage from poison!")])
-         (for [effect d/diminishing-effects
-               :let [expired? (and (contains? effects effect)
-                                   (not (contains? effects* effect)))]
-               :when expired?]
-           [:p (str "No longer affected by " (text/normalize-name effect))])]]
-    [:div.content
-     effects-section
-     (when (zero? health)
-       [:p (str (-> creature :name text/normalize-name) " has fainted!")])
-     [:button.button.is-fullwidth
-      {:on-click #(do
-                    (reset! -encounter
-                            (e/remove-dead-monsters
-                             (e/assoc-creature encounter* creature* creature***)))
-                    (if (zero? health)
-                      (reset! -stage :next-turn)
-                      (reset! -stage :ability-selection)))}
-      "Proceed"]]))
+        effects-lines
+        (filter
+         some?
+         (concat
+          [(when (contains? env-effects :jawtrapped)
+             [:p (str "Caught in a jawtrap's bite!")])
+           (when (contains? env-effects :mawtrapped)
+             [:p (str "Caught in a mawtrap's snare!")])
+           (when (contains? effects :damage)
+             [:p (str "Suffered " (:damage effects) " damage from traps!")])
+           (when (contains? effects :burning)
+             [:p (str "Burned for " d/burn-damage " damage!")])
+           (when (contains? effects :bleeding)
+             [:p (str "Bled for " d/bleed-damage " damage!")])
+           (when (contains? effects :mending)
+             [:p (str "Regenerated " (:mending effects) " health!")])
+           (when (contains? effects :poisoned)
+             [:p (str "Suffered " (:poisoned effects) " damage from poison!")])]
+          (for [effect d/diminishing-effects
+                :let [expired? (and (contains? effects effect)
+                                    (not (contains? effects* effect)))]
+                :when expired?]
+            [:p (str "No longer affected by " (text/normalize-name effect))])))]
+    (if (seq effects-lines)
+      [:div.content
+       (for [line effects-lines] line)
+       (when (zero? health)
+         [:p (str (-> creature :name text/normalize-name) " has fainted!")])
+       [:button.button.is-fullwidth
+        {:on-click #(do
+                      (reset! -encounter
+                              (e/remove-dead-monsters
+                               (e/assoc-creature encounter* creature* creature***)))
+                      (if (zero? health)
+                        (reset! -stage :next-turn)
+                        (reset! -stage :ability-selection)))}
+        "Proceed"]]
+      (do (reset! -encounter (e/assoc-creature encounter* creature* creature***))
+          (reset! -stage :ability-selection)
+          [:<>]))))
 
 (defn action-selection-view [-encounter -stage -ability creature]
   (let [encounter @-encounter]
@@ -117,14 +123,14 @@
                             (reset! -stage :ability-selection))}
             "Reset"]]]]))))
 
-(defn do-action-view [-encounter -stage -ability -target -impacts creature]
+(defn do-action-view [-encounter -stage -ability -target creature]
   (let [encounter @-encounter
         ability @-ability
         target @-target
-        [encounter* impacts] (e/calc-impacts encounter creature ability target)]
+        [creature* encounter* impacts] (e/calc-impacts encounter creature ability target)]
     (if (seq impacts)
       (let [{:keys [self-effects kobolds-env monsters-env]} impacts
-            creatures (flatten (filter (fn [[creature _]] (not (keyword? creature))) impacts))]
+            [creature** _ encounter**] (e/resolve-impacts encounter* creature* impacts)]
         [:div.content
          [:p (str (text/normalize-name (:name creature)) " used " (text/normalize-name ability) "!")]
          [:h1 [:strong "Hit!"]]
@@ -132,7 +138,7 @@
          [:ul
           (for [line (sort
                       (flatten
-                       (for [creature creatures
+                       (for [creature (filter (complement keyword?) (keys impacts))
                              :let [effects (get impacts creature)]]
                          (for [[effect magnitude] effects]
                            (str (text/normalize-name (:name creature)) " <- " (text/normalize-name effect) ": " magnitude)))))]
@@ -141,7 +147,7 @@
           (when self-effects
             (for [[effect magnitude] self-effects]
               ^{:key effect}
-              [:li "Self <- " (text/normalize-name effect) ": " magnitude]))
+              [:li (-> creature** :name text/normalize-name)" <- " (text/normalize-name effect) ": " magnitude]))
           (when kobolds-env
             (for [[effect magnitude] kobolds-env]
               ^{:key effect}
@@ -149,28 +155,33 @@
           (when monsters-env
             (for [[effect magnitude] monsters-env]
               ^{:key effect}
-              [:li "Monster environs <- " (text/normalize-name effect) ": " magnitude]))]
+              [:li "Monster environs <- " (text/normalize-name effect) ": " magnitude]))
+          (for [kobold (:kobolds encounter**)
+                :when (zero? (:health kobold))]
+            [:p (-> kobold :name text/normalize-name) " has fainted!"])
+          (for [monster (:monsters encounter**)
+                :when (zero? (:health monster))]
+            [:p (-> monster :name text/normalize-name) " has fainted!"])]
          [:button.button.is-primary
-          {:on-click #(do (reset! -encounter encounter*)
-                          (reset! -impacts impacts)
-                          (reset! -stage :process-effects))}
+          {:on-click #(do (reset! -encounter encounter**)
+                          (reset! -stage :next-turn))}
           "Proceed"]])
       [:div.content
        [:h3 "Whiff!"]
        [:p (str (text/normalize-name (:name creature)) "'s use of " (text/normalize-name ability) " missed.")]
        [:button.button.is-primary.is-fullwidth
-        {:on-click #(do (reset! -stage :next-turn))}
+        {:on-click #(do (reset! -encounter encounter*)
+                        (reset! -stage :next-turn))}
         "Proceed"]])))
 
-(defn turn-view [-encounter -stage -ability -target -impacts creature]
+(defn turn-view [-encounter -stage -ability -target creature]
   (case @-stage
     :pre-selection [pre-selection-view -encounter -stage creature]
     :ability-selection [action-selection-view -encounter -stage -ability creature]
     :target-selection [target-selection-view -encounter -stage -ability -target creature]
-    :do-ability [do-action-view -encounter -stage -ability -target -impacts creature]
-    ;; :process-effects [process-effects-view -encounter -stage -ability -target -impacts creature]
-    ;; :post-ability [post-action-view -encounter -stage -ability -target -impacts creature]
+    :do-ability [do-action-view -encounter -stage -ability -target creature]
     :next-turn (do (swap! -encounter e/next-turn)
+                   (reset! -stage :pre-selection)
                    [:<>])))
 
 (defn next-turn-button
@@ -342,9 +353,7 @@
        (if-let [creature (:turn encounter)]
          [:div.box>div.content
           [:h2 (str (text/normalize-name (:name creature)) "'s turn!")]
-          (if (contains-v? (:kobolds encounter) creature)
-            [kobold-turn-view -encounter creature (r/atom nil) (r/atom nil)]
-            [monster-turn-view -encounter creature])]
+          [turn-view -encounter -stage (r/atom nil) (r/atom nil) creature]]
          (do
            (swap! -encounter e/next-round)
            [:<>]))]]]))

@@ -13,7 +13,7 @@
  {:name :defensive-stance
   :description "Steel your footing and prepare for battle!"
   :traits #{:self :spell :mental}
-  :effects {:reinforced 0.5}}
+  :self-effects {:reinforced 0.5}}
  :armor-break
  {:name :armor-break
   :description "Cleave through an opponent's defenses!"
