@@ -302,7 +302,7 @@
                  [ability targets])))]
         [impacts-view -encounter monster* ability target]))))
 
-(defn encounter-view [-encounter]
+(defn encounter-view [-encounter -stage]
   (let [encounter @-encounter]
     [:<>
      [:div.box
@@ -353,7 +353,9 @@
        (if-let [creature (:turn encounter)]
          [:div.box>div.content
           [:h2 (str (text/normalize-name (:name creature)) "'s turn!")]
-          [turn-view -encounter -stage (r/atom nil) (r/atom nil) creature]]
+          (let [-ability (r/atom nil)
+                -target (r/atom nil)]
+            [turn-view -encounter -stage -ability -target creature])]
          (do
            (swap! -encounter e/next-round)
            [:<>]))]]]))

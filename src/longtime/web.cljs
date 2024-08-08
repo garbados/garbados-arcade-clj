@@ -44,12 +44,13 @@
          #(reset! games %)))
 
 (defn- save-game []
-  (save-doc @game {:herd @herd
-                   :monthstep @monthstep}))
+  (save-doc db @game
+            {:herd @herd
+             :monthstep @monthstep}))
 
 (defn- load-game [name]
   (reset! game name)
-  (.then (fetch-doc name)
+  (.then (fetch-doc db name)
          (fn [doc]
            (reset! herd (:herd doc))
            (reset! state :playing)
