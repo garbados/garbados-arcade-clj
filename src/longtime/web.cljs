@@ -73,7 +73,7 @@
               :else     (reset! state :list-games)))))
 
 (defn- delete-game [name]
-  (-> (delete-doc name)
+  (-> (delete-doc db name)
       (.then #(when (= @game name)
                 (reset! game nil)
                 (reset! herd nil)

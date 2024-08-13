@@ -313,42 +313,26 @@
     (-> (update :effects dissoc :cleansed)
         (update :effects
                 (fn [effects]
-                  (let [x (:cleansed effects)]
-                    (as-> effects $
-                      (reduce dissoc $ d/negative-effects)
-                      (reduce
-                       (fn [effects effect]
-                         (if (contains? effects effect)
-                           (let [y (get effects effect 0)
-                                 z (min (+ y x) 0)]
-                             (cond
-                               (pos-int? y) effects
-                               (neg-int? y)
-                               (if (zero? z)
-                                 (dissoc effects effect)
-                                 (assoc effects effect z))))
-                           effects))
-                       $ d/stat-effects))))))
+                  (reduce
+                   (fn [effects effect]
+                     (cond-> effects
+                       (pos-int? (get effects effect))
+                       (update effect (comp (partial max 0)
+                                            #(- % (:cleansed effects))))))
+                   effects
+                   d/negative-effects))))
     (contains? effects :purged)
     (-> (update :effects dissoc :purged)
         (update :effects
                 (fn [effects]
-                  (let [x (:purged effects)]
-                    (as-> effects $
-                      (reduce dissoc $ d/positive-effects)
-                      (reduce
-                       (fn [effects effect]
-                         (if (contains? effects effect)
-                           (let [y (get effects effect 0)
-                                 z (max (- y x) 0)]
-                             (cond
-                               (pos-int? y) effects
-                               (neg-int? y)
-                               (if (zero? z)
-                                 (dissoc effects effect)
-                                 (assoc effects effect z))))
-                           effects))
-                       $ d/stat-effects))))))
+                  (reduce
+                   (fn [effects effect]
+                     (cond-> effects
+                       (pos-int? (get effects effect))
+                       (update effect (comp (partial max 0)
+                                            #(- % (:purged effects))))))
+                   effects
+                   d/positive-effects))))
     :also (update :health max 0)))
 
 (s/fdef resolve-instant-effects
@@ -374,8 +358,7 @@
          creatures*)]
     [creature*
      creatures*
-     encounter*])
-  )
+     encounter*]))
 
 (s/fdef resolve-impacts
   :args (s/cat :encounter ::encounter
@@ -426,6 +409,20 @@
                :creature ::d/creature)
   :ret (s/tuple ::encounter ::d/creature))
 
+(defn remove-expired-effects [{:keys [effects] :as creature}]
+  (->> effects
+       (filter (comp pos-int? second))
+       (reduce
+        (fn [creature [effect magnitude]]
+          (if (zero? magnitude)
+            (update creature :effects dissoc effect)
+            creature))
+        creature)))
+
+(s/fdef remove-expired-effects
+  :args (s/cat :creature ::d/creature)
+  :ret ::d/creature)
+
 (defn turn-effects-tick [{:keys [effects] :as creature}]
   (cond->
    (->> d/diminishing-effects
@@ -434,10 +431,9 @@
          (fn [creature effect]
            (let [magnitude (get effects effect)
                  magnitude (if (pos-int? magnitude) (dec magnitude) (inc magnitude))]
-             (if (zero? magnitude)
-               (update creature :effects dissoc effect)
-               (assoc-in creature [:effects effect] magnitude))))
-         creature))
+             (assoc-in creature [:effects effect] magnitude)))
+         creature)
+        (remove-expired-effects))
     (contains? effects :burning) (update :health - 3)
     (contains? effects :bleeding) (update :health - 3)
     (contains? effects :mending) (update :health + (:mending effects))
@@ -511,54 +507,3 @@
 (s/fdef next-turn
   :args (s/cat :encounter ::encounter)
   :ret ::encounter)
-
-(defn resolve-instant-effects [{:keys [stats effects] :as creature}]
-  (cond-> creature
-    (contains? effects :damage)
-    (-> (update :effects disj :damage)
-        (update :health - (:damage effects)))
-    (contains? effects :healing)
-    (-> (update :effects disj :healing)
-        (update :health + (:healing effects))
-        (update :health min (:health stats)))
-    (contains? effects :pushed)
-    (-> (update :effects disj :pushed)
-        (update :row :back))
-    (contains? effects :pulled)
-    (-> (update :effects disj :pulled)
-        (update :row :front))
-    (contains? effects :cleansed)
-    (-> (update :effects disj :cleansed)
-        (update :effects
-                (fn [effects]
-                  (as-> effects $
-                    (reduce disj $ d/negative-effects)
-                    (reduce
-                     (fn [effects effect]
-                       (cond-> effects
-                         (contains? effects effect)
-                         (max (get effects effect 0) 0)))
-                     $ d/stat-effects)))))
-    (contains? effects :purged)
-    (-> (update :effects disj :purged)
-        (update :effects
-                (fn [effects]
-                  (as-> effects $
-                    (reduce disj $ d/positive-effects)
-                    (reduce
-                     (fn [effects effect]
-                       (cond-> effects
-                         (contains? effects effect)
-                         (min (get effects effect 0) 0)))
-                     $ d/stat-effects)
-                    (reduce
-                     (fn [effects effect]
-                       (cond-> effects
-                         (zero? (get effects effect)) (disj effects effect)))
-                     $ d/stat-effects)))))
-    :also (update :health max 0)))
-
-(s/fdef resolve-instant-effects
-  :args (s/cat :creature ::d/creature)
-  :ret ::d/creature)
-
