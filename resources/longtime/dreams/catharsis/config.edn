@@ -1,0 +1,4 @@
+{:cast {:sadcow {:fulfillment [:<= 30]
+                 :-trait :depressed}}
+ :effect {:sadcow {:+trait :depressed
+                   :+fulfillment 20}}}

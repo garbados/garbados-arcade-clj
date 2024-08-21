@@ -4,7 +4,7 @@
             [clojure.string :as string]
             [reagent.core :as r]
             [reagent.dom :as rd]
-            [longtime.contact-text :as contact-text]
+            [longtime.contacts :as contacts]
             [longtime.core :as core]
             [longtime.dream :as dream]
             [longtime.event :as event]
@@ -595,7 +595,7 @@
                                     (core/get-next-contact herd*))]
               (swap! herd update :contacts conj contact)
               [(str "A new People has made contact!")
-               (contact-text/contact->blurb contact)])
+               (contacts/contact->blurb contact)])
             (when (core/should-add-syndicate? herd*)
               (let [votes (core/tally-votes (:individuals herd*))
                     candidates (core/rank-candidates votes)]

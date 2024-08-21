@@ -1,5 +1,7 @@
 ;; shadow-cljs configuration
 {:lein {:profile "+cljs"}
+  :dev-http
+ {3030 "public"}
  :builds
  {:lib
   {:target :esm
@@ -10,4 +12,5 @@
   :longtime
   {:target :browser
    :output-dir "public/js/longtime"
+   :asset-path "/js/longtime"
    :modules {:main {:entries [longtime.web]}}}}}
