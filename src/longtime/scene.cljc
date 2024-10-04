@@ -1,69 +1,125 @@
 (ns longtime.scene 
-  (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as g]
+  (:require [clojure.edn :as edn]
+            [clojure.set :refer [difference]]
+            [clojure.spec.alpha :as s]
             [longtime.core :as core]
             [longtime.select :as select]))
 
-(s/def ::name string?)
-(s/def ::description string?)
-(s/def ::detail string?)
-(s/def ::filter-fn ifn?)
-(s/def ::text-fn ifn?)
-(s/def ::marshal-fn ifn?)
-(s/def ::effect ifn?)
-(s/def ::selects (s/coll-of ::select/select :max-count 5))
+(s/def ::traits*
+  (s/or :one ::core/trait
+        :many ::core/traits))
+(s/def ::+trait ::traits*)
+(s/def ::-trait ::traits*)
+(s/def ::+fulfillment int?)
+(s/def ::+skills (s/map-of ::core/skill (s/int-in (- core/max-skill) (inc core/max-skill))))
+(s/def ::passions*
+  (s/or :one ::core/skill
+        :many ::core/skills))
+(s/def ::+passion ::passions*)
+(s/def ::-passion ::passions*)
+(s/def :effects/cast
+  (s/map-of keyword?
+            (s/keys :opt-un [::+trait
+                             ::-trait
+                             ::+fulfillment
+                             ::+skills
+                             ::+passion
+                             ::-passion])))
 
-(s/def ::scene
-  (s/with-gen
-    (s/keys :req-un [::text-fn]
-            :opt-un [::name
-                     ::description
-                     ::detail
-                     ::select/filter
-                     ::selects
-                     ::marshal-fn
-                     ::filter-fn
-                     ::effect])
-    #(g/return {:name "hello"
-                :description "world"
-                :detail "wow"
-                :filter {}
-                :selects [{}]
-                :text-fn (constantly "OK")
-                :marshal-fn (constantly nil)
-                :filter-fn (constantly true)
-                :effect (constantly nil)})))
+(s/def ::+resources (s/map-of core/resources int?))
+(s/def ::-infra
+  (s/or :random true?
+        :one ::core/infra
+        :many (s/coll-of ::core/infra :kind set?)))
 
-(defn scene-may-occur?
-  [herd {:keys [filter selects filter-fn]}]
-  (and (if filter
-         (select/passes-filter? herd filter)
-         true)
-       (if selects
-         (some? (select/get-cast herd selects))
-         true)
-       (if filter-fn
-         (filter-fn herd)
-         true)))
+(s/def :effects/herd
+  (s/keys :opt-un [::+resources
+                   ::+fulfillment
+                   ::-infra]))
 
-(s/fdef scene-may-occur?
+(s/def :found/herd ::filter)
+(s/def ::match
+  (s/keys :req-un [:found/cast
+                   :found/herd]))
+(s/def ::effect
+  (s/keys :req-un [:effects/cast
+                   :effects/herd]))
+(s/def ::scene-config
+  (s/keys :req-un [::match
+                   ::effect]))
+
+(defn scene-valid? [herd scene-config]
+  (and
+   (some? (select/fetch-cast herd (get-in scene-config [:match :cast] {})))
+   (select/passes-filter? herd (get-in scene-config [:match :herd] {}))))
+
+(s/fdef scene-valid?
   :args (s/cat :herd ::core/herd
-               :scene ::scene)
+               :scene ::scene-config)
   :ret boolean?)
 
-(defn marshal-scene
-  "Scene that may occur, prepares to occur."
-  [herd {:keys [selects marshal-fn text-fn effect]
-         :or {selects []
-              marshal-fn (constantly nil)
-              text-fn (constantly nil)
-              effect (fn [herd & _] herd)}}]
-  (let [individuals (select/get-cast herd selects)
-        args (marshal-fn herd individuals)]
-    [(partial text-fn herd individuals args)
-     (partial effect herd individuals args)]))
+(defn apply-cast-effect [herd scene-config]
+  (let [{{cast-select :cast} :match
+         {cast-effect :cast} :effect} scene-config
+        found-cast (select/fetch-cast herd cast-select)]
+    (reduce
+     (fn [herd [key {:keys [+trait -trait +fulfillment +skills +passion -passion]}]]
+       (core/update-individual
+        herd
+        (get found-cast key)
+        #(cond-> %
+           (keyword? +trait)
+           (update :traits conj +trait)
+           (seq? +trait)
+           (update :traits into (set +trait))
+           (keyword? -trait)
+           (update :traits disj -trait)
+           (seq? -trait)
+           (update :traits difference (set -trait))
+           +fulfillment
+           (update :fulfillment + +fulfillment)
+           +skills
+           (update :skills (partial merge-with +) +skills)
+           (keyword? +passion)
+           (update :passions conj +passion)
+           (seq? +passion)
+           (update :passions into (set +passion))
+           (keyword? -passion)
+           (update :passions disj -passion)
+           (seq? -passion)
+           (update :passions difference (set -passion)))))
+     herd
+     cast-effect)))
 
-(s/fdef marshal-scene
+(defn apply-herd-effect [herd scene-config]
+  (let [{{herd-effect :herd} :effect} scene-config
+        {:keys [+resources +fulfillment -infra]} herd-effect]
+    (cond-> herd
+      +resources
+      (update :stores (partial merge-with +) +resources)
+      +fulfillment
+      (core/update-individuals #(core/inc-fulfillment % 5))
+      (true? -infra)
+      (core/update-current-location :infra (comp set rest shuffle vec))
+      (keyword? -infra)
+      (core/update-current-location :infra disj -infra)
+      (seq? -infra)
+      (core/update-current-location :infra difference -infra))))
+
+(defn apply-scene-effect [herd scene-config]
+  (let [{{cast-effect :cast herd-effect :herd} :effect} scene-config]
+    (cond-> herd
+      cast-effect (apply-cast-effect scene-config)
+      herd-effect (apply-herd-effect scene-config))))
+
+(s/fdef apply-scene-effect
   :args (s/cat :herd ::core/herd
-               :scene ::scene)
-  :ret (s/tuple ifn? ifn?))
+               :scene ::scene-config)
+  :ret ::core/herd)
+
+(defmacro slurp-scene [path]
+  {:config
+   (edn/read-string
+    (clojure.core/slurp `~(str "resources/" path "/config.edn")))
+   :template
+   (clojure.core/slurp `~(str "resources/" path "/text.mustache"))})

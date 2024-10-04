@@ -1,7 +1,6 @@
 {:match
  {:cast
-  {:sadcow {:fulfillment [:<= 30]
-            :-trait :depressed}}}
+  {:sadcow {:-trait :depressed}}}
  :effect
  {:cast
   {:sadcow {:+trait :depressed

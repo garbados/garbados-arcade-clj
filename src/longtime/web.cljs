@@ -12,7 +12,8 @@
             [longtime.moment :as moment]
             [longtime.project :as project]
             [longtime.remark :as remark]
-            [longtime.text :as text]))
+            [longtime.text :as text]
+            [markdown.core :as md]))
 
 (defonce db (new pouchdb "longtime"))
 (defonce state (r/atom :loading))
@@ -157,11 +158,7 @@
 (defn- credits []
   [:div.container>div.box>div.content
    [:h3 "Credits"]
-   (let [lines (string/split-lines meta-text/credits-description)]
-     (for [i (range (count lines))
-           :let [line (nth lines i)]]
-       ^{:key i}
-       [:p line]))])
+   [:div {:dangerouslySetInnerHTML {:__html (md/md->html meta-text/credits-description)}}]])
 
 (defn- navbar []
   [:div.level
@@ -328,10 +325,7 @@
   [:div
    [:div.box>div.content
     [:h3 "Welcome to " [:em "The Longtime"]]
-    (let [lines (string/split-lines (meta-text/tutorial-text @herd))]
-      (for [i (range (count lines))
-            :let [line (nth lines i)]]
-        ^{:key i} [:p line]))]
+    [:div {:dangerouslySetInnerHTML {:__html (md/md->html (meta-text/template-tutorial @herd))}}]]
    [:button.button.is-fullwidth.is-primary
     {:on-click #(reset! gamestate :playing)}
     "Then let us begin!"]])
