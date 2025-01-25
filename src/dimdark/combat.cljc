@@ -11,12 +11,13 @@
           (pos-int? health)))
        (sort-by
         (fn [{:keys [stats effects]}]
-          (:initiative (d/stats+effects->stats stats effects))))))
+          (:initiative (d/stats+effects->stats stats effects))))
+       (map :id)))
 
 (s/fdef get-turn-order
   :args (s/cat :kobolds ::party
                :monsters ::party)
-  :ret (s/coll-of ::d/creature))
+  :ret (s/coll-of ::d/id))
 
 (s/def ::rolls (s/coll-of (s/int-in 1 5)))
 

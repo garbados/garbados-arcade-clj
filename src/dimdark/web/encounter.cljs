@@ -1,6 +1,5 @@
 (ns dimdark.web.encounter 
   (:require [arcade.text :as text]
-            [arcade.utils :refer [contains-v?]]
             [clojure.string :as string]
             [dimdark.abilities :as a]
             [dimdark.encounters :as e]
@@ -288,7 +287,7 @@
                  [ability targets])))]
         [impacts-view -encounter monster* ability target]))))
 
-(defn encounter-view [-encounter]
+(defn encounter-view [-encounter -stage]
   (let [encounter @-encounter]
     [:<>
      [:div.box

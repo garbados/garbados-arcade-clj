@@ -5,7 +5,8 @@
             [dimdark.equipment :as eq]
             #?(:clj [arcade.text :refer [inline-slurp]]
                :cljs [arcade.text :refer-macros [inline-slurp]])
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [clojure.string :as string]))
 
 (def kobold-names
   #{:drg
@@ -34,10 +35,11 @@
 (def kobolds
   (reduce
    (fn [kobolds text]
-     (let [{:keys [name class abilities proficiencies growth equipped row]} (edn/read-string text)
+     (let [{:keys [id class abilities proficiencies growth equipped row]} (edn/read-string text)
            [attributes merits] (d/parse-growth growth)
            kobold
-           {:name name
+           {:id id
+            :name (string/capitalize (name id))
             :level 1
             :class class
             :abilities (set (first abilities))

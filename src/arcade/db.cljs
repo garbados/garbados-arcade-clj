@@ -15,11 +15,10 @@
                            "value" (pr-str value)))
           #(.then (.get db id)
                   (fn [doc]
-                    (let [doc* (-> doc
-                                   js->clj
-                                   (assoc :value (pr-str value))
-                                   clj->js)]
-                      (.put db doc*))))))
+                    (.put db (-> doc
+                                 js->clj
+                                 (assoc :value (pr-str value))
+                                 clj->js))))))
 
 (defn fetch-doc [db id]
   (.then (.get db id)
@@ -27,5 +26,4 @@
            (edn/read-string (.-value doc)))))
 
 (defn delete-doc [db id]
-  (-> (.get db id)
-      (.then #(.remove db %))))
+  (.then (.get db id) #(.remove db %)))

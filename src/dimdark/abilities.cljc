@@ -181,7 +181,8 @@
 
 (s/fdef friendly-ability-hits?
   :args (s/cat :ability ::ability
-               :user ::d/creature)
+               :user ::d/creature
+               :target ::d/creature)
   :ret nat-int?)
 
 (defn self-ability-magnitude [ability user]
@@ -189,11 +190,6 @@
     (if (zero? magnitude)
       0
       (int (math-log2 magnitude)))))
-
-(s/fdef friendly-ability-hits?
-  :args (s/cat :ability ::ability
-               :user ::d/creature)
-  :ret nat-int?)
 
 (defn hostile-ability-hits? [ability user target]
   (let [user-magnitude (get-user-magnitude ability user)

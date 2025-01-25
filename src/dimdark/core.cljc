@@ -1,7 +1,8 @@
 (ns dimdark.core
   (:require [clojure.spec.alpha :as s]))
 
-(s/def ::name keyword?)
+(s/def ::id keyword?)
+(s/def ::name string?)
 (def rows #{:front :back})
 (s/def ::row rows)
 (s/def ::level (s/int-in 1 6))
@@ -231,7 +232,8 @@
 
 ;; a creature is an instance of a being, prepped for combat!
 (s/def ::creature
-  (s/keys :req-un [::name
+  (s/keys :req-un [::id
+                   ::name
                    ::abilities
                    ::stats
                    ::effects

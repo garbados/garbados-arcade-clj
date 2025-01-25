@@ -8,7 +8,7 @@
    [`e/update-creature
     `e/assoc-creature
     `e/is-monster?
-    ;; `e/get-possible-targets
+    `e/get-possible-targets
     ;; `e/get-usable-abilities
     ;; `e/effects+magnitude->effects
     ;; `e/clear-magnitude-effects

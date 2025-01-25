@@ -40,7 +40,8 @@
            [(merge-with + attrs1 attrs2)
             (merge-with + merits1 merits2)])
          {:keys [health] :as stats} (d/attributes+merits->stats attributes merits)]
-     {:name (keyword (string/join "-" (map name [klass culture])))
+     {:id (random-uuid)
+      :name (string/join " " (map (comp string/capitalize name) [klass culture]))
       :stats (assoc stats :row row)
       :abilities (set (subvec abilities 0 (min (inc level) (count abilities))))
       :effects {}
