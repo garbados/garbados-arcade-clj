@@ -33,7 +33,7 @@
  {:name :dragon-heart
   :description "Draw from a spiritual reservoir to close your own wounds."
   :traits #{:self :spell :fire :mental}
-  :effects {:mending 1}}
+  :self-effects {:mending 1}}
  :fire-slash
  {:name :fire-slash
   :description "Wreathe your blade in flame to singe a foe."
@@ -58,7 +58,7 @@
  {:name :radiant-stance
   :description "Summon the blessings of the bright hot center of the world."
   :traits #{:self :spell :mental}
-  :effects {:blessed 1}}
+  :self-effects {:blessed 1}}
  :grim-cleave
  {:name :grim-cleave
   :description "Disorganize foes with a wide and gruesome slash."

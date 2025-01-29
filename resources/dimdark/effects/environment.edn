@@ -1,0 +1,10 @@
+{:mawtrapped
+ {:type :environmental
+  :phase :on-target
+  :inflicts {:exposed 1}
+  :resists #{:armor}}
+ :jawtrapped
+ {:type :environmental
+  :phase :turn-begin
+  :hurt :1d4
+  :resists #{:armor}}}

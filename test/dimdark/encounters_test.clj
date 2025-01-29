@@ -1,7 +1,9 @@
 (ns dimdark.encounters-test
-  (:require [arcade.test-util :refer [spec-test-syms]]
-            [clojure.test :refer [deftest]]
-            [dimdark.encounters :as e]))
+  (:require
+   [arcade.test-util :refer [spec-test-syms]]
+   [clojure.test :refer [deftest testing]]
+   [dimdark.encounters :as e]
+   [dimdark.kobolds :as k]))
 
 (deftest fspec-test
   (spec-test-syms
@@ -30,3 +32,10 @@
     ;; `e/next-round
     ;; `e/next-turn
     ]))
+
+(deftest auto-turn-test
+  (testing "Basic random strategy works"
+    (let [[kobolds1 kobolds2] (partition 3 (shuffle (map k/kobold->creature (vals k/kobolds))))
+          encounter (e/init-encounter kobolds1 kobolds2)
+          impacts (e/auto-turn encounter)]
+      (println impacts))))

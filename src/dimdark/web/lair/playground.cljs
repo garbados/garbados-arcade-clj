@@ -1,6 +1,6 @@
 (ns dimdark.web.lair.playground 
   (:require
-   [dimdark.games :as g]
+   [dimdark.encounters :as e]
    [dimdark.kobolds :as k]
    [dimdark.web.encounter :as encounter]))
 
@@ -41,7 +41,7 @@
                             [kobolds1 (conj kobolds2 kobold)])))
                       [[] []]
                       k/kobold-names)
-                     encounter (g/init-playground-encounter kobolds1 kobolds2)]
+                     encounter (e/init-encounter kobolds1 kobolds2)]
                  (reset! -encounter encounter))}
              "Begin!"]]
            [:div.column

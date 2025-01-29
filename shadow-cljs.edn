@@ -1,5 +1,6 @@
 ;; shadow-cljs configuration
 {:lein {:profile "+cljs"}
+ :dev-http {3000 "public"}
  :builds
  {:lib
   {:target :esm

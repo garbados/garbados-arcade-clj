@@ -1,5 +1,7 @@
 (ns dimdark.core
-  (:require [clojure.spec.alpha :as s]))
+  (:require
+   [clojure.spec.alpha :as s]
+   [clojure.walk :as walk]))
 
 (s/def ::id keyword?)
 (s/def ::name string?)
@@ -36,7 +38,7 @@
 
 (s/def ::stats
   (s/keys :opt-un [::row
-                   ::health
+                   ::health ; NOTE THAT THIS IS MAX HEALTH
                    ::attack
                    ::defense
                    ::armor
@@ -47,96 +49,9 @@
                    ::resistance
                    ::resistances]))
 
-(def effects
-  #{:damage
-    :healing
-    :mending
-    :hidden
-    :pushed
-    :pulled
-    :empowered
-    :extended
-    :cleansed
-    :purged
-    :marked
-    :delayed
-    :bleeding
-    :poisoned
-    :nauseous
-    :burning
-    :scorched
-    :chilled
-    :frozen
-    :charmed
-    :sharpened
-    :focused
-    :reinforced
-    :blessed
-    :quickened
-    :laden})
-(s/def ::effect effects)
+(s/def ::effect keyword?)
 (s/def ::effects (s/map-of ::effect pos-int?))
-
-(def burn-damage 3)
-(def bleed-damage 3)
-
-(def diminishing-effects
-  #{:mending
-    :bleeding
-    :poisoned
-    :nauseous
-    :burning
-    :scorched
-    :chilled
-    :frozen
-    :charmed
-    :sharpened
-    :focused
-    :reinforced
-    :blessed
-    :quickened
-    :laden})
-
-(def stat-effects
-  #{:sharpened
-    :focused
-    :reinforced
-    :blessed
-    :quickened
-    :laden})
-
-(def positive-effects
-  #{:mending
-    :hidden
-    :empowered
-    :extended})
-
-(def negative-effects
-  #{:marked
-    :delayed
-    :bleeding
-    :poisoned
-    :nauseous
-    :burning
-    :scorched
-    :chilled
-    :frozen
-    :charmed})
-
-(def env-effects
-  #{:jawtrapped
-    :mawtrapped})
-(s/def ::env-effect env-effects)
-(s/def ::environment (s/map-of ::env-effect pos-int?))
-
-;; when an effect is negative, it uses a name deref'd from here
-(def inverted-effects
-  {:sharpened :disarmed
-   :reinforced :exposed
-   :quickened :slowed
-   :focused :distracted
-   :blessed :cursed
-   :laden :robbed})
+(s/def ::environment (s/map-of ::row ::effects))
 
 (s/def ::attr-or-merit
   (s/or :attr ::attribute
@@ -145,9 +60,18 @@
   (s/or :stat ::stat
         :merit ::merit))
 
+(defn multiply-stats [stats n]
+  (walk/postwalk
+   (fn [x]
+     (if (number? x)
+       (* n x)
+       x))
+   stats))
+
 (defn merge-stats [stats1 stats2]
-  (merge-with (fn [x1 x2] (cond (map? x1) (merge-with + x1 x2)
-                                :else     (+ x1 x2)))
+  (merge-with #(if (map? %1)
+                 (merge-with + %1 %2)
+                 (+ %1 %2))
               stats1
               stats2))
 
@@ -164,7 +88,7 @@
          squish 0
          stink 0
          brat 0}}]
-  {:health (* 2 (+ prowess vigor))
+  {:health (* 3 (+ prowess vigor))
    :attack prowess
    :defense alacrity
    :armor 0
@@ -180,65 +104,16 @@
                :merits ::merits)
   :ret ::stats)
 
-(defn stats+effects->stats
-  [{:keys [health attack defense armor initiative aptitude aptitudes resistance resistances fortune]
-    :or {health 0
-         attack 0
-         defense 0
-         armor 0
-         initiative 0
-         aptitude 0
-         aptitudes {}
-         resistance 0
-         resistances {}
-         fortune 0}
-    :as stats}
-   {:keys [sharpened quickened reinforced blessed focused laden
-           scorched chilled frozen nauseous charmed
-           delayed]
-    :or {sharpened 0
-         quickened 0
-         reinforced 0
-         blessed 0
-         focused 0
-         laden 0
-         scorched 0
-         chilled 0
-         frozen 0
-         nauseous 0
-         charmed 0
-         delayed 0}}]
-  (merge stats
-         {:health health
-          :attack (+ attack sharpened (- charmed))
-          :defense (+ defense quickened (- nauseous) (- frozen))
-          :armor (+ armor reinforced (- frozen))
-          :initiative (+ initiative quickened (- chilled) (- delayed))
-          :aptitude (+ aptitude focused (- scorched))
-          :aptitudes aptitudes
-          :resistance (+ resistance blessed)
-          :resistances (let [{:keys [fire frost poison mental]
-                              :or {fire 0 frost 0 poison 0 mental 0}} resistances]
-                         {:fire (- fire scorched)
-                          :frost (- frost chilled)
-                          :poison (- poison nauseous)
-                          :mental (- mental charmed)})
-          :fortune (+ fortune laden)}))
-
-(s/fdef stats+effects->stats
-  :args (s/cat :stats ::stats
-               :effects ::effects)
-  :ret ::stats)
-
 ;; a creature is an instance of a being, prepped for combat!
 (s/def ::creature
   (s/keys :req-un [::id
                    ::name
                    ::abilities
-                   ::stats
+                   ::stats ; MAX HEALTH LIVES HERE
                    ::effects
                    ::row
-                   ::health]))
+                   ::health ; NOTE THAT THIS IS CURRENT HEALTH
+                   ]))
 
 (s/def ::growth (s/map-of ::attr-or-merit pos-int?))
 

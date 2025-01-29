@@ -12,7 +12,7 @@
   (let [encounter @-encounter
         monster? (e/is-monster? encounter creature)
         env-effects (get encounter (if monster? :monsters-env :kobolds-env))
-        [encounter* {:keys [stats] :as creature*}] (e/env-effects-tick encounter creature)
+        [encounter* {:keys [stats] :as creature*}] (e/realize-turn-begin encounter creature)
         creature** (update creature* :effects (partial e/expand-rolled-effects stats))
         effects (:effects creature**)
         {:keys [health] :as creature***} (e/resolve-instant-effects (e/turn-effects-tick creature**))

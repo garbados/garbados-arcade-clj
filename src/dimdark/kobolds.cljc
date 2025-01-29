@@ -54,7 +54,7 @@
               {:weapon (eq/gen-basic-equipment weapon)
                :armor (eq/gen-basic-equipment armor)
                :accessory nil})}]
-       (assoc kobolds name kobold)))
+       (assoc kobolds id kobold)))
    {}
    [(inline-slurp "resources/dimdark/kobolds/drg.edn")
     (inline-slurp "resources/dimdark/kobolds/grp.edn")
@@ -133,9 +133,10 @@
                             :kobold ::kobold))
   :ret boolean?)
 
-(defn kobold->creature [{:keys [name abilities row] :as kobold}]
+(defn kobold->creature [{:keys [id name abilities row] :as kobold}]
   (let [{:keys [health] :as stats} (kobold->stats kobold)]
-    {:name name
+    {:id id
+     :name name
      :stats stats
      :effects {}
      :abilities abilities

@@ -1,10 +1,12 @@
 (ns dimdark.abilities
-  (:require #?(:clj [arcade.text :refer [inline-slurp]]
-               :cljs [arcade.text :refer-macros [inline-slurp]])
-            [clojure.edn :as edn]
-            [clojure.set :as set]
-            [clojure.spec.alpha :as s]
-            [dimdark.core :as d]))
+  (:require
+   #?(:clj [arcade.text :refer [inline-slurp]]
+      :cljs [arcade.text :refer-macros [inline-slurp]])
+   [clojure.edn :as edn]
+   [clojure.set :as set]
+   [clojure.spec.alpha :as s]
+   [dimdark.core :as d]
+   [dimdark.effects :as effects]))
 
 (def clj-log2 #?(:clj (Math/log 2) :cljs nil))
 (defn math-log2 [x]
@@ -47,8 +49,6 @@
 (s/def ::uses (s/map-of ::stat-expr ::coefficient))
 (s/def ::affects (s/map-of ::d/stat-or-merit ::coefficient))
 (s/def ::party-affects ::affects)
-(s/def ::move-to ::d/row)
-(s/def ::move-target-to ::move-to)
 (s/def ::effects (s/map-of ::d/effect ::coefficient))
 (s/def ::self-effects ::effects)
 (s/def ::env-effects (s/map-of ::d/env-effect ::coefficient))
@@ -98,21 +98,17 @@
        (reduce merge {})))
 
 (def ability->details
-  (merge universal-abilities kobold-abilities monster-abilities ))
+  (merge universal-abilities kobold-abilities monster-abilities))
 
 (def abilities (set (keys ability->details)))
 (s/def ::ability abilities)
 
-(defn get-user-magnitude [ability creature]
-  (let [{:keys [traits uses]
-         :or {uses {}}} (ability ability->details)
-        {:keys [attack aptitude aptitudes]}
-        (d/stats+effects->stats (:stats creature) (:effects creature))]
+(defn get-user-magnitude
+  [{:keys [traits uses] :or {uses {}}} {:keys [stats effects]}]
+  (let [{:keys [attack aptitude aptitudes]} (effects/stats+effects->stats stats effects)]
     (cond-> (reduce
              (fn [sum [stat coefficient]]
-               (+ sum
-                  (* coefficient
-                     (get-in creature [:stats stat] 0))))
+               (+ sum (* coefficient (get stats stat 0))))
              0
              uses)
       (contains? traits :physical) (+ attack)
@@ -123,13 +119,13 @@
       (contains? traits :mental) (+ (:mental aptitudes 0)))))
 
 (s/fdef get-user-magnitude
-  :args (s/cat :ability ::ability
+  :args (s/cat :ability ::ability-details
                :creature ::d/creature)
   :ret number?)
 
-(defn get-synergy-magnitude [ability creature]
-  (let [{:keys [traits]} (ability ability->details)
-        {:keys [aptitudes]} (d/stats+effects->stats (:stats creature) (:effects creature))]
+(defn get-synergy-magnitude
+  [{:keys [traits]} {:keys [stats effects]}]
+  (let [{:keys [aptitudes]} (effects/stats+effects->stats stats effects)]
     (cond-> 0
       (contains? traits :fire) (+ (:fire aptitudes 0))
       (contains? traits :frost) (+ (:frost aptitudes 0))
@@ -137,14 +133,13 @@
       (contains? traits :mental) (+ (:mental aptitudes 0)))))
 
 (s/fdef get-synergy-magnitude
-  :args (s/cat :ability ::ability
+  :args (s/cat :ability ::ability-details
                :creature ::d/creature)
   :ret number?)
 
-(defn get-target-magnitude [ability creature]
-  (let [{:keys [traits]} (ability ability->details)
-        {:keys [vulns defense resistance resistances]}
-        (d/stats+effects->stats (:stats creature) (:effects creature))]
+(defn get-target-magnitude
+  [{:keys [traits]} {:keys [stats effects]}]
+  (let [{:keys [vulns defense resistance resistances]} (effects/stats+effects->stats stats effects)]
     (if (seq (set/intersection traits (or vulns #{})))
       0
       (cond-> 0
@@ -156,21 +151,41 @@
         (contains? traits :mental) (+ (:mental resistances 0))))))
 
 (s/fdef get-target-magnitude
-  :args (s/cat :ability ::ability
+  :args (s/cat :ability ::ability-details
                :creature ::d/creature)
   :ret number?)
 
 (defn needs-target? [{:keys [traits]}]
-  (not (or (contains? traits :self)
-           (contains? traits :environmental)
-           (contains? traits :area)
-           (contains? traits :front-row)
-           (contains? traits :back-row)
-           (not (contains? traits :direct)))))
+  (or
+   (contains? traits :direct)
+   (not
+    (or (contains? traits :self)
+        (contains? traits :environmental)
+        (contains? traits :area)
+        (contains? traits :front-row)
+        (contains? traits :back-row)))))
 
 (s/fdef needs-target?
   :args (s/cat :ability ::ability-details)
   :ret boolean?)
+
+(defn magnitude-bonus
+  "Calculates a magnitude bonus, such as a spell benefiting from empowerment."
+  [{:keys [traits]} {:keys [effects]} {target-effects :effects}]
+  (cond-> 0
+    (contains? effects :hidden)
+    (+ (:hidden effects))
+    (and (contains? effects :empowered)
+         (contains? traits :spell))
+    (+ (:empowered effects))
+    (contains? target-effects :marked)
+    (+ (:marked target-effects))))
+
+(s/fdef magnitude-bonus
+  :args (s/cat :ability ::ability-details
+               :creature ::d/creature
+               :target ::d/creature)
+  :ret nat-int?)
 
 (defn friendly-ability-hits? [ability user target]
   (let [magnitude (+ (get-user-magnitude ability user)
@@ -185,15 +200,16 @@
                :target ::d/creature)
   :ret nat-int?)
 
-(defn self-ability-magnitude [ability user]
-  (let [magnitude (get-user-magnitude ability user)]
+(defn self-ability-magnitude [ability-details user]
+  (let [magnitude (get-user-magnitude ability-details user)]
     (if (zero? magnitude)
       0
       (int (math-log2 magnitude)))))
 
-(defn hostile-ability-hits? [ability user target]
-  (let [user-magnitude (get-user-magnitude ability user)
-        target-magnitude (get-target-magnitude ability target)
+(defn hostile-ability-hits? [ability-details user target]
+  (let [user-magnitude (+ (get-user-magnitude ability-details user)
+                          (magnitude-bonus ability-details user target))
+        target-magnitude (get-target-magnitude ability-details target)
         magnitude (- user-magnitude target-magnitude)
         logarized (cond
                     (pos? magnitude)  (math-log2 magnitude)
@@ -203,7 +219,7 @@
        (reduce + 0 (repeatedly 3 #(inc (rand-int 5)))))))
 
 (s/fdef hostile-ability-hits?
-  :args (s/cat :ability ::ability
+  :args (s/cat :ability ::ability-details
                :user ::d/creature
                :target ::d/creature)
   :ret int?)
@@ -219,7 +235,7 @@
 (s/fdef resolve-effects
   :args (s/cat :effects ::effects
                :margin int?)
-  :ret (s/map-of ::d/effect nat-int?))
+  :ret ::effects/effects)
 
 (defn filter-active [abilities]
   (filter #(-> % ability->details :traits (contains? :passive) not) abilities))
