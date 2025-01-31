@@ -18,8 +18,8 @@
   :description "Set your sights on an enemy's weak point."
   :traits #{:ranged :hostile :direct :piercing :physical}
   :uses {:aptitude 1}
-  :effects {:damage 2}
-  :self-effects {:delayed 1}}
+  :effects {:damage :2d6}
+  :self-effects {:stunned :1}}
  :stinkbomb
  {:name :stinkbomb
   :description "Hurl a noxious explosive into the ranks of your foes."

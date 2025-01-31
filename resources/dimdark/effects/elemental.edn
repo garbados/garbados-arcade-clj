@@ -2,7 +2,8 @@
  {:type :debuff
   :phase nil
   :diminishing true
-  :stats {:resistances {:poison -1}}}
+  :stats {:resistances {:poison -1}
+          :defense -1}}
  :sickproof
  {:type :buff
   :phase nil
@@ -20,16 +21,19 @@
   :diminishing true
   :stats {:initiative -2}
   :resists #{:poison}}
- :sedated
+ :charmed
  {:type :debuff
   :phase nil
   :diminishing true
-  :stats {:resistances {:mental -1}}}
+  :stats {:resistances {:mental -1}
+          :attack -1}
+  :resists #{:mental}}
  :determined
  {:type :buff
   :phase nil
   :diminishing true
-  :stats {:resistances {:mental 1}}}
+  :stats {:resistances {:mental 1}
+          :defense 1}}
  :demoralized
  {:type :debuff
   :phase nil
@@ -42,23 +46,13 @@
   :diminishing true
   :stats {:aptitude -1}
   :resists #{:mental}}
- :charmed
- {:type :debuff
-  :phase nil
-  :diminishing true
-  :stats {:attack -2}
-  :resists #{:mental}}
- :provoked
- {:type :debuff
-  :phase nil
-  :diminishing true
-  :provoked true
-  :resists #{:mental}}
  :scorched
  {:type :debuff
   :phase nil
   :diminishing true
-  :stats {:resistances {:fire -1}}}
+  :stats {:resistances {:fire -1}}
+  :hurt :2
+  :resists #{:fire}}
  :fireproof
  {:type :buff
   :phase nil
@@ -68,13 +62,15 @@
  {:type :debuff
   :phase :turn-begin
   :diminishing true
-  :hurt 1
+  :hurt :3
   :resists #{:fire}}
  :chilled
  {:type :debuff
   :phase nil
   :diminishing true
-  :stats {:resistances {:frost -1}}}
+  :stats {:resistances {:frost -1}
+          :initiative -1}
+  :resists #{:frost}}
  :frostproof
  {:type :buff
   :phase nil
@@ -83,4 +79,7 @@
  :frozen
  {:type :debuff
   :phase :on-target
-  :stats {:defense -1 :armor -1}}}
+  :diminishing true
+  :stats {:armor :-2}
+  :stun true
+  :resists #{:frost}}}

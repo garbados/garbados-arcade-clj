@@ -42,13 +42,41 @@
                    ::removes
                    ::d/stats]))
 
-(defn resolve-hurt [creature {:keys [hurt]} magnitude]
+(defn stats+effects->stats
+  "Combines a canonical stat block
+   with the impact of some effects,
+   returning a new stat block."
+  [stats effects]
+  (reduce
+   d/merge-stats
+   stats
+   (for [[effect-name magnitude] effects
+         :let [{stat-effect :stats} (effect->details effect-name)]
+         :when stat-effect]
+     (d/multiply-stats stat-effect magnitude))))
+
+(s/fdef stats+effects->stats
+  :args (s/cat :stats ::d/stats
+               :effects ::effects)
+  :ret ::d/stats)
+
+(defn resolve-hurt
+  [{:keys [stats effects health]}
+   {:keys [hurt resists] :or {resists #{}}}
+   magnitude]
   (cond
     (keyword? hurt)
-    (let [[n m] (string/split (name hurt) #"d")]
-      (dice/roll (+ n magnitude) m))
+    (let [[n m] (map int (string/split (name hurt) #"d"))
+          rolls (dice/roll (+ n magnitude) m)]
+      (if (contains? resists :armor)
+        (let [armor (:armor (stats+effects->stats stats effects))]
+          (->> rolls
+               (map #(- % armor))
+               (map (partial max 0))
+               (reduce + 0)))
+        (reduce + 0 rolls)))
     (< 1 hurt)
-    (int (* hurt (:health creature))) ; proportion of current health
+    (int (* hurt health)) ; proportion of current health
     :else
     (* hurt magnitude)))
 
@@ -91,45 +119,39 @@
     ;; TODO inflicts -- effects that cause other effects
     ;; hurting
     (contains? effect-details :hurt)
-    (let [hurt-amt (resolve-hurt creature (:hurt effect-details) magnitude)]
+    (let [hurt-amt (resolve-hurt creature effect-details magnitude)]
+      (println hurt-amt)
       (update creature :health #(max 0 (- % hurt-amt))))
     ;; healing
     (contains? effect-details :heal)
-    (let [heal-amt (resolve-heal (:heal effect-details) magnitude)]
+    (let [heal-amt (resolve-heal effect-details magnitude)]
       (update creature :health #(min (get-in creature [:stats :health])
-                                     (+ % heal-amt))))))
+                                     (+ % heal-amt))))
+    ;; 
+    :else creature))
 
 (defn apply-instant-effects [{:keys [effects] :as creature}]
   (reduce
-   (fn [creature [effect-name magnitude]]
-     (let [{phase :phase
-            :as details} (effect->details effect-name)]
-       (cond-> (apply-effect-to-creature creature details magnitude)
-         (= :instant phase)
-         (dissoc :effects effect-name))))
+   (fn [creature [effect-name effect-details magnitude]]
+     (-> creature
+         (apply-effect-to-creature effect-details magnitude)
+         (update :effects dissoc effect-name)))
    creature
-   effects))
-
-(defn apply-effect-to-ability []
-  'todo)
-
-(defn stats+effects->stats
-  "Combines a canonical stat block
-   with the impact of some effects,
-   returning a new stat block."
-  [stats effects]
-  (reduce
-   d/merge-stats
-   stats
    (for [[effect-name magnitude] effects
-         :let [{stat-effect :stats} (effect->details effect-name)]
-         :when stat-effect]
-     (d/multiply-stats stat-effect magnitude))))
+         :let [details (effect->details effect-name)]
+         :when (= :instant (:phase details))]
+     [effect-name details magnitude])))
 
-(s/fdef stats+effects->stats
-  :args (s/cat :stats ::d/stats
-               :effects ::effects)
-  :ret ::d/stats)
+(defn apply-effect-to-ability
+  [{:keys [traits] :as ability-details}
+   {:keys [add-trait remove-trait needs-trait]}]
+  (if (or (nil? needs-trait) (contains? traits needs-trait))
+    (cond-> ability-details
+      add-trait
+      (update :traits conj add-trait)
+      remove-trait
+      (update :traits disj remove-trait))
+    ability-details))
 
 (defn diminish-effects-on-creature [{:keys [effects] :as creature}]
   (reduce

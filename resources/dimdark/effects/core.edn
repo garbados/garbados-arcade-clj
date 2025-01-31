@@ -1,13 +1,13 @@
-{:damaged
+{:damage
  {:type :debuff
   :phase :instant
   :hurt :1d6
   :resists #{:armor}}
- :healed
+ :healing
  {:type :buff
   :phase :instant
   :heal :1d4}
- :mended
+ :mending
  {:type :buff
   :phase :turn-begin
   :heal 1
@@ -58,11 +58,11 @@
   :phase nil
   :diminishing true
   :stats {:armor -1}}
- :protected
+ :toughened
  {:type :buff
   :phase nil
   :diminishing true
-  :stats {:armor 1}}
+  :stats {:armor :1}}
  :quickened
  {:type :buff
   :phase nil

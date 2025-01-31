@@ -176,32 +176,24 @@
    {environmental-effects :environment
     creature-effects :creature}]
   (let [{team :team creature :entity} (get-in encounter [:entities id])
-        effects (concat creature-effects environmental-effects)
-        creature* (apply-effects-to-creature creature effects)
-        stats* (effects/stats+effects->stats (:stats creature*) effects)]
-    [(-> (clear-environment-effects encounter team environmental-effects)
-         (assoc-creature id creature*))
-     stats*]))
+        effects (concat creature-effects environmental-effects)]
+    (-> (clear-environment-effects encounter team environmental-effects)
+        (assoc-creature id (apply-effects-to-creature creature effects)))))
 
-(def realize-on-target realize-on-creature)
-(def realize-on-spellcast realize-on-creature)
-
-(defn realize-impact
+(defn realize-impacts
   "Apply impacts to creatures and the environment,
    and resolve instant effects."
   [encounter impacts]
   (reduce
    (fn [encounter [who effects]]
-     (cond
-       (#{:monsters :kobolds} who)
+     (println who effects)
+     (if (#{:monsters :kobolds} who)
        (update-in encounter [:environment who] effects/merge-effects effects)
-       :else
-       (assoc-creature
+       (update-creature
         encounter
         who
-        (-> (get-in encounter [:entities who :entity])
-            (effects/merge-effects effects)
-            (effects/apply-instant-effects)))))
+        #(-> (effects/merge-effects % effects)
+             (effects/apply-instant-effects)))))
    encounter
    impacts))
 
@@ -278,9 +270,10 @@
   :ret boolean?)
 
 (defn defeat? [{:keys [entities]}]
-  (filter #(and (= :kobolds (:team %))
-                (pos-int? (get-in % [:entity :health])))
-          entities))
+  (empty?
+   (filter #(and (= :kobolds (:team %))
+                 (pos-int? (get-in % [:entity :health])))
+           entities)))
 
 (s/fdef defeat?
   :args (s/cat :encounter ::encounter)
@@ -343,18 +336,35 @@
     (when (pos-int? (get-in encounter [:entities id :entity :health]))
       (let [usable-abilities (get-usable-abilities encounter id)
             chosen-ability-details (a/ability->details (rand-nth usable-abilities))
+            ;; select target(s)
             possible-targets (get-possible-targets encounter id chosen-ability-details)
-            on-spellcast-effects (expand-by-phase encounter id :on-spellcast)
-            [encounter user-stats] (realize-on-spellcast encounter id on-spellcast-effects)
             targets
             (if (a/needs-target? chosen-ability-details)
               [(rand-nth possible-targets)]
               possible-targets)
-            creature-map (assoc-in (get-in encounter [:entities id])
-                                   [:entity :stats] user-stats)
+            ;; gather on-target impacts to explain later
+            on-target-impacts
+            (reduce
+             (fn [effects target-id]
+               (assoc effects target-id #(expand-by-phase encounter % :on-target)))
+             {}
+             targets)
+            ;; realize on-target impacts prior to action
+            encounter
+            (reduce
+             (fn [encounter target-id]
+               (realize-on-creature encounter target-id (get on-target-impacts target-id)))
+             encounter
+             targets)
+            ;; realize on-action impacts
+            on-spellcast-impacts (expand-by-phase encounter id :on-spellcast)
+            encounter (realize-on-creature encounter id on-spellcast-impacts)
+            ;; calculate action impact
             impacts
             (impacts/calc-impacts
-             creature-map
+             (get-in encounter [:entities id])
              chosen-ability-details
-             (map #(get-in encounter [:entities % :entity]) targets))]
-        impacts))))
+             (map #(get-in encounter [:entities % :entity]) targets))
+            ;; realize impacts
+            encounter (realize-impacts encounter impacts)]
+        encounter))))

@@ -17,8 +17,8 @@
  {:weapon :sword
   :armor :splint}
  :abilities
- [[:shield-wall :shield-bash :defensive-stance]
-  [:armor-break :spirit-break :goad]
-  [:dragon-heart :fire-slash :ice-slash]
-  [:dragon-tail :giantslayer :radiant-stance]
-  [:grim-cleave :dread-roar :juggernaut]]}
+ [[:power-break :shield-bash :defensive-stance]
+  [:focus-break :goad :fire-slash]
+  [:dragon-heart :spirit-break :ice-slash]
+  [:giantslayer :armor-break :radiant-stance]
+  [:dragon-tail :dread-roar :juggernaut]]}

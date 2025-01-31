@@ -1,0 +1,16 @@
+{:attack
+ {:name :attack
+  :description "Give 'em the ol' bonk!"
+  :traits #{:direct :hostile :physical :close}
+  :uses {:attack 1}
+  :effects {:damage :1d6}}
+ :step-forward
+ {:name :step-forward
+  :description "Move to the front line."
+  :traits #{:ranged :self}
+  :move-to :front}
+ :step-back
+ {:name :step-back
+  :description "Move to the back row."
+  :traits #{:close :self}
+  :move-to :back}}

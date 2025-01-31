@@ -6,5 +6,5 @@
  :jawtrapped
  {:type :environmental
   :phase :turn-begin
-  :hurt :1d4
+  :hurt :2d4
   :resists #{:armor}}}
