@@ -1,0 +1,24 @@
+{:id :grp
+ :class :druid
+ :row :back
+ :growth
+ {:prowess 1
+  :alacrity 2
+  :vigor 3
+  :spirit 5
+  :focus 4
+  :luck 3
+  :squish 1
+  :stink 1}
+ :proficiencies
+ {:weapons #{:staff :club}
+  :armor #{:light :medium}}
+ :equipped
+ {:weapon :staff
+  :armor :hide}
+ :abilities
+ [[:restore :tanglefoot :frostbolt]
+  [:protect :swarm :rejuvenate]
+  [:cleanse :skunkspray :nullify]
+  [:healing-roots :hailstorm :snake-bite]
+  [:true-strike :bury-alive :elder-druid]]}

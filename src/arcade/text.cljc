@@ -1,4 +1,4 @@
-(ns longtime.text 
+(ns arcade.text
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]))
 
@@ -195,3 +195,9 @@
      "\n"
      (for [[prefix line] (map vector prefixes lines)]
        (str prefix " " line)))))
+
+;; macros run in clj, during compilation
+;; so cljs can use slurp
+;; so long as it uses it at compilation
+(defmacro inline-slurp [path]
+  (clojure.core/slurp path))

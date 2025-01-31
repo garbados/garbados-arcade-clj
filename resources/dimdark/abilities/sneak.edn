@@ -1,0 +1,81 @@
+{:fade
+ {:name :fade
+  :description "Disappear into the shadows."
+  :traits #{:self :spell :mental}
+  :uses {:initiative 0.5}
+  :self-effects {:hidden 1 :pushed 1}}
+ :backstab
+ {:name :backstab
+  :description "Strike from the shadows for massive damage!"
+  :traits #{:ranged :hostile :direct :piercing :physical}
+  :effects {:damage 2}
+  :self-effects {:pulled 1}
+  :self-requires #{:hidden}}
+ :feint
+ {:name :feint
+  :description "Throw your enemy off-balance with a distracting flourish."
+  :traits #{:hostile :direct :close :physical :mental}
+  :effects {:reinforced -1 :focused -1}}
+ :pickpocket
+ {:name :pickpocket
+  :description "Use an ethereal hand to rob your enemies!"
+  :traits #{:hostile :direct :close :spell :mental}
+  :self-effects {:laden 1}}
+ :steal-magic
+ {:name :steal-magic
+  :description "Siphon a foe's arcana and into boons for yourself."
+  :traits #{:hostile :direct :spell :mental}
+  :effects {:purged 1}
+  :self-effects {:sharpened 1 :focused 1}}
+ :debilitate
+ {:name :debilitate
+  :description "With a mix of physical and telekinetic strikes, lock up your foe's muscles."
+  :traits #{:hostile :direct :close :physical :spell :mental}
+  :effects {:charmed 1 :quickened -0.5}}
+ :lacerate
+ {:name :lacerate
+  :description "With a flourish, inflict many shallow bleeding wounds."
+  :traits #{:hostile :direct :close :physical}
+  :effects {:bleeding 1.5}}
+ :hamstring
+ {:name :hamstring
+  :description "Slit a foe's critical tendons, hobbling them."
+  :traits #{:hostile :direct :close :physical :mental}
+  :effects {:damage 0.5 :quickened -1}}
+ :sabotage
+ {:name :sabotage
+  :description "With a blast of targeted sound, shatter an enemy's weapon."
+  :traits #{:hostile :direct :close :spell :mental}
+  :effects {:sharpened -2}}
+ :brute
+ {:name :brute
+  :description "You're well-adapted to beating what you need out of your enemies."
+  :traits #{:passive}
+  :affects {:health 1 :attack 1}}
+ :phase-bolt
+ {:name :phase-bolt
+  :description "Blast an enemy with telekinetic energy that curves around barriers."
+  :traits #{:hostile :direct :piercing :spell :mental}
+  :effects {:damage 1}}
+ :evasion
+ {:name :evasion
+  :description "With astounding dexterity, you dodge with deftness!"
+  :traits #{:passive}
+  :affects {:defense 2}}
+ :barrel-roll
+ {:name :barrel-roll
+  :description "Roll through an enemy's guard, striking from below."
+  :traits #{:hostile :direct :close :physical}
+  :uses {:initiative 0.5}
+  :effects {:damage 0.5}
+  :self-effects {:quickened 1}}
+ :browbeat
+ {:name :browbeat
+  :description "Knock an enemy about the head, scattering their thoughts."
+  :traits #{:hostile :direct :close :physical :mental}
+  :effects {:damage 0.5 :focused -1}}
+ :arcane-trickster
+ {:name :arcane-trickster
+  :description "Arcana swirls about you, leaping from your fingertips."
+  :traits #{:passive}
+  :affects {:aptitude 2 :brat 1}}}

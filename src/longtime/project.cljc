@@ -6,7 +6,7 @@
             [longtime.core :as core]
             [longtime.select :as select]
             [longtime.space-text :as space-text]
-            [longtime.text :as text]))
+            [arcade.text :as text]))
 
 (def base-need 50)
 (def low-need 10)
