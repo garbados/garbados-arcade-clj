@@ -206,10 +206,14 @@
       0
       (int (math-log2 magnitude)))))
 
-(defn hostile-ability-hits? [ability-details user target]
-  (let [user-magnitude (+ (get-user-magnitude ability-details user)
-                          (magnitude-bonus ability-details user target))
-        target-magnitude (get-target-magnitude ability-details target)
+(s/fdef self-ability-magnitude
+  :args (s/cat :ability ::ability
+               :user ::d/creature)
+  :ret nat-int?)
+
+(defn hostile-ability-hits? [ability user target]
+  (let [user-magnitude (get-user-magnitude ability user)
+        target-magnitude (get-target-magnitude ability target)
         magnitude (- user-magnitude target-magnitude)
         logarized (cond
                     (pos? magnitude)  (math-log2 magnitude)

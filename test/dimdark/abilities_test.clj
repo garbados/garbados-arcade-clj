@@ -9,6 +9,7 @@
    [`a/get-user-magnitude
     `a/get-synergy-magnitude
     `a/get-target-magnitude
+    `a/self-ability-magnitude
     `a/needs-target?
     `a/friendly-ability-hits?
     `a/hostile-ability-hits?

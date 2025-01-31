@@ -4,9 +4,9 @@
   :license {:name "CC BY-NC-SA 4.0"
             :url "https://creativecommons.org/licenses/by-nc-sa/4.0/"}
   :dependencies [[org.clojure/clojure "1.12.0"]
-                 [clj-commons/clj-yaml "1.0.26"]]
+                 [clj-commons/clj-yaml "1.0.27"]]
   :repl-options {:init-ns arcade.core}
-  :plugins [[lein-cloverage "1.2.2"]]
+  :plugins [[lein-cloverage "1.2.4"]]
   :profiles
   {:dev {:dependencies [[org.clojure/test.check "1.1.1"]]}
    :cljs

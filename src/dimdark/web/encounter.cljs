@@ -183,15 +183,29 @@
                    (reset! -stage :pre-selection)
                    [:<>])))
 
-(defn next-turn-button [-encounter]
-  [:button.button.is-primary.is-fullwidth
-   {:on-click #(swap! -encounter (comp e/next-turn e/remove-dead-monsters))}
-   "Proceed"])
+(defn next-turn-button
+  ([-encounter]
+   [:button.button.is-primary.is-fullwidth
+    {:on-click #(swap! -encounter (comp e/next-turn e/remove-dead-monsters))}
+    "Proceed"])
+  ([-encounter encounter*]
+   [:button.button.is-primary.is-fullwidth
+    {:on-click #(swap! -encounter (comp e/next-turn e/remove-dead-monsters (constantly encounter*)))}
+    "Proceed"]))
 
 (defn impacts-view [-encounter creature ability target]
-  (if-let [impacts (e/calc-impacts @-encounter creature ability target)]
+  (if-let [[encounter* impacts] (e/calc-impacts @-encounter creature ability target)]
     (let [{:keys [kobolds-env monsters-env]} impacts
           creatures (flatten (filter (fn [[creature _]] (not (keyword? creature))) impacts))
+          encounter**
+          (reduce
+           (fn [encounter* creature]
+             (let [creature*
+                   (e/resolve-instant-effects
+                    (update creature :effects e/merge-effects (get impacts creature)))]
+               (e/assoc-creature encounter* creature creature*)))
+           encounter*
+           creatures)
           effect-lines
           (sort
            (flatten
@@ -215,7 +229,7 @@
           (for [[effect magnitude] monsters-env]
             ^{:key effect}
             [:li "Monster environs <- " (text/normalize-name effect) ": " magnitude]))]
-       [next-turn-button -encounter]])
+       [next-turn-button -encounter encounter**]])
     [:div.content
      [:h3 "Whiff!"]
      [:p (str (text/normalize-name (:name creature)) "'s use of " (text/normalize-name ability) " missed.")]
@@ -338,7 +352,9 @@
        (if-let [creature (:turn encounter)]
          [:div.box>div.content
           [:h2 (str (text/normalize-name (:name creature)) "'s turn!")]
-          [turn-view -encounter -stage (r/atom nil) (r/atom nil) creature]]
+          (let [-ability (r/atom nil)
+                -target (r/atom nil)]
+            [turn-view -encounter -stage -ability -target creature])]
          (do
            (swap! -encounter e/next-round)
            [:<>]))]]]))
