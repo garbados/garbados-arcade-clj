@@ -5,20 +5,20 @@
 (s/def ::coord (s/cat :q int? :r int?))
 (s/def ::coords (s/coll-of ::coord :kind set?))
 
-(defn get-adjacent-coords*
+(defn get-adjacent-coords
   "Returns coordinates for hexes "
   [coord]
   {:pre [(s/valid? ::coord coord)]
    :post [#(s/valid? ::coords %)]}
   (let [[q r] coord]
-    #{[(- q 1) r]
-      [(- q 1) (+ r 1)]
-      [q (- r 1)]
-      [q (+ r 1)]
-      [(+ q 1) (- r 1)]
-      [(+ q 1) r]}))
+    #{[(dec q) r]
+      [(dec q) (inc r)]
+      [q (inc r)]
+      [(dec q) (dec r)]
+      [(inc q) (dec r)]
+      [(inc q) r]}))
 
-(def get-adjacent-coords (memoize get-adjacent-coords*))
+;; (def get-adjacent-coords (memoize get-adjacent-coords*))
 
 (defn get-adjacent-to-region [region]
   {:pre [(s/valid? ::coords region)]
@@ -50,7 +50,7 @@
   {:pre [(s/valid? ::coord center)
          (s/valid? pos-int? n)]
    :post [#(s/valid? ::coords %)]}
-  (let [-n (* -1 n)]
+  (let [-n (- n)]
     (reduce into
             #{}
             (for [q (range -n (+ 1 n))]

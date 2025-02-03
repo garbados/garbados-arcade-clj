@@ -8,6 +8,11 @@
    :modules {:index {:exports {arcade arcade.exports/arcade
                                planetcall planetcall.exports/planetcall}}}
    :output-dir "lib/arcade"}
+  :planetcall
+  {:target :browser
+   :output-dir "public/js/planetcall"
+   :asset-path "/js/planetcall"
+   :modules {:main {:entries [planetcall.web]}}}
   :longtime
   {:target :browser
    :output-dir "public/js/longtime"
