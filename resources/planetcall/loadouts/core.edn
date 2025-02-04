@@ -1,0 +1,6 @@
+[{:id :oldworld-weapons
+  :short "Oldworld"
+  :arms 1}
+ {:id :engineering
+  :arms 0
+  :abilities :engineering}]

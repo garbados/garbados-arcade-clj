@@ -43,25 +43,12 @@
 
 (s/def :faction/designs (s/coll-of :unit/design :kind vector?))
 
-;;  -1 : vendetta
-;;   0 : truce
-;;   1 : treaty
-;;   2 : friends
-;;   3 : allies
-;;   4 : partners
-(s/def :faction/treaties (s/map-of nat-int? (s/int-in -1 5)))
-
-(s/def :resources/food nat-int?)
-(s/def :resources/materials nat-int?)
-(s/def :resources/energy nat-int?)
-(s/def :resources/insight nat-int?)
-
 (s/def :faction/resources
-  (s/def :req-un [:resources/food
-                  :resources/materials
-                  :resources/energy
-                  :resources/insight]))
+  (s/map-of #{:food :materials :energy :insight} nat-int?))
  
+(s/def :research/current (s/tuple keyword? nat-int?))
+(s/def :research/known (s/coll-of keyword? :kind set?))
+(s/def :research/experience (s/map-of keyword? nat-int?))
 (s/def :faction/research
   (s/keys :req-un [:research/current
                    :research/known
@@ -79,7 +66,6 @@
   (s/keys :req-un [:faction/i
                    :faction/name
                    :faction/designs
-                   :faction/treaties
                    :faction/resources
                    :faction/research
                    :faction/conditions
@@ -112,7 +98,9 @@
                    :geo/coord]))
 
 (s/def :game/spaces (s/map-of :geo/coord :space/space))
-(s/def :game/units (s/map-of :geo/coord :unit/unit))
+(s/def :game/units (s/map-of :geo/coord (s/coll-of :unit/unit
+                                                   :kind vector?
+                                                   :max-count 3)))
 
 (s/def :world/eco-damage nat-int?)
 (s/def :world/conditions :faction/conditions)
@@ -128,8 +116,22 @@
                    :turn/actions
                    :turn/phase]))
 
+
+;;  -1 : vendetta
+;;   0 : strangers
+;;   1 : neutral
+;;   2 : friends
+;;   3 : allies
+;;   4 : partners
+(s/def :game/treaties (s/map-of (s/coll-of :faction/i
+                                           :kind set?
+                                           :count 2)
+                                (s/int-in -1 5)))
+
+
 (s/def :game/game
   (s/keys :req-un [:game/factions
+                   :game/treaties
                    :game/wonders
                    :game/spaces
                    :game/units

@@ -1,0 +1,33 @@
+[{:ideology :industry
+  :level 1
+  :id :fiduciary-duty
+  :modifies
+  {:improvements
+   {:farm
+    {:food 1
+     :impact 1}
+    :factory
+    {:materials 1
+     :impact 1}
+    :reactor
+    {:energy 1
+     :impact 1}}}}
+ {:ideology :industry
+  :level 1
+  :id :colonialism
+  :grants {:loadouts [:settler]}}
+ {:ideology :industry
+  :level 2
+  :id :luxury-of-privacy
+  :grants {:actions [:construct-dome]}}
+ {:ideology :industry
+  :level 2
+  :id :just-in-time-logistics
+  :modifies
+  {:improvements
+   {:stockpile
+    {:capacity 10}}}}
+ {:ideology :industry
+  :level 2
+  :id :first-to-market
+  :modifies {:actions 1}}]

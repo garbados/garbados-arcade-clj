@@ -1,0 +1,19 @@
+[{:ideology :military
+  :level 1
+  :id :command-hierarchy
+  :grants {:loadouts [:commander]}}
+ {:ideology :military
+  :level 1
+  :id :martial-entrenchment
+  :grants {:actions [:construct-bunker]}}
+ {:ideology :military
+  :level 2
+  :id :doctrine-power
+  :name "Doctrine: Power"
+  :grants {:loadouts [:railguns]}}
+ {:ideology :military
+  :level 2
+  :id :doctrine-obliteration
+  :name "Doctrine: Destruction"
+  :grants {:loadouts [:missiles]
+           :actions [:construct-missile-silo]}}]

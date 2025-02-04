@@ -1,0 +1,36 @@
+[{:ideology :ecology
+  :level 1
+  :id :contamination-protocols
+  :grants {:conditions [:fungus-immune]}}
+ {:ideology :ecology
+  :level 1
+  :id :nothing-of-honor
+  :grants {:actions [:scrub-radiation]}}
+ {:ideology :ecology
+  :level 2
+  :id :integrative-architecture
+  :grants {:conditions [:fungus-friend]}}
+ {:ideology :ecology
+  :level 2
+  :id :lifecycle-accounting
+  :grants {:mods [:zero-trace]}}
+ {:ideology :ecology
+  :level 2
+  :id :antimiasmic-enamel
+  :grants {:conditions [:miasma-immune]}}
+ {:ideology :ecology
+  :level 3
+  :id :ecosystem-rehabilitation
+  :grants {:actions [:construct-detoxer]}}
+ {:ideology :ecology
+  :level 3
+  :id :pathfinder-corps
+  :grants {:conditions [:fungus-navigator]}}
+ {:ideology :ecology
+  :level 3
+  :id :rigorous-harmony
+  :grants {:actions [:harmonize]}}
+ {:ideology :ecology
+  :level 3
+  :id :rigorous-harmony
+  :grants {:actions [:harmonize]}}]
