@@ -1,0 +1,103 @@
+{:damage
+ {:type :debuff
+  :phase :instant
+  :hurt :1d6
+  :resists #{:armor}}
+ :healing
+ {:type :buff
+  :phase :instant
+  :heal :1d4}
+ :mending
+ {:type :buff
+  :phase :turn-begin
+  :heal 1
+  :diminishing true}
+ :pushed
+ {:type :neutral
+  :phase :instant
+  :move-to :back}
+ :pulled
+ {:type :neutral
+  :phase :instant
+  :move-to :front}
+ :cleansed
+ {:type :buff
+  :phase :instant
+  :removes :debuffs}
+ :purged
+ {:type :debuff
+  :phase :instant
+  :removes :buffs}
+ :bleeding
+ {:type :debuff
+  :phase :turn-end
+  :diminishing true
+  :hurt 1/5}
+ :honed
+ {:type :buff
+  :phase nil
+  :diminishing true
+  :stats {:attack 1}}
+ :dulled
+ {:type :debuff
+  :phase nil
+  :diminishing true
+  :stats {:attack -1}}
+ :flat-footed
+ {:type :debuff
+  :phase nil
+  :diminishing true
+  :stats {:defense -1}}
+ :nimble
+ {:type :buff
+  :phase nil
+  :diminishing true
+  :stats {:defense 1}}
+ :exposed
+ {:type :debuff
+  :phase nil
+  :diminishing true
+  :stats {:armor -1}}
+ :toughened
+ {:type :buff
+  :phase nil
+  :diminishing true
+  :stats {:armor :1}}
+ :quickened
+ {:type :buff
+  :phase nil
+  :diminishing true
+  :stats {:initiative 1}}
+ :slowed
+ {:type :debuff
+  :phase nil
+  :diminishing true
+  :stats {:initiative -1}}
+ :focused
+ {:type :buff
+  :phase nil
+  :diminishing true
+  :stats {:aptitude 1}}
+ :withered
+ {:type :debuff
+  :phase nil
+  :diminishing true
+  :stats {:aptitude -1}}
+ :warded
+ {:type :buff
+  :phase nil
+  :diminishing true
+  :stats {:resistance 1}}
+ :cursed
+ {:type :debuff
+  :phase nil
+  :diminishing true
+  :stats {:resistance -1}}
+ :empowered
+ {:type :buff
+  :phase :on-spellcast
+  :stats {:aptitude 2}}
+ :expanded
+ {:type :buff
+  :phase :on-spellcast
+  :add-trait :area}}

@@ -1,0 +1,6 @@
+{:use-potion
+ {:name :use-potion
+  :description "Take this! Chug the life juice!"
+  :traits #{:friendly :direct}
+  :effects {:healing :5}
+  :consumes #{:potion}}}

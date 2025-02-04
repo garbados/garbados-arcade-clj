@@ -1,9 +1,8 @@
 (ns longtime.web
   (:require ["pouchdb" :as pouchdb]
-            [clojure.edn :as edn]
+            [arcade.db :as db :refer [delete-doc fetch-doc save-doc]]
+            [arcade.reagent :refer [prompt-int prompt-text]]
             [clojure.string :as string]
-            [reagent.core :as r]
-            [reagent.dom :as rd]
             [longtime.contact-text :as contact-text]
             [longtime.core :as core]
             [longtime.dream :as dream]
@@ -12,7 +11,9 @@
             [longtime.moment :as moment]
             [longtime.project :as project]
             [longtime.remark :as remark]
-            [longtime.text :as text]))
+            [arcade.text :as text]
+            [reagent.core :as r]
+            [reagent.dom :as rd]))
 
 (defonce db (new pouchdb "longtime"))
 (defonce state (r/atom :loading))
@@ -39,37 +40,17 @@
   (conj project/projects dismantle-infra))
 
 (defn- find-games []
-  (.then (.allDocs db)
-         (fn [rows]
-           (reset! games (vec (map #(.-id %) (.-rows rows)))))))
-
-(defn- save-doc [id value]
-  (.catch (.put db (js-obj "_id" id
-                           "value" (pr-str value)))
-          #(.then (.get db id)
-                  (fn [doc]
-                    (let [doc* (-> doc
-                                   js->clj
-                                   (assoc :value (pr-str value))
-                                   clj->js)]
-                      (.put db doc*))))))
-
-(defn- fetch-doc [id]
-  (.then (.get db id)
-         (fn [doc]
-           (edn/read-string (.-value doc)))))
-
-(defn- delete-doc [id]
-  (-> (.get db id)
-      (.then #(.remove db %))))
+  (.then (db/list-docs db)
+         #(reset! games %)))
 
 (defn- save-game []
-  (save-doc @game {:herd @herd
-                   :monthstep @monthstep}))
+  (save-doc db @game
+            {:herd @herd
+             :monthstep @monthstep}))
 
 (defn- load-game [name]
   (reset! game name)
-  (.then (fetch-doc name)
+  (.then (fetch-doc db name)
          (fn [doc]
            (reset! herd (:herd doc))
            (reset! state :playing)
@@ -92,7 +73,7 @@
               :else     (reset! state :list-games)))))
 
 (defn- delete-game [name]
-  (-> (delete-doc name)
+  (-> (delete-doc db name)
       (.then #(when (= @game name)
                 (reset! game nil)
                 (reset! herd nil)
@@ -102,24 +83,6 @@
       (.then #(if (zero? (count @games))
                 (reset! state :new-game)
                 (reset! state :list-games)))))
-
-(defn- prompt-text [value on-submit]
-  [:input.input
-   {:type "text"
-    :value @value
-    :on-change #(reset! value (-> % .-target .-value))
-    :on-key-down
-    (fn [e]
-      (when (= 13 (.-which e))
-        (on-submit @value)))}])
-
-(defn- prompt-int [value maximum]
-  [:input.input
-   {:type "number"
-    :min 0
-    :max maximum
-    :value @value
-    :on-change #(reset! value (-> % .-target .-value))}])
 
 (defn- init-new-game []
   (let [value (r/atom "")]

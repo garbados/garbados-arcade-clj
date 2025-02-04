@@ -1,5 +1,6 @@
 ;; shadow-cljs configuration
 {:lein {:profile "+cljs"}
+ :dev-http {3000 "public"}
  :builds
  {:lib
   {:target :esm
@@ -7,7 +8,18 @@
    :modules {:index {:exports {arcade arcade.exports/arcade
                                planetcall planetcall.exports/planetcall}}}
    :output-dir "lib/arcade"}
+  :planetcall
+  {:target :browser
+   :output-dir "public/js/planetcall"
+   :asset-path "/js/planetcall"
+   :modules {:main {:entries [planetcall.web]}}}
   :longtime
   {:target :browser
    :output-dir "public/js/longtime"
-   :modules {:main {:entries [longtime.web]}}}}}
+   :asset-path "/js/longtime"
+   :modules {:main {:entries [longtime.web]}}}
+  :dimdark
+  {:target :browser
+   :output-dir "public/js/dimdark"
+   :asset-path "/js/dimdark"
+   :modules {:main {:entries [dimdark.web]}}}}}

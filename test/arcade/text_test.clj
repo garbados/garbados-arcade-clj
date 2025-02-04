@@ -1,7 +1,7 @@
-(ns longtime.text-test 
+(ns arcade.text-test
   (:require [clojure.test :refer [deftest]]
             [arcade.test-util :refer [spec-test-syms]]
-            [longtime.text :as text]))
+            [arcade.text :as text]))
 
 (deftest spec-tests
   (spec-test-syms

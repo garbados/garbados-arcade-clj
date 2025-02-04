@@ -4,7 +4,7 @@ This document contains wild speculation and intentionally enormous undertakings.
 
 ## Randomly Generated Faction Casts
 
-When the game begins, ten characters are created for each faction: one for each primary tree and each synergy tree. These characters may be of one or more total species, representing the possibility of the ark ship coming from a multisapient planet. The game randomizes species descriptors and genetic personality traits, and then derives a set of graphical avatar. These characters will physically change as your society develops, possibly gaining retroviral biomods or cybernetic enhancements.
+When the game begins, ten characters are created for each faction: one for each primary tree and each synergy tree. These characters may be of one or more total species, representing the possibility of the ark ship coming from a multisapient planet. The game randomizes species descriptors and genetic personality traits, and then derives a set of graphical avatars. These characters will physically change as your society develops, possibly gaining retroviral biomods or cybernetic enhancements.
 
 A species has three attributes, and each character has one among their species' set of graphical avatars, and two personality traits. In addition each character has an expertise in a particular tree. Characters usually show up when their expertise becomes relevant to a scene.
 
@@ -22,12 +22,13 @@ Once these traits are set, a graphical avatar is drawn that becomes a template f
 
 #### Materials
 
+- Crystal
+- Energy
+- Feathers
 - Flesh
 - Fur
-- Scales
-- Crystal
 - Goo
-- Energy
+- Scales
 
 #### Manipulators
 

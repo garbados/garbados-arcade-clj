@@ -1,0 +1,78 @@
+{:scout
+ {:name :scout
+  :description "Keen eyes warn of danger before it's too late. Raises party initiative."
+  :traits #{:passive}
+  :party-affects {:initiative 2}}
+ :poison-shot
+ {:name :poison-shot
+  :description "Loose an arrow coated in toxins."
+  :traits #{:ranged :direct :hostile :physical :poison}
+  :effects {:damage 0.5 :poisoned 1}}
+ :jawtrap
+ {:name :jawtrap
+  :description "Lay a biting trap that the next enemy to act will trigger."
+  :traits #{:environmental :hostile :spell}
+  :env-effects {:jawtrapped 1}}
+ :aimed-shot
+ {:name :aimed-shot
+  :description "Set your sights on an enemy's weak point."
+  :traits #{:ranged :hostile :direct :piercing :physical}
+  :uses {:aptitude 1}
+  :effects {:damage :2d6}
+  :self-effects {:stunned :1}}
+ :stinkbomb
+ {:name :stinkbomb
+  :description "Hurl a noxious explosive into the ranks of your foes."
+  :traits #{:ranged :area :hostile :spell :poison}
+  :effects {:nauseous 1}}
+ :field-medicine
+ {:name :field-medicine
+  :description "Apply herbal remedies to mend the wounds of allies."
+  :traits #{:friendly :direct :spell :poison}
+  :effects {:mending 1}}
+ :multi-shot
+ {:name :multi-shot
+  :description "Fire a flurry of arrows at several targets."
+  :traits #{:front-row :ranged :hostile :physical}
+  :effects {:damage 1}}
+ :flashbang
+ {:name :flashbang
+  :description "Hurl a device that bursts with light and sound, disorienting your foes."
+  :traits #{:hostile :ranged :area :spell :mental}
+  :effects {:quickened -1 :focused -1}}
+ :camouflage
+ {:name :camouflage
+  :description "Melt into the filth and brush, to prepare unseen."
+  :traits #{:self :spell :poison}
+  :self-effects {:hidden 1}}
+ :toxic-rain
+ {:name :toxic-rain
+  :description "Hail venom upon your foes!"
+  :traits #{:hostile :area :ranged :physical :poison}
+  :effects {:poisoned 1}}
+ :hunters-mark
+ {:name :hunters-mark
+  :description "Illuminate a foe's weakspots. The next attack against them deals extra damage!"
+  :traits #{:hostile :direct :ranged :spell :mental}
+  :effects {:marked 1}}
+ :precision
+ {:name :precision
+  :description "With measured breath, let fly the true arrow! Increases attack."
+  :traits #{:passive}
+  :affects {:attack 2}}
+ :trick-shot
+ {:name :trick-shot
+  :description "Aim to ricochet your shot, bending around corners to strike with impunity."
+  :traits #{:hostile :direct :piercing :physical :ranged}
+  :uses {:aptitude 1}
+  :effects {:damage 0.5}}
+ :exploding-shot
+ {:name :exploding-shot
+  :description "Launch an arrow with an exploding tip, which bursts into flames!"
+  :traits #{:hostile :area :ranged :physical :fire}
+  :effects {:damage 0.5 :burning 1}}
+ :mawtrap
+ {:name :mawtrap
+  :description "Place a spiked-chain snare that leaves deep gashes."
+  :traits #{:environmental :hostile :spell}
+  :env-effects {:mawtrapped 1}}}
