@@ -1,0 +1,137 @@
+(ns planetcall-next.entities
+   (:require
+    [clojure.spec.alpha :as s]))
+
+(s/def :geo/coord (s/tuple int? int?))
+
+(s/def :unit/loadout keyword?)
+(s/def :unit/chassis keyword?)
+(s/def :unit/mods (s/coll-of keyword? :max-count 2))
+
+(s/def :unit/design
+  (s/keys :req-un [:unit/loadout
+                   :unit/chassis
+                   :unit/mods]))
+
+(s/def :unit/integrity nat-int?)
+(s/def :unit/max-integrity pos-int?)
+(s/def :unit/arms pos-int?)
+(s/def :unit/resolve pos-int?)
+(s/def :unit/moves nat-int?)
+(s/def :unit/max-moves pos-int?)
+(s/def :unit/traits (s/coll-of keyword? :kind set?))
+(s/def :unit/conditions (s/map-of keyword? any?))
+(s/def :unit/faction :faction/i)
+
+(s/def :ability/abilities (s/coll-of keyword? :kind set?))
+(s/def :ability/cooldowns (s/map-of keyword? pos-int?))
+
+(s/def :unit/unit
+  (s/keys :req-un [:unit/design
+                   :unit/integrity
+                   :unit/max-integrity
+                   :unit/arms
+                   :unit/resolve
+                   :unit/moves
+                   :unit/max-moves
+                   :unit/traits
+                   :unit/conditions
+                   :unit/upkeep
+                   :unit/faction
+                   :ability/abilities
+                   :ability/cooldowns]))
+
+(s/def :faction/designs (s/coll-of :unit/design :kind vector?))
+
+;;  -1 : vendetta
+;;   0 : truce
+;;   1 : treaty
+;;   2 : friends
+;;   3 : allies
+;;   4 : partners
+(s/def :faction/treaties (s/map-of nat-int? (s/int-in -1 5)))
+
+(s/def :resources/food nat-int?)
+(s/def :resources/materials nat-int?)
+(s/def :resources/energy nat-int?)
+(s/def :resources/insight nat-int?)
+
+(s/def :faction/resources
+  (s/def :req-un [:resources/food
+                  :resources/materials
+                  :resources/energy
+                  :resources/insight]))
+ 
+(s/def :faction/research
+  (s/keys :req-un [:research/current
+                   :research/known
+                   :research/experience]))
+
+(s/def :faction/conditions (s/map-of keyword? any?))
+
+(s/def :faction/claimed (s/coll-of :geo/coord :kind set?))
+(s/def :faction/visible (s/coll-of :geo/coord :kind set?))
+(s/def :faction/seen (s/coll-of :geo/coord :kind set?))
+(s/def :faction/i nat-int?)
+(s/def :faction/name string?)
+
+(s/def :game/faction
+  (s/keys :req-un [:faction/i
+                   :faction/name
+                   :faction/designs
+                   :faction/treaties
+                   :faction/resources
+                   :faction/research
+                   :faction/conditions
+                   :faction/claimed
+                   :faction/visible
+                   :faction/seen]))
+
+(s/def :game/factions (s/coll-of :game/faction :kind vector?))
+
+(s/def :game/wonders (s/map-of keyword? nat-int?))
+
+(s/def :space/prefix keyword?)
+(s/def :space/suffix keyword?)
+(s/def :space/feature keyword?)
+(s/def :space/improvement keyword?)
+(s/def :space/controller :faction/i)
+(s/def :space/fungus boolean?)
+(s/def :space/miasma boolean?)
+(s/def :space/road boolean?)
+
+(s/def :space/space
+  (s/keys :req-un [:space/prefix
+                   :space/suffix
+                   :space/feature
+                   :space/improvement
+                   :space/controller
+                   :space/fungus
+                   :space/miasma
+                   :space/road
+                   :geo/coord]))
+
+(s/def :game/spaces (s/map-of :geo/coord :space/space))
+(s/def :game/units (s/map-of :geo/coord :unit/unit))
+
+(s/def :world/eco-damage nat-int?)
+(s/def :world/conditions :faction/conditions)
+(s/def :game/world
+  (s/keys :req-un [:world/eco-damage
+                   :world/conditions]))
+
+(s/def :turn/n nat-int?)
+(s/def :turn/actions nat-int?)
+(s/def :turn/phase #{:actions :abilities :upkeep})
+(s/def :game/turn
+  (s/keys :req-un [:turn/n
+                   :turn/actions
+                   :turn/phase]))
+
+(s/def :game/game
+  (s/keys :req-un [:game/factions
+                   :game/wonders
+                   :game/spaces
+                   :game/units
+                   :game/world
+                   :game/turn]))
