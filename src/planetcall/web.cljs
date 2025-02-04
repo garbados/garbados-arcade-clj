@@ -80,7 +80,7 @@
     :suffix suffix
     :feature feature
     :improvement improvement
-    :controller controller}))
+    :controller (when improvement controller)}))
 
 (defn draw-space [scene board r [x y] space]
   (let [{:keys [prefix suffix feature miasma road fungus improvement controller]} space
@@ -100,7 +100,7 @@
       (let [feature-gfx (add-gfx scene {:fillStyle {:color color :alpha 0.5}
                                         :lineStyle {:color accent :alpha 0.5}})
             [x y] (midpoint center n-vertex ne-vertex)
-            circle (new Phaser.Geom.Circle. x y (/ r 6))]
+            circle (new js/Phaser.Geom.Circle. x y (/ r 6))]
         (.fillCircleShape feature-gfx circle)
         (.strokeCircleShape feature-gfx circle)))
     (when-let [[color char] (improvement->color+char improvement)]
@@ -108,7 +108,7 @@
             improvement-gfx (add-gfx scene {:fillStyle {:color color :alpha 0.5}
                                             :lineStyle {:color accent :alpha 0.5}})
             [x y] (midpoint center n-vertex nw-vertex)
-            circle (new Phaser.Geom.Circle. x y (/ r 6))
+            circle (new js/Phaser.Geom.Circle. x y (/ r 6))
             text-opts
             (clj->js
              {:fontSize "10px"
@@ -138,23 +138,36 @@
         tooltip-rect (.add.rectangle scene 0 0 w h colors/BLACK)
         coord-text (.add.text scene w 0 "x, y")
         space-name-text (.add.text scene w (+ (.-y coord-text) (.-height coord-text)) "buggy dunes")
-        bools-text (.add.text scene w (+ (.-y space-name-text) (.-height space-name-text)) "fungus, miasma, road")]
+        bools-text (.add.text scene w (+ (.-y space-name-text) (.-height space-name-text)) "fungus, miasma, road")
+        improvement-text (.add.text scene w (+ (.-y bools-text) (.-height bools-text)) "feature, improvement")
+        controller-text (.add.text scene w (+ (.-y improvement-text) (.-height improvement-text)) "faction: Solemnity")]
     (.setOrigin coord-text 1 0)
     (.setOrigin space-name-text 1 0)
     (.setOrigin bools-text 1 0)
+    (.setOrigin improvement-text 1 0)
+    (.setOrigin controller-text 1 0)
     (.setOrigin tooltip-rect 0)
     (.add container (clj->js
-                     [tooltip-rect coord-text space-name-text bools-text]))
+                     [tooltip-rect
+                      coord-text
+                      space-name-text
+                      bools-text
+                      improvement-text
+                      controller-text]))
     {:container container
      :tooltip-rect tooltip-rect
      :coord coord-text
      :space-name space-name-text
-     :bools bools-text}))
+     :bools bools-text
+     :improvement improvement-text
+     :controller controller-text}))
 
 (defn create-ui-scene [scene]
   (let [{coord-text :coord
          space-name-text :space-name
-         bools-text :bools} (draw-tooltip-bg scene (- WIDTH 200) (- HEIGHT 100) 200 100)
+         bools-text :bools
+         improvement-text :improvement
+         controller-text :controller} (draw-tooltip-bg scene (- WIDTH 200) (- HEIGHT 100) 200 100)
         main-scene (.scene.get scene "main")]
     (.events.on main-scene "tilemove"
                 (fn [coord space]
@@ -165,10 +178,21 @@
                         frm (->> (select-keys space [:fungus :miasma :road])
                                  (filter (comp true? second))
                                  (map (comp name first))
-                                 (string/join ", "))]
+                                 (string/join ", "))
+                        imp-feat (->> [(:improvement space)
+                                       (:feature space)]
+                                      (filter some?)
+                                      (map name)
+                                      (string/join ", " ))]
                     (.setText coord-text (string/join ", " coord))
                     (.setText space-name-text space-name)
-                    (.setText bools-text frm)))
+                    (.setText bools-text frm)
+                    (if (not-empty imp-feat)
+                      (.setText improvement-text imp-feat)
+                      (.setText improvement-text ""))
+                    (if-let [controller (:controller space)]
+                      (.setText controller-text (str "faction: " controller))
+                      (.setText controller-text ""))))
                 scene)))
 
 (defn create-main-scene [scene]

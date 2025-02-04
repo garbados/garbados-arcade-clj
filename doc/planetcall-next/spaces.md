@@ -3,10 +3,10 @@
 A hex's space has many qualities:
 
 - Prefix:
-  - Rotting: +1 food
-  - Volatile: +1 energy
-  - Shattered: +1 mats
-  - Preserved: +1 insight
+  - Rotting: +1 food.
+  - Volatile: +1 energy.
+  - Shattered: +1 mats.
+  - Preserved: +1 insight.
   - Ashen: nothing.
 - Suffix:
   - Mountain: Impassable except to walkers. +2 mats!

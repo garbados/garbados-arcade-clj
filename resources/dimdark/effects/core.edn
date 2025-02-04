@@ -1,16 +1,15 @@
 {:damage
  {:type :debuff
   :phase :instant
-  :hurt :1d6
-  :resists #{:armor}}
+  :hurt 1}
  :healing
  {:type :buff
   :phase :instant
-  :heal :1d4}
+  :heal 1}
  :mending
  {:type :buff
   :phase :turn-begin
-  :heal 1
+  :heal :3
   :diminishing true}
  :pushed
  {:type :neutral
