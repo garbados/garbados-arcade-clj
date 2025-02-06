@@ -1,4 +1,4 @@
-(ns planetcall.web.camera)
+(ns planetcall-next.web.camera)
 
 (defn draggable-camera [scene x y z]
   (let [camera (-> scene .-cameras .-main)

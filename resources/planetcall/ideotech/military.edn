@@ -10,7 +10,8 @@
   :level 2
   :id :doctrine-power
   :name "Doctrine: Power"
-  :grants {:loadouts [:railguns]}}
+  :grants {:loadouts [:railguns]
+           :wonder [:command-control-center]}}
  {:ideology :military
   :level 2
   :id :doctrine-obliteration

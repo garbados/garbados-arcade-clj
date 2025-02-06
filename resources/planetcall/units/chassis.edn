@@ -1,0 +1,17 @@
+[{:id :infantry
+  :moves 1
+  :traits #{:infantry}}
+ {:id :speeder
+  :moves 3}
+ {:id :hover
+  :moves 3
+  :traits #{:hover}}
+ {:id :walker
+  :moves 3
+  :traits #{:infantry}}
+ {:id :worm-swarm
+  :moves 2
+  :traits #{:fauna :infantry :psychic}}
+ {:id :loper
+  :moves 3
+  :traits #{:fauna}}]

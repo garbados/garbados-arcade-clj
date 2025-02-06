@@ -12,7 +12,7 @@
   {:target :browser
    :output-dir "public/js/planetcall"
    :asset-path "/js/planetcall"
-   :modules {:main {:entries [planetcall.web]}}}
+   :modules {:main {:entries [planetcall-next.web]}}}
   :longtime
   {:target :browser
    :output-dir "public/js/longtime"

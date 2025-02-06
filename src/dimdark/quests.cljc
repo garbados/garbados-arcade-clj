@@ -1,7 +1,7 @@
 (ns dimdark.quests 
   (:require [clojure.spec.alpha :as s]
-            #?(:clj [arcade.text :refer [inline-slurp]]
-               :cljs [arcade.text :refer-macros [inline-slurp]])))
+            #?(:clj [arcade.slurp :refer [inline-slurp]]
+               :cljs [arcade.slurp :refer-macros [inline-slurp]])))
 
 (def relics
   #{:despots-crown

@@ -1,6 +1,6 @@
 (ns dimdark.web.lair.core 
   (:require
-   [arcade.text :refer-macros [inline-slurp]]
+   [arcade.slurp :refer-macros [inline-slurp]]
    [clojure.string :as string]
    [dimdark.web.lair.crafting :refer [crafting-view]]
    [dimdark.web.lair.equipment :refer [inventory-view]]

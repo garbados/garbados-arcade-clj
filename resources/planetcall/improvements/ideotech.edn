@@ -1,0 +1,4 @@
+[{:id :bunker
+  :grants-nearby {:advantage 1}}
+ {:id :detoxer
+  :yield {:impact -5 :food 1}}]

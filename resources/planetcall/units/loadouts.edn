@@ -1,0 +1,16 @@
+[{:id :oldworld-weapons
+  :short "Oldworld"
+  :arms 1
+  :traits #{:warrior}}
+ {:id :engineering
+  :arms 0
+  :traits #{:engineer}}
+ {:id :assault-rails
+  :arms 2
+  :traits #{:warrior}}
+ {:id :beam-rifles
+  :arms 2
+  :traits #{:archer}}
+ {:id :missiles
+  :arms 3
+  :traits #{:artillery}}]

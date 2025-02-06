@@ -5,8 +5,8 @@
             [clojure.string :as string]
             [dimdark.abilities :as a]
             [dimdark.core :as d]
-            #?(:clj [arcade.text :refer [inline-slurp]]
-               :cljs [arcade.text :refer-macros [inline-slurp]])))
+            #?(:clj [arcade.slurp :refer [inline-slurp]]
+               :cljs [arcade.slurp :refer-macros [inline-slurp]])))
 
 (s/def ::vulns ::a/traits)
 

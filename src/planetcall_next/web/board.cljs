@@ -1,4 +1,4 @@
-(ns planetcall.web.rexboard)
+(ns planetcall-next.web.board)
 
 (set! *warn-on-infer* false)
 

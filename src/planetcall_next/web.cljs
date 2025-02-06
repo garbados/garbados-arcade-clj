@@ -1,11 +1,12 @@
-(ns planetcall.web
+(ns planetcall-next.web
   (:require
    ["phaser" :as Phaser]
    ["phaser3-rex-plugins/plugins/board-plugin.js" :as BoardPlugin]
    [clojure.string :as string]
-   [planetcall.web.camera :refer [draggable-camera]]
-   [planetcall.web.colors :as colors]
-   [planetcall.web.rexboard :as rex]
+   [planetcall-next.rules.games :as games]
+   [planetcall-next.web.board :as rex]
+   [planetcall-next.web.camera :refer [draggable-camera]]
+   [planetcall-next.web.colors :as colors]
    [shadow.cljs.modern :refer [defclass]]))
 
 (set! *warn-on-infer* false)
@@ -58,29 +59,6 @@
    colors/YELLOW
    colors/PURPLE
    colors/CYAN])
-
-(defn gen-space
-  ([coord]
-   (gen-space coord {}))
-  ([[x y]
-    {:keys [miasma fungus road prefix suffix feature improvement controller]
-     :or {miasma (rand-nth [true false])
-          fungus (rand-nth [true false])
-          road (rand-nth [true false])
-          prefix (rand-nth (keys prefix->color))
-          suffix (rand-nth (keys suffix->color))
-          feature (rand-nth (cons nil (keys feature->color+accent)))
-          improvement (rand-nth (cons nil (keys improvement->color+char)))
-          controller (rand-int 6)}}]
-   {:coords [x y]
-    :miasma miasma
-    :fungus fungus
-    :road road
-    :prefix prefix
-    :suffix suffix
-    :feature feature
-    :improvement improvement
-    :controller (when improvement controller)}))
 
 (defn draw-space [scene board r [x y] space]
   (let [{:keys [prefix suffix feature miasma road fungus improvement controller]} space
@@ -136,42 +114,46 @@
 (defn draw-tooltip-bg [scene x y w h]
   (let [container (.add.container scene x y)
         tooltip-rect (.add.rectangle scene 0 0 w h colors/BLACK)
-        coord-text (.add.text scene w 0 "x, y")
-        space-name-text (.add.text scene w (+ (.-y coord-text) (.-height coord-text)) "buggy dunes")
-        bools-text (.add.text scene w (+ (.-y space-name-text) (.-height space-name-text)) "fungus, miasma, road")
-        improvement-text (.add.text scene w (+ (.-y bools-text) (.-height bools-text)) "feature, improvement")
-        controller-text (.add.text scene w (+ (.-y improvement-text) (.-height improvement-text)) "faction: Solemnity")]
-    (.setOrigin coord-text 1 0)
-    (.setOrigin space-name-text 1 0)
-    (.setOrigin bools-text 1 0)
-    (.setOrigin improvement-text 1 0)
-    (.setOrigin controller-text 1 0)
+        [improvement-text
+         feature-text
+         bools-text
+         space-name-text
+         coord-text
+         :as text-objects]
+        (reduce
+         (fn [text-objects s]
+           (let [first-object (first text-objects)
+                 text-object (.add.text scene w (+ (.-y first-object) (.-height first-object)) s)]
+             (.setOrigin text-object 1 0)
+             (cons text-object text-objects)))
+         [(let [text-object (.add.text scene w 0 "x, y")]
+            (.setOrigin text-object 1 0)
+            text-object)]
+         ["buggy dunes"
+          "fungus, miasma, road"
+          "feature"
+          "controller improvement"])]
     (.setOrigin tooltip-rect 0)
-    (.add container (clj->js
-                     [tooltip-rect
-                      coord-text
-                      space-name-text
-                      bools-text
-                      improvement-text
-                      controller-text]))
+    (.add container (clj->js (cons tooltip-rect text-objects)))
     {:container container
      :tooltip-rect tooltip-rect
      :coord coord-text
      :space-name space-name-text
      :bools bools-text
-     :improvement improvement-text
-     :controller controller-text}))
+     :feature feature-text
+     :improvement improvement-text}))
 
 (defn create-ui-scene [scene]
   (let [{coord-text :coord
          space-name-text :space-name
          bools-text :bools
-         improvement-text :improvement
-         controller-text :controller} (draw-tooltip-bg scene (- WIDTH 200) (- HEIGHT 100) 200 100)
+         feature-text :feature
+         improvement-text :improvement} (draw-tooltip-bg scene (- WIDTH 200) (- HEIGHT 100) 200 100)
         main-scene (.scene.get scene "main")]
     (.events.on main-scene "tilemove"
                 (fn [coord space]
-                  (let [space-name
+                  (let [game (.registry.get scene "game")
+                        space-name
                         (->> [(:prefix space) (:suffix space)]
                              (map name)
                              (string/join " "))
@@ -179,41 +161,38 @@
                                  (filter (comp true? second))
                                  (map (comp name first))
                                  (string/join ", "))
-                        imp-feat (->> [(:improvement space)
-                                       (:feature space)]
-                                      (filter some?)
-                                      (map name)
-                                      (string/join ", " ))]
+                        feature-name
+                        (if-let [feature (:feature space)]
+                          (name feature)
+                          "")
+                        improvement
+                        (let [{:keys [improvement controller]} space]
+                          (if (and improvement controller)
+                            (let [faction-name (get-in game [:factions controller :name])]
+                              (string/join " " [faction-name improvement]))
+                            ""))]
                     (.setText coord-text (string/join ", " coord))
                     (.setText space-name-text space-name)
                     (.setText bools-text frm)
-                    (if (not-empty imp-feat)
-                      (.setText improvement-text imp-feat)
-                      (.setText improvement-text ""))
-                    (if-let [controller (:controller space)]
-                      (.setText controller-text (str "faction: " controller))
-                      (.setText controller-text ""))))
+                    (.setText feature-text feature-name)
+                    (.setText improvement-text improvement)))
                 scene)))
 
 (defn create-main-scene [scene]
   (let [radius 32
         {:keys [board coords]} (rex/gen-board scene radius :map :standard)
         _camera (draggable-camera scene (/ WIDTH 2) (/ HEIGHT 2) 1)
-        spaces (reduce
-                (fn [spaces coord]
-                  (let [space (gen-space coord)]
-                    (assoc spaces coord space)))
-                {}
-                coords)]
+        game (games/init-game coords 6)]
+    (.registry.set scene "game" game)
     (doall
      (for [coord coords
-           :let [space (get spaces coord)]]
+           :let [space (get-in game [:spaces coord])]]
        (draw-space scene board radius coord space)))
     (.setInteractive board)
     (.on board "tilemove"
          (fn [_pointer xy]
            (let [coord [(.-x xy) (.-y xy)]
-                 space (get spaces coord)]
+                 space (get-in game [:spaces coord])]
              (when space
                (.events.emit scene "tilemove" coord space)))))))
 

@@ -1,0 +1,8 @@
+[{:id :farm
+  :yield {:food 2}}
+ {:id :factory
+  :yield {:materials 2}}
+ {:id :reactor
+  :yield {:energy 2}}
+ {:id :stockpile
+  :stockpile true}]

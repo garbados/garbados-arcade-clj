@@ -1,4 +1,4 @@
-(ns planetcall.web.colors)
+(ns planetcall-next.web.colors)
 
 (def BLACK 0x000000)
 (def WHITE 0xffffff)

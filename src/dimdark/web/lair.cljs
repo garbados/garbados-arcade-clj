@@ -1,5 +1,5 @@
 (ns dimdark.web.lair
-  (:require [arcade.text :refer-macros [inline-slurp]]
+  (:require [arcade.slurp :refer-macros [inline-slurp]]
             [clojure.string :as string]
             [dimdark.abilities :as a]
             [dimdark.equipment :as eq]

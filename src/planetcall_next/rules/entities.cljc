@@ -1,4 +1,4 @@
-(ns planetcall-next.entities
+(ns planetcall-next.rules.entities
    (:require
     [clojure.spec.alpha :as s]))
 
@@ -17,6 +17,7 @@
 (s/def :unit/max-integrity pos-int?)
 (s/def :unit/arms pos-int?)
 (s/def :unit/resolve pos-int?)
+(s/def :unit/base-resolve pos?)
 (s/def :unit/moves nat-int?)
 (s/def :unit/max-moves pos-int?)
 (s/def :unit/traits (s/coll-of keyword? :kind set?))
@@ -26,12 +27,16 @@
 (s/def :ability/abilities (s/coll-of keyword? :kind set?))
 (s/def :ability/cooldowns (s/map-of keyword? pos-int?))
 
+(s/def :unit/id uuid?)
+
 (s/def :unit/unit
-  (s/keys :req-un [:unit/design
+  (s/keys :req-un [:unit/id
+                   :unit/design
                    :unit/integrity
                    :unit/max-integrity
                    :unit/arms
                    :unit/resolve
+                   :unit/base-resolve
                    :unit/moves
                    :unit/max-moves
                    :unit/traits
@@ -41,12 +46,12 @@
                    :ability/abilities
                    :ability/cooldowns]))
 
-(s/def :faction/designs (s/coll-of :unit/design :kind vector?))
+(s/def :faction/designs (s/coll-of :unit/design :kind set?))
 
 (s/def :faction/resources
   (s/map-of #{:food :materials :energy :insight} nat-int?))
  
-(s/def :research/current (s/tuple keyword? nat-int?))
+(s/def :research/current (s/nilable (s/tuple keyword? nat-int?)))
 (s/def :research/known (s/coll-of keyword? :kind set?))
 (s/def :research/experience (s/map-of keyword? nat-int?))
 (s/def :faction/research
@@ -97,25 +102,24 @@
                    :space/road
                    :geo/coord]))
 
-(s/def :game/spaces (s/map-of :geo/coord :space/space))
-(s/def :game/units (s/map-of :geo/coord (s/coll-of :unit/unit
-                                                   :kind vector?
-                                                   :max-count 3)))
-
 (s/def :world/eco-damage nat-int?)
 (s/def :world/conditions :faction/conditions)
+
+(s/def :turn/n nat-int?)
+(s/def :turn/actions nat-int?)
+(s/def :turn/phase #{nil :actions :abilities :upkeep})
+
+(s/def :game/spaces (s/map-of :geo/coord :space/space))
+(s/def :game/units (s/map-of :unit/id :unit/unit))
+
 (s/def :game/world
   (s/keys :req-un [:world/eco-damage
                    :world/conditions]))
 
-(s/def :turn/n nat-int?)
-(s/def :turn/actions nat-int?)
-(s/def :turn/phase #{:actions :abilities :upkeep})
 (s/def :game/turn
   (s/keys :req-un [:turn/n
                    :turn/actions
                    :turn/phase]))
-
 
 ;;  -1 : vendetta
 ;;   0 : strangers
@@ -127,7 +131,6 @@
                                            :kind set?
                                            :count 2)
                                 (s/int-in -1 5)))
-
 
 (s/def :game/game
   (s/keys :req-un [:game/factions

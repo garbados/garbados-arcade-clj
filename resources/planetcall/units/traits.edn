@@ -1,0 +1,17 @@
+[{:id :warrior
+  :abilities #{:assault}}
+ {:id :engineer
+  :abilities #{:construct-road}}
+ {:id :archer
+  :abilities #{:snipe}}
+ {:id :artillery
+  :abilities #{:bombard}}
+ {:id :frail
+  :integrity -3}
+ {:id :fortified
+  :integrity 3}
+ {:id :noxxed
+  :moves 1}
+ {:id :heavy
+  :moves -1
+  :integrity 5}]
