@@ -26,13 +26,13 @@
    :triad [fit-board-triad-trial 18]
    :standard [fit-board-standard 12]})
 
-(defn gen-board [scene size & {:keys [x y w h n]
-                                    map-size :map
-                                    :or {x 0
-                                         y 0
-                                         w 0
-                                         h 0
-                                         map-size :standard}}]
+(defn gen-board [scene size & {:keys [x y w h]
+                               map-size :map
+                               :or {x 0
+                                    y 0
+                                    w 0
+                                    h 0
+                                    map-size :standard}}]
   (let [[map-fn n] (get map-data map-size)
         board (init-board scene w h x y size)
         points (map-fn scene board n)]

@@ -1,6 +1,9 @@
 (ns planetcall-next.web.camera)
 
-(defn draggable-camera [scene x y z]
+(defn draggable-camera [scene x y z & {:keys [min-zoom
+                                              max-zoom]
+                                       :or {min-zoom 0.25
+                                            max-zoom 3}}]
   (let [camera (-> scene .-cameras .-main)
         zoom (atom z)]
     (.setZoom camera @zoom)
@@ -20,17 +23,15 @@
          (fn [p]
            (swap! zoom
                   (if (neg? (.-deltaY p))
-                    #_inc
                     (fn [z]
                       (if (<= 1 z)
                         (inc z)
                         (* z 2)))
-                    #_dec
                     (fn [z]
                       (if (< 1 z)
                         (dec z)
                         (/ z 2)))))
-           (swap! zoom (partial max 0.25))
-           (swap! zoom (partial min 10))
+           (swap! zoom (partial max min-zoom))
+           (swap! zoom (partial min max-zoom))
            (.setZoom camera @zoom)))
     camera))
