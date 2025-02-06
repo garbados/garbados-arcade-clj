@@ -4,6 +4,7 @@
    ["phaser3-rex-plugins/plugins/board-plugin.js" :as BoardPlugin]
    [clojure.string :as string]
    [planetcall-next.rules.games :as games]
+   [planetcall-next.rules.units :as units]
    [planetcall-next.web.board :as rex]
    [planetcall-next.web.camera :refer [draggable-camera]]
    [planetcall-next.web.colors :as colors]
@@ -58,9 +59,9 @@
    colors/GREEN
    colors/YELLOW
    colors/PURPLE
-   colors/CYAN])
+   colors/ORANGE])
 
-(defn draw-space [scene board r [x y] space]
+(defn draw-space [scene board r [x y] space units]
   (let [{:keys [prefix suffix feature miasma road fungus improvement controller]} space
         points (.getGridPoints board x y true)
         [ne-vertex
@@ -99,7 +100,8 @@
             points (rex/js-points [nw-vertex (midpoint nw-vertex sw-vertex) (midpoint s-vertex center) center])]
         (.fillPoints fungus-gfx points true)))
     (when road
-      (let [road-gfx (add-gfx scene {:lineStyle {:color colors/BROWN :alpha 0.5}})
+      (let [road-gfx (add-gfx scene {:lineStyle {:color colors/BROWN :alpha 0.5
+                                                 :width 3}})
             vert-road (rex/js-points [s-vertex nw-vertex])
             horz-road (rex/js-points [sw-vertex ne-vertex])]
         (.strokePoints road-gfx vert-road true)
@@ -109,7 +111,57 @@
             points (rex/js-points [sw-vertex s-vertex (midpoint s-vertex center) (midpoint nw-vertex sw-vertex)])]
         (.fillPoints miasma-gfx points true)))
     (let [line-gfx (add-gfx scene {:lineStyle {:color colors/WHITE :alpha 0.5}})]
-      (.strokePoints line-gfx points true))))
+      (.strokePoints line-gfx points true))
+    (when controller
+      (let [color (nth PLAYER-COLORS controller)
+            controller-gfx (add-gfx scene {:fillStyle {:color color :alpha 0.25}})
+            points (rex/js-points [s-vertex se-vertex ne-vertex center])]
+        (.fillPoints controller-gfx points)))
+    (when (seq units)
+      (doall
+       (for [i (range (count units))
+             :let [unit (nth units i)]]
+         (let [col-width (/ (js/Math.abs (- (first center) (first ne-vertex))) 10)
+               row-height (/ (js/Math.abs (- (second center) (second ne-vertex))) 10)
+               color (nth PLAYER-COLORS (:faction unit))
+               unit-gfx (add-gfx scene {:fillStyle {:color color :alpha 1}})
+               points
+               (rex/js-points
+                [[(+ (first center)
+                     col-width
+                     (* 3 col-width i))
+                  (- (second center)
+                     (* 3 row-height i))]
+                 [(+ (first center)
+                     col-width
+                     (* 3 col-width i))
+                  (- (second s-vertex)
+                     (* 2 row-height)
+                     (* 3 row-height i))]
+                 [(+ (first center)
+                     (* 3 col-width)
+                     (* 3 col-width i))
+                  (- (second s-vertex)
+                     (* 4 row-height)
+                     (* 3 row-height i))]
+                 [(+ (first center)
+                     (* 3 col-width)
+                     (* 3 col-width i))
+                  (- (second center)
+                     (* 2 row-height)
+                     (* 3 row-height i))]])
+               #_(rex/js-points
+                [[(+ (first center) col-width) (second center)]
+                 [(+ (first center) col-width) (- (second s-vertex) (* 2 row-height))]
+                 [(+ (first center) (* 3 col-width)) (- (second s-vertex) (* 4 row-height))]
+                 [(+ (first center) (* 3 col-width)) (- (second center) (* 2 row-height))]])
+               #_(rex/js-points
+                  [[(+ (first center) col-width) (second center)]
+                   [(+ (first center) (* 2 col-width)) (- row-height (second center))]
+                   [(+ (first s-vertex) col-width) (- row-height (second s-vertex))]
+                   [(+ (first s-vertex) (* 2 col-width)) (- (* 2 row-height) (second s-vertex))]])]
+           (js/console.log col-width row-height points)
+           (.fillPoints unit-gfx points)))))))
 
 (defn draw-tooltip-bg [scene x y w h]
   (let [container (.add.container scene x y)
@@ -126,13 +178,13 @@
                  text-object (.add.text scene w (+ (.-y first-object) (.-height first-object)) s)]
              (.setOrigin text-object 1 0)
              (cons text-object text-objects)))
-         [(let [text-object (.add.text scene w 0 "x, y")]
+         [(let [text-object (.add.text scene w 0 "")]
             (.setOrigin text-object 1 0)
             text-object)]
-         ["buggy dunes"
-          "fungus, miasma, road"
-          "feature"
-          "controller improvement"])]
+         [""
+          ""
+          ""
+          ""])]
     (.setOrigin tooltip-rect 0)
     (.add container (clj->js (cons tooltip-rect text-objects)))
     {:container container
@@ -168,7 +220,7 @@
                         improvement
                         (let [{:keys [improvement controller]} space]
                           (if (and improvement controller)
-                            (let [faction-name (get-in game [:factions controller :name])]
+                            (let [faction-name (get-in @game [:factions controller :name])]
                               (string/join " " [faction-name improvement]))
                             ""))]
                     (.setText coord-text (string/join ", " coord))
@@ -178,21 +230,38 @@
                     (.setText improvement-text improvement)))
                 scene)))
 
+(defn claim-space [game faction coord]
+  (-> game
+      (update-in [:factions faction :claimed] into coord)
+      (assoc-in [:spaces coord :controller] faction)))
+
+(defn realize-unit [game unit]
+  (assoc-in game [:units (:id unit)] unit))
+
 (defn create-main-scene [scene]
   (let [radius 32
         {:keys [board coords]} (rex/gen-board scene radius :map :standard)
         _camera (draggable-camera scene (/ WIDTH 2) (/ HEIGHT 2) 1)
-        game (games/init-game coords 6)]
+        game (atom (games/init-game coords 6))]
     (.registry.set scene "game" game)
-    (doall
-     (for [coord coords
-           :let [space (get-in game [:spaces coord])]]
-       (draw-space scene board radius coord space)))
+    (let [warrior (units/create-unit 0 [7 7] {:chassis :infantry :loadout :oldworld-weapons})
+          engineer (units/create-unit 0 [7 7] {:chassis :infantry :loadout :engineering})
+          walker (units/create-unit 0 [7 7] {:chassis :walker :loadout :oldworld-weapons})]
+      (swap! game claim-space 0 [7 7])
+      (swap! game realize-unit warrior)
+      (swap! game realize-unit engineer)
+      (swap! game realize-unit walker))
+    (let [coord->units (group-by :coord (vals (:units @game)))]
+      (doall
+       (for [coord coords
+             :let [units (coord->units coord)
+                   space (get-in @game [:spaces coord])]]
+         (draw-space scene board radius coord space units))))
     (.setInteractive board)
     (.on board "tilemove"
          (fn [_pointer xy]
            (let [coord [(.-x xy) (.-y xy)]
-                 space (get-in game [:spaces coord])]
+                 space (get-in @game [:spaces coord])]
              (when space
                (.events.emit scene "tilemove" coord space)))))))
 

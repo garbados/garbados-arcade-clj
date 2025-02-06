@@ -3,6 +3,7 @@
 (def BLACK 0x000000)
 (def WHITE 0xffffff)
 
+(def GRAY 0x888888)
 (def BROWN 0xa0522d)
 
 (def RED 0xff0000)
@@ -12,6 +13,8 @@
 (def YELLOW 0xffff00)
 (def CYAN 0x00ffff)
 (def PURPLE 0xff00ff)
+
+(def ORANGE 0xff8800)
 
 ;; colors i like, by name
 
@@ -26,17 +29,3 @@
 (def SCREAMIN-GREEN 0x76ff7a)
 (def ROMAN-SILVER 0x838996)
 (def SILVER-PINK 0xc4aead)
-
-;; (def PLAYERS
-;;   "Primary & Accent"
-;;   [[0xfa8072 0xffa07a]
-;;    [0x6495ed 0x87cefa]
-;;    'todo])
-
-;; (def ROTTING 0x008000)
-;; (def VOLATILE 0xffbf00)
-;; (def SHATTERED 0xc0c0c0)
-;; (def PRESERVED 0x2f4f4f)
-;; (def ASHEN 0xf0e68c)
-
-;; (def MESA 0xa0522d)

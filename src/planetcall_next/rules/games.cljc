@@ -27,13 +27,7 @@
   ([coord]
    (gen-space coord {}))
   ([[x y]
-    {:keys [miasma fungus road prefix suffix feature improvement controller]
-     :or {miasma (rand-nth [true false])
-          fungus (rand-nth [true true true false false])
-          road (rand-nth [true false false false])
-          prefix (rand-nth (seq space-prefixes))
-          suffix (rand-nth (seq space-suffixes))
-          feature (rand-nth (concat (repeatedly 5 (constantly nil)) (seq space-features)))}}]
+    {:keys [miasma fungus road prefix suffix feature improvement controller]}]
    {:coord [x y]
     :miasma miasma
     :fungus fungus
@@ -43,6 +37,14 @@
     :feature feature
     :improvement improvement
     :controller controller}))
+
+(defn gen-chaotic-space [coord]
+  (gen-space coord {:miasma (rand-nth [true false])
+                    :fungus (rand-nth [true true true false false])
+                    :road (rand-nth [true false false false])
+                    :prefix (rand-nth (seq space-prefixes))
+                    :suffix (rand-nth (seq space-suffixes))
+                    :feature (rand-nth (concat (repeatedly 5 (constantly nil)) (seq space-features)))}))
 
 (def CHEEKY ["Red" "Blue" "Yellow" "Green" "Purple" "Orange"])
 
@@ -82,7 +84,7 @@
                 #{i j}))
    :spaces (reduce
             (fn [spaces coord]
-              (assoc spaces coord (gen-space coord)))
+              (assoc spaces coord (gen-chaotic-space coord)))
             {}
             coords)
    :units {}

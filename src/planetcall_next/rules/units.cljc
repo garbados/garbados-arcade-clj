@@ -1,8 +1,6 @@
 (ns planetcall-next.rules.units 
   (:require
    [clojure.set :refer [union]]
-   [clojure.edn :as edn]
-   [clojure.spec.alpha :as s]
    [arcade.slurp :refer-macros [slurp->details]]))
 
 (def chassis->details
