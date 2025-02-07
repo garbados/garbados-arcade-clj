@@ -1,0 +1,18 @@
+[{:id :mountain
+  :yield {:materials 2}
+  :requires #{:infantry}}
+ {:id :canyon
+  :yield {:materials 2}
+  :requires #{:hover}}
+ {:id :ooze
+  :yield {:food 1 :energy 1}
+  :requires #{:hover}}
+ {:id :marsh
+  :yield {:food 1}}
+ {:id :mesa
+  :yield {:materials 1}}
+ {:id :steppe
+  :yield {:energy 1}}
+ {:id :wreckage
+  :yield {:insight 1}}
+ {:id :wastes}]

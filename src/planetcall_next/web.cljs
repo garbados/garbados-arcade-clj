@@ -3,8 +3,8 @@
    ["phaser" :as Phaser]
    ["phaser3-rex-plugins/plugins/board-plugin.js" :as BoardPlugin]
    [clojure.string :as string]
-   [planetcall-next.rules.games :as games]
-   [planetcall-next.rules.units :as units]
+   [planetcall-next.rules.scenarios :as scenarios]
+   [planetcall-next.rules.spaces :as spaces]
    [planetcall-next.web.board :as rex]
    [planetcall-next.web.camera :refer [draggable-camera]]
    [planetcall-next.web.colors :as colors]
@@ -51,74 +51,78 @@
   {:farm [:lime \F]
    :factory [:brown \M]
    :turbine [:yellow \E]
-   :labs [:white \L]})
+   :labs [:white \L]
+   :stockpile [:silver \S]})
 
 (def PLAYER-COLORS
   [:red
    :blue
-   :green
    :yellow
+   :green
    :purple
    :orange])
 
-(defn init-gfx [scene]
-  (let [colors [[:black colors/BLACK]
-                [:white colors/WHITE]
-                [:brown colors/BROWN]
-                [:gray colors/GRAY]
-                [:red colors/RED]
-                [:blue colors/BLUE]
-                [:green colors/GREEN]
-                [:yellow colors/YELLOW]
-                [:purple colors/PURPLE]
-                [:orange colors/ORANGE]
-                [:lime colors/LIME-GREEN]
-                [:sgreen colors/SCREAMIN-GREEN]
-                [:roman colors/ROMAN-SILVER]
-                [:spink colors/SILVER-PINK]
-                [:dorange colors/DARK-ORANGE]
-                [:silver colors/SILVER]
-                [:dgray colors/DIM-GRAY]
-                [:salmon colors/SALMON]
-                [:teal colors/TEAL]
-                [:cyan colors/CYAN]
-                [:crimson colors/CRIMSON]
-                [:lsalmon colors/LIGHT-SALMON]]]
-    {:tinted
-     (reduce
-      (fn [gfx [color-name color-code]]
-        (->> {:fillStyle {:color color-code :alpha 0.25}
-              :lineStyle {:color color-code :alpha 0.25}}
-             (add-gfx scene)
-             (assoc gfx color-name)))
-      {}
-      colors)
-     :faded
-     (reduce
-      (fn [gfx [color-name color-code]]
-        (->> {:fillStyle {:color color-code :alpha 0.5}
-              :lineStyle {:color color-code :alpha 0.5}}
-             (add-gfx scene)
-             (assoc gfx color-name)))
-      {}
-      colors)
-     :solid
-     (reduce
-      (fn [gfx [color-name color-code]]
-        (->> {:fillStyle {:color color-code :alpha 1}
-              :lineStyle {:color color-code :alpha 1}}
-             (add-gfx scene)
-             (assoc gfx color-name)))
-      {}
-      colors)
-     :wide
-     (reduce
-      (fn [gfx [color-name color-code]]
-        (->> {:lineStyle {:color color-code :alpha 0.5 :width 3}}
-             (add-gfx scene)
-             (assoc gfx color-name)))
-      {}
-      colors)}))
+(def COLORS
+  [[:black colors/BLACK]
+   [:white colors/WHITE]
+   [:brown colors/BROWN]
+   [:gray colors/GRAY]
+   [:red colors/RED]
+   [:blue colors/BLUE]
+   [:green colors/GREEN]
+   [:yellow colors/YELLOW]
+   [:purple colors/PURPLE]
+   [:orange colors/ORANGE]
+   [:lime colors/LIME-GREEN]
+   [:sgreen colors/SCREAMIN-GREEN]
+   [:roman colors/ROMAN-SILVER]
+   [:spink colors/SILVER-PINK]
+   [:dorange colors/DARK-ORANGE]
+   [:silver colors/SILVER]
+   [:dgray colors/DIM-GRAY]
+   [:salmon colors/SALMON]
+   [:teal colors/TEAL]
+   [:cyan colors/CYAN]
+   [:crimson colors/CRIMSON]
+   [:lsalmon colors/LIGHT-SALMON]])
+
+(defn init-gfx [scene & {:keys [colors]
+                         :or {colors COLORS}}]
+  {:tinted
+   (reduce
+    (fn [gfx [color-name color-code]]
+      (->> {:fillStyle {:color color-code :alpha 0.25}
+            :lineStyle {:color color-code :alpha 0.25}}
+           (add-gfx scene)
+           (assoc gfx color-name)))
+    {}
+    colors)
+   :faded
+   (reduce
+    (fn [gfx [color-name color-code]]
+      (->> {:fillStyle {:color color-code :alpha 0.5}
+            :lineStyle {:color color-code :alpha 0.5}}
+           (add-gfx scene)
+           (assoc gfx color-name)))
+    {}
+    colors)
+   :solid
+   (reduce
+    (fn [gfx [color-name color-code]]
+      (->> {:fillStyle {:color color-code :alpha 1}
+            :lineStyle {:color color-code :alpha 1}}
+           (add-gfx scene)
+           (assoc gfx color-name)))
+    {}
+    colors)
+   :wide
+   (reduce
+    (fn [gfx [color-name color-code]]
+      (->> {:lineStyle {:color color-code :alpha 0.5 :width 3}}
+           (add-gfx scene)
+           (assoc gfx color-name)))
+    {}
+    colors)})
 
 (defn draw-units [scene gfx ne-vertex center s-vertex units]
   (doseq [i (range (count units))
@@ -201,8 +205,9 @@
          s-vertex
          sw-vertex
          nw-vertex
-         n-vertex] (rex/cljs-points points)
-        center (midpoint s-vertex n-vertex)]
+         n-vertex
+         :as vertices] (rex/cljs-points points)
+        center (apply midpoint vertices)]
     (let [prefix-gfx (get-in gfx [:faded (prefix->color prefix)])]
       (.fillPoints prefix-gfx (rex/js-points [center nw-vertex n-vertex]) true))
     (let [suffix-gfx (get-in gfx [:faded (suffix->color suffix)])]
@@ -217,7 +222,7 @@
     (when-let [[color char] (improvement->color+char improvement)]
       (let [accent (nth PLAYER-COLORS controller)
             imp-fill-gfx (get-in gfx [:solid color])
-            imp-line-gfx (get-in gfx [:faded accent])
+            imp-line-gfx (get-in gfx [:wide accent])
             [x y] (midpoint center n-vertex nw-vertex)
             circle (new js/Phaser.Geom.Circle. x y (/ r 6))
             text-opts
@@ -240,7 +245,8 @@
     (when miasma
       (let [miasma-gfx (get-in gfx [:faded :cyan])
             points (rex/js-points [sw-vertex s-vertex (midpoint s-vertex center) (midpoint nw-vertex sw-vertex)])]
-        (.fillPoints miasma-gfx points true)))
+        (->> (.fillPoints miasma-gfx points true)
+             (.children.moveUp scene))))
     (let [line-gfx (get-in gfx [:faded :white])]
       (.strokePoints line-gfx points true))
     (when controller
@@ -251,12 +257,12 @@
     (when (seq units)
       (draw-units scene gfx ne-vertex center s-vertex units))))
 
-(defn draw-tooltip-bg [scene x y w h]
+(defn draw-space-tooltip [scene gfx x y w h]
   (let [container (.add.container scene x y)
         tooltip-rect (.add.rectangle scene 0 0 w h colors/BLACK)
         [improvement-text
-         feature-text
          bools-text
+         yield-text
          space-name-text
          coord-text
          :as text-objects]
@@ -274,76 +280,80 @@
           ""
           ""])]
     (.setOrigin tooltip-rect 0)
+    (.children.moveUp
+     scene
+     (.strokeRectShape (get-in gfx [:solid :white]) tooltip-rect))
     (.add container (clj->js (cons tooltip-rect text-objects)))
     {:container container
      :tooltip-rect tooltip-rect
      :coord coord-text
      :space-name space-name-text
      :bools bools-text
-     :feature feature-text
-     :improvement improvement-text}))
+     :improvement improvement-text
+     :yield yield-text}))
+
+(defn make-space-tooltip
+  [scene & {:keys [WIDTH HEIGHT]
+            :or {WIDTH WIDTH HEIGHT HEIGHT}}]
+  (let [w (/ WIDTH 3) h (/ HEIGHT 8)
+        x (- WIDTH w) y (- HEIGHT h)
+        transforms
+        {:coord
+         (fn [_game {:keys [coord]}]
+           (str "[" (string/join ", " coord) "]"))
+         :space-name
+         (fn [_game {:keys [prefix suffix feature]}]
+           (let [base-name (->> [prefix suffix]
+                                (map name)
+                                (string/join " "))]
+             (if feature
+               (str base-name ", " (name feature))
+               base-name)))
+         :bools
+         (fn [_game space]
+           (->> (select-keys space [:fungus :miasma :road])
+                (filter (comp true? second))
+                (map (comp name first))
+                (string/join ", ")))
+         :improvement
+         (fn [game space]
+           (let [{:keys [improvement controller]} space]
+             (if (and improvement controller)
+               (let [faction-name (get-in @game [:factions controller :name])]
+                 (string/join " " [faction-name (name improvement)]))
+               "")))
+         :yield
+         (fn [_game space]
+           (->> (spaces/space-yield space)
+                (filter (comp pos-int? second))
+                (map #(string/join " " [(string/capitalize (first (name (first %))))
+                                        (second %)]))
+                (string/join ", ")))}
+        gfx
+        {:solid
+         {:white (add-gfx scene {:x x
+                                 :y y
+                                 :fillStyle {:color colors/WHITE :alpha 1}
+                                 :lineStyle {:color colors/WHITE :alpha 1 :width 3}})}}
+        tooltip (draw-space-tooltip scene gfx x y w h)]
+    (fn [space]
+      (let [game (.registry.get scene "game")]
+        (doseq [[field f] transforms]
+          (.setText (get tooltip field) (f game space)))))))
 
 (defn create-ui-scene [scene]
-  (let [{coord-text :coord
-         space-name-text :space-name
-         bools-text :bools
-         feature-text :feature
-         improvement-text :improvement} (draw-tooltip-bg scene (- WIDTH 200) (- HEIGHT 100) 200 100)
-        main-scene (.scene.get scene "main")]
+  (let [main-scene (.scene.get scene "main")]
     (.events.on main-scene "tilemove"
-                (fn [coord space]
-                  (let [game (.registry.get scene "game")
-                        space-name
-                        (->> [(:prefix space) (:suffix space)]
-                             (map name)
-                             (string/join " "))
-                        frm (->> (select-keys space [:fungus :miasma :road])
-                                 (filter (comp true? second))
-                                 (map (comp name first))
-                                 (string/join ", "))
-                        feature-name
-                        (if-let [feature (:feature space)]
-                          (name feature)
-                          "")
-                        improvement
-                        (let [{:keys [improvement controller]} space]
-                          (if (and improvement controller)
-                            (let [faction-name (get-in @game [:factions controller :name])]
-                              (string/join " " [faction-name improvement]))
-                            ""))]
-                    (.setText coord-text (string/join ", " coord))
-                    (.setText space-name-text space-name)
-                    (.setText bools-text frm)
-                    (.setText feature-text feature-name)
-                    (.setText improvement-text improvement)))
+                (make-space-tooltip scene)
                 scene)))
-
-(defn claim-space [game faction coord]
-  (-> game
-      (update-in [:factions faction :claimed] into coord)
-      (assoc-in [:spaces coord :controller] faction)))
-
-(defn realize-unit [game unit]
-  (assoc-in game [:units (:id unit)] unit))
-
-(defn harm-unit [game unit n]
-  (update-in game [:units (:id unit) :integrity] - n))
 
 (defn create-main-scene [scene]
   (let [radius 64
-        {:keys [board coords]} (rex/gen-board scene radius :map :standard)
+        {:keys [board coords]} (rex/gen-board scene radius :scenario :standard)
         _camera (draggable-camera scene WIDTH HEIGHT 0.5)
         gfx (init-gfx scene)
-        game (atom (games/init-game coords 6))]
+        game (atom (scenarios/init-game-from-scenario coords :standard))]
     (.registry.set scene "game" game)
-    (let [warrior (units/create-unit 0 [7 7] {:chassis :infantry :loadout :oldworld-weapons})
-          engineer (units/create-unit 0 [7 7] {:chassis :infantry :loadout :engineering})
-          walker (units/create-unit 0 [7 7] {:chassis :walker :loadout :oldworld-weapons})]
-      (swap! game claim-space 0 [7 7])
-      (swap! game realize-unit warrior)
-      (swap! game realize-unit engineer)
-      (swap! game realize-unit walker)
-      (swap! game harm-unit walker 3))
     (let [coord->units (group-by :coord (vals (:units @game)))]
       (doall
        (for [coord coords
@@ -356,7 +366,7 @@
            (let [coord [(.-x xy) (.-y xy)]
                  space (get-in @game [:spaces coord])]
              (when space
-               (.events.emit scene "tilemove" coord space)))))))
+               (.events.emit scene "tilemove" space)))))))
 
 (defclass UIScene
   (extends js/Phaser.Scene)

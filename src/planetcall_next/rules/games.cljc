@@ -1,56 +1,14 @@
-(ns planetcall-next.rules.games)
+(ns planetcall-next.rules.games 
+  (:require
+   [planetcall-next.rules.spaces :as spaces]))
 
-(def space-prefixes
-  #{:rotting
-    :volatile
-    :shattered
-    :preserved
-    :ashen})
+;; faction names that match default player colors
+(def CHEEKY [:red :blue :yellow :green :purple :orange])
 
-(def space-suffixes
-  #{:mountain
-    :canyon
-    :mesa
-    :steppe
-    :marsh
-    :ooze
-    :wreckage
-    :wastes})
-
-(def space-features
-  #{:vents
-    :ruins
-    :titan
-    :xenobog})
-
-(defn gen-space
-  ([coord]
-   (gen-space coord {}))
-  ([[x y]
-    {:keys [miasma fungus road prefix suffix feature improvement controller]}]
-   {:coord [x y]
-    :miasma miasma
-    :fungus fungus
-    :road road
-    :prefix prefix
-    :suffix suffix
-    :feature feature
-    :improvement improvement
-    :controller controller}))
-
-(defn gen-chaotic-space [coord]
-  (gen-space coord {:miasma (rand-nth [true false])
-                    :fungus (rand-nth [true true true false false])
-                    :road (rand-nth [true false false false])
-                    :prefix (rand-nth (seq space-prefixes))
-                    :suffix (rand-nth (seq space-suffixes))
-                    :feature (rand-nth (concat (repeatedly 5 (constantly nil)) (seq space-features)))}))
-
-(def CHEEKY ["Red" "Blue" "Yellow" "Green" "Purple" "Orange"])
-
-(defn gen-faction [i]
+(defn gen-faction [i & {:keys [colors]
+                        :or {colors CHEEKY}}]
   {:i i
-   :name (nth CHEEKY i)
+   :name (name (nth colors i))
    :designs #{}
    :resources {:food 0
                :materials 0
@@ -68,7 +26,9 @@
    :visible #{}
    :seen #{}})
 
-(defn init-game [coords players]
+(defn init-game
+  [coords players & {:keys [space-gen]
+                     :or {space-gen :default}}]
   {:turn {:n 0
           :actions 0
           :phase nil}
@@ -82,11 +42,7 @@
               (for [i (range players)
                     j (range players)]
                 #{i j}))
-   :spaces (reduce
-            (fn [spaces coord]
-              (assoc spaces coord (gen-chaotic-space coord)))
-            {}
-            coords)
+   :spaces ((get spaces/space-gens space-gen) coords)
    :units {}
    :factions
    (reduce
@@ -94,3 +50,27 @@
       (assoc factions i (gen-faction i)))
     {}
     (range players))})
+
+(defn claim-space [game faction coord]
+  (-> game
+      (update-in [:factions faction :claimed] into coord)
+      (assoc-in [:spaces coord :controller] faction)))
+
+(defn place-improvement [game coord improvement]
+  (assoc-in game [:spaces coord :improvement] improvement))
+
+(defn realize-unit [game unit]
+  (assoc-in game [:units (:id unit)] unit))
+
+(defn harm-unit [game unit n]
+  (-> game
+      (update-in [:units (:id unit) :integrity] - n)
+      (update-in [:units (:id unit) :integrity] max 0)))
+
+(defn heal-unit [game unit n]
+  (-> game
+      (update-in [:units (:id unit) :integrity] + n)
+      (update-in [:units (:id unit) :integrity] min (:max-integrity unit))))
+
+(defn destroyed? [unit]
+  (zero? (:integrity unit)))

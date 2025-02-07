@@ -1,0 +1,8 @@
+[{:id :xenobog
+  :yield {:food 2}}
+ {:id :vents
+  :yield {:energy 2}}
+ {:id :titan
+  :yield {:materials 2}}
+ {:id :ruins
+  :yield {:insight 2}}]
