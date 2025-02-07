@@ -1,7 +1,8 @@
 (ns planetcall-next.rules.units 
   (:require
+   [arcade.slurp :refer-macros [slurp->details]]
    [clojure.set :refer [union]]
-   [arcade.slurp :refer-macros [slurp->details]]))
+   [clojure.string :as string]))
 
 (def chassis->details
   (slurp->details "resources/planetcall/units/chassis.edn"))
@@ -75,13 +76,23 @@
 
 (defn create-unit
   [faction coord design]
-  (let [details (expand-design design)
-        traits (apply get-design-traits details)
+  (let [[loadout-details
+         chassis-details
+         mods-details] (expand-design design)
+        traits (get-design-traits loadout-details chassis-details mods-details)
         traits-details (map trait->details traits)
         max-integrity (integrity-from-traits traits-details)
-        max-moves (moves-from-chassis+traits (second details) traits-details)
-        base-resolve (resolve-from-traits traits)]
+        max-moves (moves-from-chassis+traits chassis-details traits-details)
+        base-resolve (resolve-from-traits traits)
+        unit-name
+        (->> (concat mods-details [loadout-details chassis-details])
+             (map (fn [details]
+                    (or (:short details)
+                        (:name details)
+                        (string/capitalize (name (:id details))))))
+             (string/join " "))]
     {:id (random-uuid)
+     :name unit-name
      :coord coord
      :faction faction
      :design design
@@ -92,9 +103,9 @@
      :max-moves max-moves
      :resolve base-resolve
      :base-resolve base-resolve
-     :arms (arms-from-loadout+traits (first details) traits-details)
+     :arms (arms-from-loadout+traits loadout-details traits-details)
      :cooldowns {}
-     :upkeep (get-design-upkeep design :traits traits)}))
+     :upkeep (get-design-upkeep loadout-details chassis-details mods-details)}))
 
 #_(s/fdef design->unit
   :args (s/cat :design :unit/design)

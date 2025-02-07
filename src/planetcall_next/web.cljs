@@ -5,6 +5,7 @@
    [clojure.string :as string]
    [planetcall-next.rules.scenarios :as scenarios]
    [planetcall-next.rules.spaces :as spaces]
+   [planetcall-next.rules.units :as units]
    [planetcall-next.web.board :as rex]
    [planetcall-next.web.camera :refer [draggable-camera]]
    [planetcall-next.web.colors :as colors]
@@ -257,7 +258,21 @@
     (when (seq units)
       (draw-units scene gfx ne-vertex center s-vertex units))))
 
-(defn draw-space-tooltip [scene gfx x y w h]
+(defn create-text-objects
+  [scene w n & {:keys [top right] :or {top 4 right 4}}]
+  (reduce
+   (fn [text-objects s]
+     (let [first-object (first text-objects)
+           h (if (seq text-objects)
+               (+ (.-y first-object) (.-height first-object))
+               top)
+           text-object (.add.text scene (- w right) h s)]
+       (.setOrigin text-object 1 0)
+       (cons text-object text-objects)))
+   []
+   (repeat n "")))
+
+(defn draw-space-tooltip [scene x y w h]
   (let [container (.add.container scene x y)
         tooltip-rect (.add.rectangle scene 0 0 w h colors/BLACK)
         [improvement-text
@@ -266,36 +281,41 @@
          space-name-text
          coord-text
          :as text-objects]
-        (reduce
-         (fn [text-objects s]
-           (let [first-object (first text-objects)
-                 text-object (.add.text scene w (+ (.-y first-object) (.-height first-object)) s)]
-             (.setOrigin text-object 1 0)
-             (cons text-object text-objects)))
-         [(let [text-object (.add.text scene w 0 "")]
-            (.setOrigin text-object 1 0)
-            text-object)]
-         [""
-          ""
-          ""
-          ""])]
+        (create-text-objects scene w 5)]
     (.setOrigin tooltip-rect 0)
-    (.children.moveUp
-     scene
-     (.strokeRectShape (get-in gfx [:solid :white]) tooltip-rect))
+    (.setStrokeStyle tooltip-rect 3 colors/WHITE)
     (.add container (clj->js (cons tooltip-rect text-objects)))
     {:container container
-     :tooltip-rect tooltip-rect
+     :rect tooltip-rect
      :coord coord-text
      :space-name space-name-text
      :bools bools-text
      :improvement improvement-text
      :yield yield-text}))
 
+(defn draw-unit-tooltip
+  [scene x y w h]
+  (let [container (.add.container scene x y)
+        tooltip-rect (.add.rectangle scene 0 0 w h colors/BLACK)
+        [integrity-moves-text
+         arms-resolve-text
+         traits-text
+         name-text
+         :as text-objects]
+        (create-text-objects scene w 4)]
+    (.setOrigin tooltip-rect 0)
+    (.setStrokeStyle tooltip-rect 3 colors/WHITE)
+    (.add container (clj->js (cons tooltip-rect text-objects)))
+    {:container container
+     :name name-text
+     :traits traits-text
+     :arms-resolve arms-resolve-text
+     :integrity-moves integrity-moves-text}))
+
 (defn make-space-tooltip
   [scene & {:keys [WIDTH HEIGHT]
             :or {WIDTH WIDTH HEIGHT HEIGHT}}]
-  (let [w (/ WIDTH 3) h (/ HEIGHT 8)
+  (let [w (/ WIDTH 3) h (/ HEIGHT 10)
         x (- WIDTH w) y (- HEIGHT h)
         transforms
         {:coord
@@ -329,31 +349,67 @@
                 (map #(string/join " " [(string/capitalize (first (name (first %))))
                                         (second %)]))
                 (string/join ", ")))}
-        gfx
-        {:solid
-         {:white (add-gfx scene {:x x
-                                 :y y
-                                 :fillStyle {:color colors/WHITE :alpha 1}
-                                 :lineStyle {:color colors/WHITE :alpha 1 :width 3}})}}
-        tooltip (draw-space-tooltip scene gfx x y w h)]
+        {container :container
+         :as tooltip} (draw-space-tooltip scene x y w h)]
     [(fn [space]
+       (.setVisible container true)
        (let [game (.registry.get scene "game")]
          (doseq [[field f] transforms]
            (.setText (get tooltip field) (f game space)))))
      (fn []
-       (doseq [[field _] transforms]
-         (.setText (get tooltip field) "")))]))
+       (.setVisible container false))]))
+
+(defn make-unit-tooltip
+  [scene & {:keys [WIDTH HEIGHT]
+            :or {WIDTH WIDTH HEIGHT HEIGHT}}]
+  (let [w (/ WIDTH 3) h (/ HEIGHT 12)
+        x (- WIDTH w)
+        transforms
+        {:name #(get %2 :name)
+         :traits
+         (fn [_game unit]
+           (str "[" (string/join ", " (map name (:traits unit))) "]"))
+         :arms-resolve
+         (fn [_game unit]
+           (str "Arms: " (:arms unit) ", Resolve: " (:resolve unit)))
+         :integrity-moves
+         (fn [_game unit]
+           (str "Moves: " (:moves unit) " / " (:max-moves unit)
+                ", HP: " (:integrity unit) " / " (:max-integrity unit)))}
+        tooltips
+        (for [i (range 3)]
+          (let [y (* h i)]
+            (draw-unit-tooltip scene x y w h)))]
+    [(fn [space]
+       (let [game (.registry.get scene "game")
+             units (filter #(= (:coord %) (:coord space)) (vals (:units @game)))]
+         (if (seq units)
+           (doseq [i (range (count units))
+                   :let [unit (nth units i)
+                         {container :container
+                          :as tooltip} (nth tooltips i)]]
+             (.setVisible container true)
+             (doseq [[field f] transforms]
+               (.setText (get tooltip field) (f game unit))))
+           (doseq [{container :container} tooltips]
+             (.setVisible container false)))))
+     (fn []
+       (doseq [{container :container} tooltips]
+         (.setVisible container false)))]))
 
 (defn create-ui-scene [scene]
   (let [main-scene (.scene.get scene "main")
         [update-space-tooltip
          reset-space-tooltip]
-        (make-space-tooltip scene)]
+        (make-space-tooltip scene)
+        [update-unit-tooltip
+         reset-unit-tooltip]
+        (make-unit-tooltip scene)]
     (.events.on main-scene "tilemove"
-                update-space-tooltip
+                (juxt update-space-tooltip update-unit-tooltip)
                 scene)
     (.events.on main-scene "tilereset"
-                reset-space-tooltip
+                (juxt reset-unit-tooltip reset-space-tooltip)
                 scene)))
 
 (defn create-main-scene [scene]
