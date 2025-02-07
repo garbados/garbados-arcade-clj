@@ -14,7 +14,7 @@
 (set! *warn-on-infer* false)
 
 (def HEIGHT 800)
-(def WIDTH 800)
+(def WIDTH 1000)
 
 (defn midpoint [& coords]
   (let [xs (map first coords)
@@ -365,7 +365,11 @@
   (let [w (/ WIDTH 3) h (/ HEIGHT 12)
         x (- WIDTH w)
         transforms
-        {:name #(get %2 :name)
+        {:name
+         (fn [_game unit]
+           (let [color (nth PLAYER-COLORS (:faction unit))
+                 faction-name (string/capitalize (name color))]
+             (str faction-name " " (:name unit))))
          :traits
          (fn [_game unit]
            (str "[" (string/join ", " (map name (:traits unit))) "]"))
