@@ -336,15 +336,24 @@
                                  :fillStyle {:color colors/WHITE :alpha 1}
                                  :lineStyle {:color colors/WHITE :alpha 1 :width 3}})}}
         tooltip (draw-space-tooltip scene gfx x y w h)]
-    (fn [space]
-      (let [game (.registry.get scene "game")]
-        (doseq [[field f] transforms]
-          (.setText (get tooltip field) (f game space)))))))
+    [(fn [space]
+       (let [game (.registry.get scene "game")]
+         (doseq [[field f] transforms]
+           (.setText (get tooltip field) (f game space)))))
+     (fn []
+       (doseq [[field _] transforms]
+         (.setText (get tooltip field) "")))]))
 
 (defn create-ui-scene [scene]
-  (let [main-scene (.scene.get scene "main")]
+  (let [main-scene (.scene.get scene "main")
+        [update-space-tooltip
+         reset-space-tooltip]
+        (make-space-tooltip scene)]
     (.events.on main-scene "tilemove"
-                (make-space-tooltip scene)
+                update-space-tooltip
+                scene)
+    (.events.on main-scene "tilereset"
+                reset-space-tooltip
                 scene)))
 
 (defn create-main-scene [scene]
@@ -365,8 +374,9 @@
          (fn [_pointer xy]
            (let [coord [(.-x xy) (.-y xy)]
                  space (get-in @game [:spaces coord])]
-             (when space
-               (.events.emit scene "tilemove" space)))))))
+             (if space
+               (.events.emit scene "tilemove" space)
+               (.events.emit scene "tilereset")))))))
 
 (defclass UIScene
   (extends js/Phaser.Scene)
