@@ -161,27 +161,34 @@
   [scene x y]
   (let [h 0
         top 7 left 7
-        title (.add.text scene left (- top) "hello world")
-        flavor (.add.text scene (- left) (- top) "i came to this world")
-        title-w (+ (.-width title) (* 2 left))
-        flavor-w (+ (.-width flavor) (* 2 left))
+        effect-text (.add.text scene left (- top) "")
+        title (.add.text scene left (- top (.-height effect-text)) "")
+        flavor-text (.add.text scene (- left) (- top) "")
+        effect-w (+ (max (.-width title) (.-width effect-text))
+                    (* 2 left))
+        flavor-w (+ (.-width flavor-text) (* 2 left))
         [flavor-container
          effect-container
          :as containers]
         [(.add.container scene x y)
-         (.add.container scene (- x title-w) y)]
+         (.add.container scene (- x effect-w) y)]
         flavor-rect (.add.rectangle scene 0 0 flavor-w h colors/BLACK)
-        effect-rect (.add.rectangle scene 0 0 title-w h colors/BLACK)]
+        effect-rect (.add.rectangle scene 0 0 effect-w h colors/BLACK)]
     (.setOrigin flavor-rect 1)
     (.setStrokeStyle flavor-rect 3 colors/WHITE)
-    (.setFontStyle flavor "italic")
-    (.setOrigin flavor 1)
+    (.setFontStyle flavor-text "italic")
+    (.setStyle flavor-text (clj->js
+                            {:wordWrap {:width 300}}))
+    (.setOrigin flavor-text 1)
     (.setOrigin effect-rect 0 1)
     (.setStrokeStyle effect-rect 3 colors/WHITE)
     (.setFontStyle title "bold")
     (.setOrigin title 0 1)
-    (.add flavor-container (clj->js [flavor-rect flavor]))
-    (.add effect-container (clj->js [effect-rect title]))
+    (.setStyle effect-text (clj->js
+                            {:wordWrap {:width 300}}))
+    (.setOrigin effect-text 0 1)
+    (.add flavor-container (clj->js [flavor-rect flavor-text]))
+    (.add effect-container (clj->js [effect-rect title effect-text]))
     {:containers [flavor-container effect-container]
      :update
      (fn [x y details]
@@ -190,21 +197,23 @@
          (.setX container x)
          (.setY container y))
        (.setText title (tech/tech-name details))
+       (.setText effect-text (tech/explain-tech details))
+       (.setY title (- (.-y effect-text) (.-height effect-text)))
        (.setSize effect-rect
-                 (+ (* 2 left) (.-width title))
-                 (+ (* 2 top) (.-height title)))
-       (let [flavor-text
+                 (+ (* 2 left) (max (.-width title) (.-width effect-text)))
+                 (+ (* 2 top) (.-height title) (.-height effect-text)))
+       (let [flavor-s
              (->> (string/split (:flavor details "") #"\n")
                   (map string/trim)
-                  (string/join "\n"))]
-         (if (seq flavor-text)
+                  (string/join " "))]
+         (if (seq flavor-s)
            (do
-             (.setText flavor flavor-text)
+             (.setText flavor-text flavor-s)
              (.setSize flavor-rect
-                       (+ (* 2 left) (.-width flavor) )
-                       (+ (* 2 top) (.-height flavor))))
+                       (+ (* 2 left) (.-width flavor-text))
+                       (+ (* 2 top) (.-height flavor-text))))
            (do
-             (.setText flavor "")
+             (.setText flavor-text "")
              (.setSize flavor-rect 0 0)))))
      :reset
      (fn []

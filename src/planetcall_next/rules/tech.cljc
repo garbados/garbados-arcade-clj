@@ -37,3 +37,41 @@
   (->> (string/split (name tech-id) #"-")
        (map string/capitalize)
        (string/join " ")))
+
+(defn explain-tech [{description :description
+                     grants :grants
+                     ideology :ideology
+                     level :level
+                     n :n
+                     :or {description "TODO"}}]
+  (if (seq grants)
+    (->> grants
+         (reduce
+          (fn [parts [k vs]]
+            (cons
+             (let [k-name (name k)
+                   k-name
+                   (if (< 1 (count vs))
+                     (apply str (subvec (vec k-name) 0
+                                        (dec (count k-name))))
+                     k-name)
+                   k-name (str (string/capitalize k-name) ":")
+                   v-s
+                   (string/join
+                    ", "
+                    (for [v vs]
+                      (->> (-> (name v)
+                               (string/split #"-"))
+                           (map string/capitalize)
+                           (string/join " "))))]
+               [k-name v-s])
+             parts))
+          [])
+         (map #(str "- " (string/join " " %)))
+         (cons "Grants:")
+         (cons "")
+         (cons description)
+         (cons "")
+         (cons (str (name ideology) " level " level))
+         (string/join "\n"))
+    ""))
