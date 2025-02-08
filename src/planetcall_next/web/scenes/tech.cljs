@@ -22,7 +22,7 @@
    Belief in what?
    Oh child, that is up to you.
    Choice is the privilege of the living.
-   Will you squander it?"
+   Will you use it to thrive?"
   [scene]
   (let [_camera (camera/draggable-camera scene 0 0 1)
         circles
@@ -60,7 +60,7 @@
         (doall
          (flatten
           (for [i (range 3)
-                :let [r (+ 96 (* (inc i) 128))
+                :let [r (+ 48 (* (inc i) 142))
                       n (+ 2 i)
                       points (ideograph/polygon-points [0 0] 5 r :rotation 120)
                       polygon (.add.polygon scene 0 0 (clj->js (flatten points)))]]

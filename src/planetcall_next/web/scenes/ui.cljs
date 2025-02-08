@@ -39,7 +39,7 @@
       (doseq [rect (map second text-pairs)]
         (.setStrokeStyle rect 3 border)))
     {:container container
-     :text-pairs text-pairs})) 1
+     :text-pairs text-pairs}))
 
 (defn create-horz-text-objects
   [scene x y strings
@@ -111,6 +111,15 @@
                 :wiki wiki-scene}
         active-scene (atom (get scenes active))
         file-menu (atom nil) ; initialized later
+        {space-tooltip :container
+         update-space-tooltip :update
+         reset-space-tooltip :reset}
+        (tooltips/make-space-tooltip scene)
+        {unit-tooltips :containers
+         update-unit-tooltip :update
+         reset-unit-tooltip :reset}
+        (tooltips/make-unit-tooltip scene)
+        tooltip-containers (cons space-tooltip unit-tooltips)
         swap-to
         (fn [tab-key]
           (if (not= tab-key :file)
@@ -119,20 +128,17 @@
               (.setVisible (:container @file-menu) false)
               (when (not= prev-scene new-scene)
                 (.scene.switch prev-scene new-scene)
-                (reset! active-scene new-scene)))
+                (reset! active-scene new-scene))
+              (when (not= tab-key :map)
+                (doseq [container tooltip-containers]
+                  (.setVisible container false))))
             (.setVisible (:container @file-menu) true)))
         tab-bar
         (draw-tab-bar scene 0 0 [:file :map :tech :wiki]
                       {:active active
-                       :on-click (fn [tab-key _] (swap-to tab-key))})
-        {space-tooltip :container
-         update-space-tooltip :update
-         reset-space-tooltip :reset}
-        (tooltips/make-space-tooltip scene)
-        {update-unit-tooltip :update
-         reset-unit-tooltip :reset}
-        (tooltips/make-unit-tooltip scene)]
-    (.setVisible space-tooltip false)
+                       :on-click (fn [tab-key _] (swap-to tab-key))})]
+    (doseq [container tooltip-containers]
+      (.setVisible container false))
     (reset! file-menu
             (draw-file-menu scene 0 (.-height (second (first (:text-pairs tab-bar))))))
     (.setVisible (:container @file-menu) false)
