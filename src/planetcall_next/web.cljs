@@ -5,14 +5,12 @@
    [planetcall-next.web.config :as config]
    [planetcall-next.web.scenes.map :refer [create-map-scene]]
    [planetcall-next.web.scenes.ui :refer [create-ui-scene]]
+   [planetcall-next.web.scenes.tech :refer [create-tech-scene]]
    [shadow.cljs.modern :refer [defclass]]))
 
 (set! *warn-on-infer* false)
 
 (defn create-title-screen [scene]
-  nil)
-
-(defn create-tech-scene [scene]
   nil)
 
 (defn create-wiki-scene [scene]

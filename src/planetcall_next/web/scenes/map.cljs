@@ -240,7 +240,9 @@
 (defn create-map-scene [scene]
   (let [radius 64
         {:keys [board coords]} (rex/gen-board scene radius :scenario :standard)
-        _camera (camera/draggable-camera scene config/WIDTH config/HEIGHT 0.5)
+        center-points (map #(vec [(.-x %) (.-y %)]) (.getGridPoints board 6 8 true)) ; center on red player
+        [ct-x ct-y] (apply midpoint center-points)
+        _camera (camera/draggable-camera scene ct-x ct-y 0.5)
         gfx (init-gfx scene)
         game (atom (scenarios/init-game-from-scenario coords :standard))]
     (.registry.set scene "game" game)
