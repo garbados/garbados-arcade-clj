@@ -18,6 +18,7 @@
 
 ;; colors i like, by name
 
+(def PINK 0xdb7093)
 (def SALMON 0xfa8072)
 (def LIGHT-SALMON 0xffa07a)
 (def CRIMSON 0xdc143c)

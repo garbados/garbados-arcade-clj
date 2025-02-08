@@ -14,7 +14,7 @@
 (def IDEO-NAMES [:military :industry :contact :ecology :science])
 (def IDEO-COLORS [colors/RED colors/YELLOW colors/PURPLE colors/GREEN colors/SILVER])
 (def SYNG-NAMES [:science-military :military-industry :industry-contact :contact-ecology :ecology-science])
-(def SYNG-COLORS [colors/CRIMSON colors/ORANGE colors/LIGHT-SALMON colors/CYAN colors/TEAL])
+(def SYNG-COLORS [colors/PINK colors/ORANGE colors/LIGHT-SALMON colors/CYAN colors/TEAL])
 
 (defn mark-researched [all-circles ideology level n]
   (let [{circle :object}
