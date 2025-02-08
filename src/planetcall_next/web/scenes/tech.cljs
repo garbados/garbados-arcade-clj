@@ -1,10 +1,11 @@
 (ns planetcall-next.web.scenes.tech 
   (:require
-   [planetcall-next.rules.tech :refer [ideotech->details]]
+   [planetcall-next.rules.games :as games]
+   [planetcall-next.rules.tech :refer [ideograph ideotech->details]]
    [planetcall-next.web.camera :as camera]
    [planetcall-next.web.colors :as colors]
-   [planetcall-next.web.geometry :as ideograph]
-   [planetcall-next.rules.games :as games]))
+   [planetcall-next.web.geometry :as geometry]
+   [planetcall-next.web.tooltips :refer [make-tech-tooltip]]))
 
 (set! *warn-on-infer* false)
 
@@ -33,10 +34,11 @@
           (for [i (range 4)
                 :let [r (* (inc i) 128)
                       n (+ 3 i)
-                      points (ideograph/polygon-points [x y] 5 r)
+                      points (geometry/polygon-points [x y] 5 r)
                       polygon (.add.polygon scene 0 0 (clj->js (flatten points)))]]
             (do
               (.setOrigin polygon 0)
+            ;;   (.setStrokeStyle polygon 3 colors/WHITE)
               (for [j (range 5)
                     :let [[x1 y1] (nth points j)
                           [x2 y2]
@@ -65,13 +67,13 @@
         (doall
          (flatten
           (for [i (range 3)
-                :let [r (+ 54 (* (inc i) 140))
+                :let [r (+ 64 (* (inc i) 144))
                       n (+ 2 i)
-                      points (ideograph/polygon-points [x y] 5 r :rotation 120)
+                      points (geometry/polygon-points [x y] 5 r :rotation 120)
                       polygon (.add.polygon scene 0 0 (clj->js (flatten points)))]]
             (do
               (.setOrigin polygon 0)
-                      ;; (.setStrokeStyle polygon 3 colors/WHITE)
+            ;;   (.setStrokeStyle polygon 3 colors/WHITE)
               (for [j (range 5)
                     :let [[x1 y1] (nth points j)
                           [x2 y2]
@@ -121,11 +123,29 @@
         _camera (camera/draggable-camera scene x y 1)
         all-circles (draw-ideo-circles scene x y)
         {game :game} (.registry.get scene "game")
-        player (mod (get-in @game [:turn :n]) (count (keys (:factions @game))))]
+        player (mod (get-in @game [:turn :n]) (count (keys (:factions @game))))
+        {containers :containers
+         update-tooltip :update
+         reset-tooltip :reset
+         :as tooltip} (make-tech-tooltip scene x y)]
+    (doseq [container containers]
+      (.setVisible container false))
     (swap! game games/gain-tech-locator player :ecology 1 0)
     (let [faction (get-in @game [:factions player])
           known-tech (get-in faction [:research :known])]
       (doseq [{ideology :ideology
                level :level
                n :n} (map ideotech->details known-tech)]
-        (mark-researched all-circles ideology level n)))))
+        (mark-researched all-circles ideology level n)))
+    (doseq [[ideology details] all-circles]
+      (doseq [[level details] details]
+        (doseq [[n details] details
+                :let [{circle :object} details
+                      tech (get-in ideograph [ideology level n])]
+                :when tech]
+          (.setInteractive circle)
+          (.on circle "pointerout" reset-tooltip)
+          (.on circle "pointerover"
+               (fn []
+                 (let [x (.-x circle) y (.-y circle)]
+                   (update-tooltip x y tech)))))))))

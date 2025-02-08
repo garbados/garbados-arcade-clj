@@ -1,6 +1,7 @@
 (ns planetcall-next.rules.tech
   (:require
-   [arcade.slurp :refer-macros [slurp->details]]))
+   [arcade.slurp :refer-macros [slurp->details]]
+   [clojure.string :as string]))
 
 (def ideotech->details*
   (merge
@@ -31,3 +32,8 @@
      (assoc ->details tech-id detail))
    {}
    (->> ideograph vals (map vals) flatten (map #(map second %)) flatten)))
+
+(defn tech-name [{tech-id :id}]
+  (->> (string/split (name tech-id) #"-")
+       (map string/capitalize)
+       (string/join " ")))
