@@ -1,6 +1,7 @@
 (ns planetcall-next.rules.games 
   (:require
-   [planetcall-next.rules.spaces :as spaces]))
+   [planetcall-next.rules.spaces :as spaces]
+   [planetcall-next.rules.tech :refer [ideograph]]))
 
 ;; faction names that match default player colors
 (def CHEEKY [:red :blue :yellow :green :purple :orange])
@@ -74,3 +75,10 @@
 
 (defn destroyed? [unit]
   (zero? (:integrity unit)))
+
+(defn gain-tech [game faction tech-id]
+  (update-in game [:factions faction :research :known] conj tech-id))
+
+(defn gain-tech-locator [game faction ideology level n]
+  (let [{tech-id :id} (get-in ideograph [ideology level n])]
+    (gain-tech game faction tech-id)))

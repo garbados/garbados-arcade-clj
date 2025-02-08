@@ -2,6 +2,7 @@
   (:require
    [clojure.string :as string]
    [planetcall-next.web.colors :as colors]
+   [planetcall-next.web.scenes.new-game :as new-game]
    [planetcall-next.web.tooltips :as tooltips]))
 
 (set! *warn-on-infer* false)
@@ -136,7 +137,9 @@
         tab-bar
         (draw-tab-bar scene 0 0 [:file :map :tech :wiki]
                       {:active active
-                       :on-click (fn [tab-key _] (swap-to tab-key))})]
+                       :on-click (fn [tab-key _] (swap-to tab-key))})
+        game-stuff (new-game/init-board-and-game map-scene)]
+    (.registry.set scene "game" game-stuff)
     (doseq [container tooltip-containers]
       (.setVisible container false))
     (reset! file-menu

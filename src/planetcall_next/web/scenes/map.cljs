@@ -1,6 +1,5 @@
 (ns planetcall-next.web.scenes.map 
   (:require
-   [planetcall-next.rules.scenarios :as scenarios]
    [planetcall-next.web.board :as rex]
    [planetcall-next.web.camera :as camera]
    [planetcall-next.web.colors :as colors]
@@ -238,20 +237,17 @@
       (draw-units scene gfx ne-vertex center s-vertex units))))
 
 (defn create-map-scene [scene]
-  (let [radius 64
-        {:keys [board coords]} (rex/gen-board scene radius :scenario :standard)
+  (let [{:keys [board coords game]} (.registry.get scene "game")
         center-points (map #(vec [(.-x %) (.-y %)]) (.getGridPoints board 12 12 true)) ; map center
         [ct-x ct-y] (apply midpoint center-points)
         _camera (camera/draggable-camera scene ct-x ct-y 0.5)
-        gfx (init-gfx scene)
-        game (atom (scenarios/init-game-from-scenario coords :standard))]
-    (.registry.set scene "game" game)
+        gfx (init-gfx scene)]
     (let [coord->units (group-by :coord (vals (:units @game)))]
       (doall
        (for [coord coords
              :let [units (coord->units coord)
                    space (get-in @game [:spaces coord])]]
-         (draw-space scene gfx board radius coord space units))))
+         (draw-space scene gfx board 64 coord space units))))
     (.setInteractive board)
     (.on board "tilemove"
          (fn [_pointer xy]

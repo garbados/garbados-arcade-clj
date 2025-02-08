@@ -1,12 +1,9 @@
-(ns planetcall-next.web.ideograph)
+(ns planetcall-next.web.geometry)
 
 (def PI js/Math.PI)
 
-(defn deg->rad [degrees]
-  (* degrees (/ js/Math.pi 180)))
-
-(defn polygon-points [[x y] sides r & {:keys [rotation]
-                                        :or {rotation 0}}]
+(defn polygon-points
+  [[x y] sides r & {:keys [rotation] :or {rotation 0}}]
   (let [rotation* (mod rotation 360)
         angle (/ (* 2 PI) sides)
         rotation** (+ rotation* (/ angle 2))]

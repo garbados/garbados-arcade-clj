@@ -95,7 +95,7 @@
          (fn [_game space]
            (->> (spaces/space-yield space)
                 (filter (comp pos-int? second))
-                (map #(string/join " " [(string/capitalize (first (name (first %))))
+                (map #(string/join " " [(name (first %))
                                         (second %)]))
                 (string/join ", ")))}
         {container :container
@@ -104,7 +104,7 @@
      :update
      (fn [space]
        (.setVisible container true)
-       (let [game (.registry.get scene "game")]
+       (let [{game :game} (.registry.get scene "game")]
          (doseq [[field f] transforms]
            (.setText (get tooltip field) (f game space)))))
      :reset
@@ -139,7 +139,7 @@
     {:containers (map :container tooltips)
      :update
      (fn [space]
-       (let [game (.registry.get scene "game")
+       (let [{game :game} (.registry.get scene "game")
              units (filter #(= (:coord %) (:coord space)) (vals (:units @game)))]
          (if (seq units)
            (doseq [i (range (count units))

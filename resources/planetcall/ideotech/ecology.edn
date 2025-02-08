@@ -1,6 +1,12 @@
 [{:ideology :ecology
   :level 1
   :id :contamination-protocols
+  :description "Units no longer suffer movement penalties in fungus."
+  :flavor "We didn't know what we would find.
+           Planet didn't know either.
+           Best to keep a safe distance
+           while we become acquainted.
+           - Roan Ybrovki, Solemnity Pathfinder"
   :grants {:conditions [:fungus-immune]}}
  {:ideology :ecology
   :level 1
