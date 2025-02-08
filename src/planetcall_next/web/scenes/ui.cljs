@@ -120,7 +120,11 @@
          update-unit-tooltip :update
          reset-unit-tooltip :reset}
         (tooltips/make-unit-tooltip scene)
-        tooltip-containers (cons space-tooltip unit-tooltips)
+        {tech-tooltip-containers :containers
+         update-tech-tooltip :update
+         reset-tech-tooltip :reset}
+        (tooltips/make-tech-tooltip scene)
+        map-tooltip-containers (cons space-tooltip unit-tooltips)
         swap-to
         (fn [tab-key]
           (if (not= tab-key :file)
@@ -131,16 +135,18 @@
                 (.scene.switch prev-scene new-scene)
                 (reset! active-scene new-scene))
               (when (not= tab-key :map)
-                (doseq [container tooltip-containers]
+                (doseq [container map-tooltip-containers]
+                  (.setVisible container false)))
+              (when (not= tab-key :tech)
+                (doseq [container tech-tooltip-containers]
                   (.setVisible container false))))
             (.setVisible (:container @file-menu) true)))
         tab-bar
         (draw-tab-bar scene 0 0 [:file :map :tech :wiki]
                       {:active active
-                       :on-click (fn [tab-key _] (swap-to tab-key))})
-        game-stuff (new-game/init-board-and-game map-scene)]
-    (.registry.set scene "game" game-stuff)
-    (doseq [container tooltip-containers]
+                       :on-click (fn [tab-key _] (swap-to tab-key))})]
+    (.registry.set scene "game" (new-game/init-board-and-game map-scene))
+    (doseq [container (concat map-tooltip-containers tech-tooltip-containers)]
       (.setVisible container false))
     (reset! file-menu
             (draw-file-menu scene 0 (.-height (second (first (:text-pairs tab-bar))))))
@@ -151,4 +157,10 @@
                 scene)
     (.events.on map-scene "tilereset"
                 (juxt reset-unit-tooltip reset-space-tooltip)
+                scene)
+    (.events.on tech-scene "circleout"
+                reset-tech-tooltip
+                scene)
+    (.events.on tech-scene "circleover"
+                update-tech-tooltip
                 scene)))

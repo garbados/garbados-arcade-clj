@@ -158,7 +158,7 @@
          (.setVisible container false)))}))
 
 (defn make-tech-tooltip
-  [scene x y]
+  [scene & {:keys [x y] :or {x 0 y 0}}]
   (let [h 0
         top 7 left 7
         effect-text (.add.text scene left (- top) "")

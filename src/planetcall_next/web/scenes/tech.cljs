@@ -5,7 +5,8 @@
    [planetcall-next.web.camera :as camera]
    [planetcall-next.web.colors :as colors]
    [planetcall-next.web.geometry :as geometry]
-   [planetcall-next.web.tooltips :refer [make-tech-tooltip]]))
+   [planetcall-next.web.tooltips :refer [make-tech-tooltip]]
+   [planetcall-next.web.config :as config]))
 
 (set! *warn-on-infer* false)
 
@@ -118,18 +119,13 @@
    Oh child, that is up to you.
    Choice is the privilege of the living.
    Will you use it to thrive?"
-  [scene]
-  (let [x 0 y 0
-        _camera (camera/draggable-camera scene x y 1)
+  [scene & {:keys [x y]
+            :or {x (/ config/WIDTH 2)
+                 y (/ config/HEIGHT 2)}}]
+  (let [camera (camera/draggable-camera scene x y 1)
         all-circles (draw-ideo-circles scene x y)
         {game :game} (.registry.get scene "game")
-        player (mod (get-in @game [:turn :n]) (count (keys (:factions @game))))
-        {containers :containers
-         update-tooltip :update
-         reset-tooltip :reset
-         :as tooltip} (make-tech-tooltip scene x y)]
-    (doseq [container containers]
-      (.setVisible container false))
+        player (mod (get-in @game [:turn :n]) (count (keys (:factions @game))))]
     (swap! game games/gain-tech-locator player :ecology 1 0)
     (let [faction (get-in @game [:factions player])
           known-tech (get-in faction [:research :known])]
@@ -144,8 +140,9 @@
                       tech (get-in ideograph [ideology level n])]
                 :when tech]
           (.setInteractive circle)
-          (.on circle "pointerout" reset-tooltip)
+          (.on circle "pointerout"
+               #(.events.emit scene "circleout"))
           (.on circle "pointerover"
-               (fn []
-                 (let [x (.-x circle) y (.-y circle)]
-                   (update-tooltip x y tech)))))))))
+               #(let [x (+ x (* (- (.-x circle) x) (.-zoom camera)))
+                      y (+ y (* (- (.-y circle) y) (.-zoom camera)))]
+                  (.events.emit scene "circleover" x y tech))))))))
