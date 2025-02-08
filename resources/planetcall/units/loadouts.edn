@@ -1,4 +1,8 @@
-[{:id :oldworld-weapons
+[{:id :natural-weapons
+  :short "Native"
+  :arms 2
+  :traits #{:fauna :warrior}}
+ {:id :oldworld-weapons
   :short "Oldworld"
   :arms 1
   :traits #{:warrior}}
@@ -10,7 +14,7 @@
   :traits #{:warrior}}
  {:id :beam-rifles
   :arms 2
-  :traits #{:archer}}
+  :traits #{:sniper}}
  {:id :missiles
   :arms 3
   :traits #{:artillery}}]

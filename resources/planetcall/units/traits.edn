@@ -14,4 +14,8 @@
   :moves 1}
  {:id :heavy
   :moves -1
-  :integrity 5}]
+  :integrity 5}
+ {:id :honed
+  :arms 1}
+ {:id :dulled
+  :arms -1}]

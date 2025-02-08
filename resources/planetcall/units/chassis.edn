@@ -3,15 +3,21 @@
   :traits #{:infantry}}
  {:id :speeder
   :moves 3}
- {:id :hover
+ {:id :hovertank
   :moves 3
   :traits #{:hover}}
- {:id :walker
+ {:id :mech-walker
   :moves 3
   :traits #{:infantry}}
  {:id :worm-swarm
-  :moves 2
+  :moves 1
   :traits #{:fauna :infantry :psychic}}
  {:id :loper
   :moves 3
-  :traits #{:fauna}}]
+  :traits #{:fauna}}
+ {:id :myrmidon
+  :moves 3
+  :traits #{:fortified :fauna :honed}}
+ {:id :troll
+  :moves 3
+  :traits #{:fortified :troll :fauna}}]
