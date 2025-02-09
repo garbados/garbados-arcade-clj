@@ -4,7 +4,8 @@
    [planetcall-next.rules.spaces :as spaces]
    [planetcall-next.rules.tech :as tech]
    [planetcall-next.web.colors :as colors]
-   [planetcall-next.web.config :as config]))
+   [planetcall-next.web.config :as config]
+   [planetcall-next.rules.games :as games]))
 
 (set! *warn-on-infer* false)
 
@@ -65,7 +66,7 @@
 (defn make-space-tooltip
   [scene & {:keys [WIDTH HEIGHT]
             :or {WIDTH config/WIDTH HEIGHT config/HEIGHT}}]
-  (let [w (/ WIDTH 3) h (/ HEIGHT 10)
+  (let [w (/ WIDTH 2) h (/ HEIGHT 10)
         x (- WIDTH w) y (- HEIGHT h)
         transforms
         {:coord
@@ -158,7 +159,8 @@
          (.setVisible container false)))}))
 
 (defn make-tech-tooltip
-  [scene & {:keys [x y] :or {x 0 y 0}}]
+  [scene & {:keys [x y]
+            :or {x 0 y 0}}]
   (let [h 0
         top 7 left 7
         effect-text (.add.text scene left (- top) "")
@@ -196,8 +198,18 @@
          (.setVisible container true)
          (.setX container x)
          (.setY container y))
-       (.setText title (tech/tech-name details))
-       (.setText effect-text (tech/explain-tech details))
+       (.setText title
+                 (tech/tech-name details))
+       (let [{game :game} (.registry.get scene "game")
+             player (games/get-current-player @game)
+             known (get-in @game [:factions player :research :known] #{})
+             forbidden (reduce into #{} (map tech/tech-forbidden-by known))]
+         (.setText effect-text
+                   (cond-> (tech/explain-tech details)
+                     (contains? known (:id details))
+                     (str "\n\n" "KNOWN")
+                     (contains? forbidden (:id details))
+                     (str "\n\n" "FORBIDDEN"))))
        (.setY title (- (.-y effect-text) (.-height effect-text)))
        (.setSize effect-rect
                  (+ (* 2 left) (max (.-width title) (.-width effect-text)))

@@ -1,6 +1,7 @@
 (ns planetcall-next.web.scenes.ui 
   (:require
    [clojure.string :as string]
+   [planetcall-next.rules.games :as games]
    [planetcall-next.web.colors :as colors]
    [planetcall-next.web.scenes.new-game :as new-game]
    [planetcall-next.web.tooltips :as tooltips]))
@@ -105,6 +106,7 @@
 
 (defn create-ui-scene [scene & {:keys [active] :or {active :map}}]
   (let [map-scene (.scene.get scene "map")
+        _ (.registry.set scene "game" (new-game/init-board-and-game map-scene))
         tech-scene (.scene.get scene "tech")
         wiki-scene (.scene.get scene "wiki")
         scenes {:map map-scene
@@ -145,7 +147,6 @@
         (draw-tab-bar scene 0 0 [:file :map :tech :wiki]
                       {:active active
                        :on-click (fn [tab-key _] (swap-to tab-key))})]
-    (.registry.set scene "game" (new-game/init-board-and-game map-scene))
     (doseq [container (concat map-tooltip-containers tech-tooltip-containers)]
       (.setVisible container false))
     (reset! file-menu

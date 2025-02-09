@@ -1,21 +1,18 @@
 (ns planetcall-next.web.scenes.tech 
   (:require
    [planetcall-next.rules.games :as games]
-   [planetcall-next.rules.tech :refer [ideograph ideotech->details]]
+   [planetcall-next.rules.tech :refer [ideograph ideotech->details] :as tech]
    [planetcall-next.web.camera :as camera]
    [planetcall-next.web.colors :as colors]
-   [planetcall-next.web.geometry :as geometry]
-   [planetcall-next.web.tooltips :refer [make-tech-tooltip]]
-   [planetcall-next.web.config :as config]))
+   [planetcall-next.web.config :as config]
+   [planetcall-next.web.geometry :as geometry]))
 
 (set! *warn-on-infer* false)
 
 (defn lerp [p1 p2 t]
   (js/Phaser.Math.Linear p1 p2 t))
 
-(def IDEO-NAMES [:military :industry :contact :ecology :science])
 (def IDEO-COLORS [colors/RED colors/YELLOW colors/PURPLE colors/GREEN colors/SILVER])
-(def SYNG-NAMES [:science-military :military-industry :industry-contact :contact-ecology :ecology-science])
 (def SYNG-COLORS [colors/PINK colors/ORANGE colors/LIGHT-SALMON colors/CYAN colors/TEAL])
 
 (defn mark-researched [all-circles ideology level n]
@@ -28,11 +25,16 @@
         (get-in all-circles [ideology level n])]
     (.setStrokeStyle circle 0 colors/BLACK)))
 
+(defn mark-forbidden [all-circles ideology level n]
+  (let [{circle :object}
+        (get-in all-circles [ideology level n])]
+    (.setStrokeStyle circle 5 colors/DIM-GRAY)))
+
 (defn draw-ideo-circles [scene x y]
   (let [main-ideo-circles
         (doall
          (flatten
-          (for [i (range 4)
+          (for [i (range 3)
                 :let [r (* (inc i) 128)
                       n (+ 3 i)
                       points (geometry/polygon-points [x y] 5 r)
@@ -52,7 +54,7 @@
                             :let [[dx dy] [(lerp x1 x2 (/ (inc k) n))
                                            (lerp y1 y2 (/ (inc k) n))]]]
                         {:object (.add.circle scene dx dy 9 color)
-                         :ideology (nth IDEO-NAMES j)
+                         :ideology (nth tech/ideology-names j)
                          :level (inc i)
                          :n k})
                       circles (map :object circle-objects)
@@ -88,7 +90,7 @@
                             :let [[dx dy] [(lerp x1 x2 (/ (+ cramping (inc k)) (+ (* 2 cramping) n)))
                                            (lerp y1 y2 (/ (+ cramping (inc k)) (+ (* 2 cramping) n)))]]]
                         {:object (.add.circle scene dx dy 9 color)
-                         :ideology (nth SYNG-NAMES j)
+                         :ideology (nth tech/synergy-names j)
                          :level (inc i)
                          :n k})
                       circles (map :object circle-objects)
@@ -125,24 +127,28 @@
   (let [camera (camera/draggable-camera scene x y 1)
         all-circles (draw-ideo-circles scene x y)
         {game :game} (.registry.get scene "game")
-        player (mod (get-in @game [:turn :n]) (count (keys (:factions @game))))]
-    (swap! game games/gain-tech-locator player :ecology 1 0)
-    (let [faction (get-in @game [:factions player])
-          known-tech (get-in faction [:research :known])]
+        player (games/get-current-player @game)]
+    (swap! game games/gain-tech-locator player :industry 1 0)
+;;     (swap! game games/gain-tech-locator player :industry 2 0)
+    (let [known-tech (get-in @game [:factions player :research :known] #{})
+          forbidden (reduce into #{} (map tech/tech-forbidden-by known-tech))]
       (doseq [{ideology :ideology
                level :level
                n :n} (map ideotech->details known-tech)]
-        (mark-researched all-circles ideology level n)))
-    (doseq [[ideology details] all-circles]
-      (doseq [[level details] details]
-        (doseq [[n details] details
-                :let [{circle :object} details
-                      tech (get-in ideograph [ideology level n])]
+        (mark-researched all-circles ideology level n))
+      (doseq [{ideology :ideology
+               level :level
+               n :n} (map ideotech->details forbidden)]
+        (mark-forbidden all-circles ideology level n)))
+    (doseq [[ideology ideo-tech] all-circles]
+      (doseq [[level level-tech] ideo-tech]
+        (doseq [[n {circle :object}] level-tech
+                :let [tech (get-in ideograph [ideology level n])]
                 :when tech]
           (.setInteractive circle)
           (.on circle "pointerout"
                #(.events.emit scene "circleout"))
           (.on circle "pointerover"
-               #(let [x (+ x (* (- (.-x circle) x) (.-zoom camera)))
-                      y (+ y (* (- (.-y circle) y) (.-zoom camera)))]
+               #(let [x (- (.-x circle) (.-scrollX camera))
+                      y (- (.-y circle) (.-scrollY camera))]
                   (.events.emit scene "circleover" x y tech))))))))

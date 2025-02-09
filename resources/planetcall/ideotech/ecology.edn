@@ -7,7 +7,7 @@
            Best to keep a safe distance
            while we become acquainted.
            - Roan Ybrovki, Solemnity Pathfinder"
-  :grants {:conditions [:fungus-immune]}}
+  :grants {:conditions [:fungus-adept]}}
  {:ideology :ecology
   :level 1
   :id :nothing-of-honor

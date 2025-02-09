@@ -1,6 +1,7 @@
 [{:ideology :industry
   :level 1
   :id :fiduciary-duty
+  :grants {:wonders [:externalities-market]}
   :modifies
   {:improvements
    {:farm
@@ -15,7 +16,8 @@
  {:ideology :industry
   :level 1
   :id :colonialism
-  :grants {:loadouts [:settler]}}
+  :grants {:loadouts [:settler]
+           :abilities [:purge-miasma :cull-fungus]}}
  {:ideology :industry
   :level 2
   :id :luxury-of-privacy

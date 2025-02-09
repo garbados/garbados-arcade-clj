@@ -82,3 +82,8 @@
 (defn gain-tech-locator [game faction ideology level n]
   (let [{tech-id :id} (get-in ideograph [ideology level n])]
     (gain-tech game faction tech-id)))
+
+(defn get-current-player [game]
+  (let [players (count (keys (:factions game)))
+        turn-n (get-in game [:turn :n])]
+    (mod turn-n players)))

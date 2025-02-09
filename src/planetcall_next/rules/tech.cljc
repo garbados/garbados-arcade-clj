@@ -3,9 +3,25 @@
    [arcade.slurp :refer-macros [slurp->details]]
    [clojure.string :as string]))
 
+(def ideology-names [:military :industry :contact :ecology :science])
+(def synergy-names [:science-military :military-industry :industry-contact :contact-ecology :ecology-science])
+
+(def ideology->opposites
+  {:ecology [:military :industry :military-industry]
+   :ecology-science [:industry]
+   :contact [:science :military :science-military]
+   :contact-ecology [:military]
+   :industry [:ecology :science :ecology-science]
+   :industry-contact [:science]
+   :military [:contact :ecology :contact-ecology]
+   :military-industry [:ecology]
+   :science [:industry :contact :industry-contact]
+   :science-military [:contact]})
+
 (def ideotech->details*
   (merge
    (slurp->details "resources/planetcall/ideotech/ecology.edn")
+   (slurp->details "resources/planetcall/ideotech/ecology-science.edn")
    (slurp->details "resources/planetcall/ideotech/industry.edn")
    (slurp->details "resources/planetcall/ideotech/military.edn")))
 
@@ -38,40 +54,80 @@
        (map string/capitalize)
        (string/join " ")))
 
+(def explain-key-names
+  {:actions ["action" "actions"]
+   :conditions ["condition" "conditions"]
+   :improvement ["improvement" "improvements"]
+   :abilities ["ability" "abilities"]
+   :loadouts ["loadout" "loadouts"]
+   :chassis ["chassis" "chassis"]
+   :mods ["unit mod" "unit mods"]
+   :wonders ["wonder" "wonders"]})
+
 (defn explain-tech [{description :description
                      grants :grants
+                     modifies :modifies
                      ideology :ideology
                      level :level
-                     n :n
                      :or {description "TODO"}}]
-  (if (seq grants)
-    (->> grants
-         (reduce
-          (fn [parts [k vs]]
-            (cons
-             (let [k-name (name k)
-                   k-name
-                   (if (< 1 (count vs))
-                     (apply str (subvec (vec k-name) 0
-                                        (dec (count k-name))))
-                     k-name)
-                   k-name (str (string/capitalize k-name) ":")
-                   v-s
-                   (string/join
-                    ", "
-                    (for [v vs]
-                      (->> (-> (name v)
-                               (string/split #"-"))
-                           (map string/capitalize)
-                           (string/join " "))))]
-               [k-name v-s])
-             parts))
-          [])
-         (map #(str "- " (string/join " " %)))
-         (cons "Grants:")
-         (cons "")
-         (cons description)
-         (cons "")
-         (cons (str (name ideology) " level " level))
-         (string/join "\n"))
-    ""))
+  (let [grant-text
+        (if (seq grants)
+          (->> grants
+               (reduce
+                (fn [parts [k vs]]
+                  (cons
+                   (let [k-name
+                         (if (= 1 (count vs))
+                           (first (get explain-key-names k))
+                           (second (get explain-key-names k)))
+                         k-name (str (string/capitalize k-name) ":")
+                         v-s
+                         (string/join
+                          ", "
+                          (for [v vs]
+                            (->> (-> (name v)
+                                     (string/split #"-"))
+                                 (map string/capitalize)
+                                 (string/join " "))))]
+                     [k-name v-s])
+                   parts))
+                [])
+               (map #(str "- " (string/join " " %)))
+               (cons "Grants:")
+               (string/join "\n"))
+          "")
+        modifies-text
+        (if modifies
+          (let [s
+                (->>
+                 (flatten
+                  (for [[k v] modifies]
+                    (cond
+                      (= k :actions)
+                      (str "Actions: " v)
+                      (= k :improvements)
+                      (for [[improvement yields] v]
+                        (str
+                         (string/capitalize (name improvement)) ": "
+                         (string/join
+                          ", "
+                          (for [[resource n] yields]
+                            (str (string/capitalize (name resource)) " " n))))))))
+                 (filter some?)
+                 (map #(str "- " %))
+                 (string/join "\n"))]
+            (str "Modifies:\n" s))
+          "")
+        level-description (str (name ideology) " level " level)]
+    (string/join "\n\n" (filter seq [level-description description grant-text modifies-text]))))
+
+(defn tech-forbidden-by* [tech-id]
+  (let [{ideology :ideology level :level} (ideotech->details tech-id)
+        opposites (ideology->opposites ideology)]
+    (set
+     (for [[tech-id* {ideology* :ideology level* :level}] ideotech->details
+           :when (and (contains? (set opposites) ideology*)
+                      (> level* (- (if (contains? (set ideology-names) ideology*) 4 3) level)))]
+       tech-id*))))
+
+(def tech-forbidden-by (memoize tech-forbidden-by*))
