@@ -34,7 +34,7 @@
   (let [main-ideo-circles
         (doall
          (flatten
-          (for [i (range 3)
+          (for [i (range 4)
                 :let [r (* (inc i) 128)
                       n (+ 3 i)
                       points (geometry/polygon-points [x y] 5 r)
@@ -70,7 +70,7 @@
         (doall
          (flatten
           (for [i (range 3)
-                :let [r (+ 64 (* (inc i) 144))
+                :let [r (+ 64 (* (inc i) 140))
                       n (+ 2 i)
                       points (geometry/polygon-points [x y] 5 r :rotation 120)
                       polygon (.add.polygon scene 0 0 (clj->js (flatten points)))]]

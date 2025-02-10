@@ -23,16 +23,18 @@
    []
    (repeat n "")))
 
-(defn draw-space-tooltip [scene x y w h]
-  (let [container (.add.container scene x y)
-        tooltip-rect (.add.rectangle scene 0 0 w h colors/BLACK)
+(defn draw-space-tooltip [scene x y w]
+  (let [top 4 right 4
         [improvement-text
          bools-text
          yield-text
          space-name-text
          coord-text
          :as text-objects]
-        (create-vert-text-objects scene w 5)]
+        (create-vert-text-objects scene w 5 :top top :right right)
+        h (reduce #(+ %1 (.-height %2)) (* 3 top) text-objects)
+        container (.add.container scene x (- y h))
+        tooltip-rect (.add.rectangle scene 0 0 w h colors/BLACK)]
     (.setOrigin tooltip-rect 0)
     (.setStrokeStyle tooltip-rect 3 colors/WHITE)
     (.add container (clj->js (cons tooltip-rect text-objects)))
@@ -67,7 +69,7 @@
   [scene & {:keys [WIDTH HEIGHT]
             :or {WIDTH config/WIDTH HEIGHT config/HEIGHT}}]
   (let [w (/ WIDTH 2) h (/ HEIGHT 10)
-        x (- WIDTH w) y (- HEIGHT h)
+        x (- WIDTH w) y HEIGHT
         transforms
         {:coord
          (fn [_game {:keys [coord]}]
@@ -101,7 +103,7 @@
                                         (second %)]))
                 (string/join ", ")))}
         {container :container
-         :as tooltip} (draw-space-tooltip scene x y w h)]
+         :as tooltip} (draw-space-tooltip scene x y w)]
     {:container container
      :update
      (fn [space]

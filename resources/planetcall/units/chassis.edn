@@ -15,9 +15,18 @@
  {:id :loper
   :moves 3
   :traits #{:fauna}}
- {:id :myrmidon
+ {:id :arachnodon
   :moves 3
-  :traits #{:fortified :fauna :honed}}
+  :traits #{:fauna :infantry :hover}}
+ {:id :rust-wyrm
+  :moves 3
+  :traits #{:fortified :fauna :honed :hover}}
+ {:id :bowerholm
+  :moves 2
+  :traits #{:fortified :fauna :resilient :psychic}}
  {:id :troll
   :moves 3
-  :traits #{:fortified :troll :fauna}}]
+  :traits #{:fortified :fauna :troll}}
+ {:id :planet-marine
+  :moves 2
+  :traits #{:fortified :infantry}}]

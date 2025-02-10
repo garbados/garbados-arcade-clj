@@ -1,7 +1,8 @@
 (ns planetcall-next.web.config)
 
-(def WIDTH 1000)
-(def HEIGHT 800)
+(def WIDTH 1200)
+(def HEIGHT 1000)
+
 (def PLANET-COLOR :cyan)
 (def PLAYER-COLORS
   [:red

@@ -3,8 +3,19 @@
    [arcade.slurp :refer-macros [slurp->details]]
    [clojure.string :as string]))
 
-(def ideology-names [:military :industry :contact :ecology :science])
-(def synergy-names [:science-military :military-industry :industry-contact :contact-ecology :ecology-science])
+(def ideology-names
+  [:military
+   :industry
+   :contact
+   :ecology
+   :science])
+
+(def synergy-names
+  [:science-military
+   :military-industry
+   :industry-contact
+   :contact-ecology
+   :ecology-science])
 
 (def ideology->opposites
   {:ecology [:military :industry :military-industry]
@@ -35,8 +46,9 @@
            (assoc-in ideograph [ideology level n] detail))
          ideograph
          (for [i (range (count details))
-               :let [detail (nth details i)]]
-           [i (assoc detail :n i)])))
+               :let [detail (nth details i)
+                     detail* (assoc detail :n i)]]
+           [i detail*])))
       ideograph
       (group-by :level ideo-details)))
    {}
