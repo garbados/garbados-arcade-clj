@@ -169,3 +169,86 @@
        :vegetation vegetation
        :miasma miasma}))
   )
+
+(comment
+  (ns planetcall-next.web
+    (:require
+     ["pixi.js" :refer [Application Graphics Text Container]]
+     ["@pixi/ui" :refer [Button]]
+     [planetcall-next.web.colors :as colors]))
+
+  (defn ->text
+    ([s style & {:as options :or {options {}}}]
+     (new Text (clj->js (merge {:text s :style style} options)))))
+
+  (defn move-to [thing [x y]]
+    (when x
+      (set! (.-x thing) x))
+    (when y
+      (set! (.-y thing) y)))
+
+  (defn pivot-to [thing [x y]]
+    (set! (.-pivot.-x thing) x)
+    (set! (.-pivot.-y thing) y))
+
+  (defn move-below [above below & {:as padding :or {padding 0}}]
+    (let [y (+ (.-y above) (.-height above) padding)]
+      (set! (.-y below) y)))
+
+  (defn container-size [container]
+    (reduce
+     (fn [{:keys [x y w h]} child]
+       {:x (min x (.-x child))
+        :y (min y (.-y child))
+        :w (max w (+ (.-width child) (.-x child)))
+        :h (max h (+ (.-height child) (.-y child)))})
+     {:x 0 :y 0 :w 0 :h 0}
+     (.-children container)))
+
+  (defn anchor-container [[ox oy] container ax & [ay]]
+    (let [{:keys [w h]} (container-size container)]
+      (set! (.-x container) (-> ox (- w) (* ax)))
+      (set! (.-y container) (-> oy (- h) (* (or ay ax))))))
+
+  (defn create-title-menu []
+    (let [title-text (->text "Planetcall" {:fontSize 70})
+          continue-game-text (->text "Continue Game" {:fontSize 30})
+          new-game-text (->text "New Game" {:fontSize 30})
+          load-game-text (->text "Load Game" {:fontSize 30})
+          settings-text (->text "Settings" {:fontSize 20})
+          credits-text (->text "Credits" {:fontSize 20})
+          title-menu (new Container)
+          title-menu-texts (new Container)
+          w-margin 30
+          h-margin 30
+          text-objects [title-text continue-game-text new-game-text load-game-text settings-text credits-text]]
+      (move-to title-menu-texts [w-margin h-margin])
+      (move-below title-text continue-game-text 30)
+      (move-below continue-game-text new-game-text)
+      (move-below new-game-text load-game-text)
+      (move-below load-game-text settings-text 30)
+      (move-below settings-text credits-text)
+      (doseq [obj text-objects]
+        (.addChild title-menu-texts obj))
+      (let [bg-w (+ (* 2 w-margin) (apply max (map #(.-width %) text-objects)))
+            bg-h (+ (* 2 h-margin) (.-height credits-text) (.-y credits-text))
+            title-menu-bg (-> (new Graphics)
+                              (.roundRect 0 0 bg-w bg-h 45)
+                              (.fill colors/WHITE))]
+        (.addChild title-menu
+                   title-menu-bg
+                   title-menu-texts))
+      title-menu))
+
+  (defn main []
+    (let [app (new Application)
+          title-menu (create-title-menu)]
+      (.stage.addChild app title-menu)
+      (-> (.init app (clj->js {:background colors/BLACK :resizeTo js/window}))
+          (.then (fn []
+                   ()
+                   (anchor-container title-menu 0.5)
+                   (js/document.body.appendChild (.-canvas app)))))))
+
+  (main)
+  )

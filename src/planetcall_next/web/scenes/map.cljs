@@ -5,8 +5,7 @@
    [planetcall-next.web.colors :as colors]
    [planetcall-next.web.config :as config]
    [planetcall-next.web.utils :refer [midpoint]]
-   [planetcall.geometry :refer [get-adjacent-coords]]
-   [dimdark.abilities :as a]))
+   [planetcall.geometry :refer [get-adjacent-coords]]))
 
 (set! *warn-on-infer* false)
 

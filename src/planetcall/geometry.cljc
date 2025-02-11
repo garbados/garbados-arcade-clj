@@ -6,17 +6,23 @@
 (s/def ::coords (s/coll-of ::coord :kind set?))
 
 (defn get-adjacent-coords
-  "Returns coordinates for hexes "
+  "Returns coordinates for adjacent hexes."
   [coord]
   {:pre [(s/valid? ::coord coord)]
    :post [#(s/valid? ::coords %)]}
   (let [[q r] coord]
-    [[q (inc r)]
-     [(dec q) r]
+    [[(inc q) r]
+     [(inc q) (dec r)]
      [q (dec r)]
-     [(inc q) (inc r)]
-     [(inc q) r]
-     [(inc q) (dec r)]]))
+     [(dec q) r]
+     [(dec q) (inc r)]
+     [q (inc r)]]
+    #_[[q (inc r)]
+       [(dec q) r]
+       [q (dec r)]
+       [(inc q) (inc r)]
+       [(inc q) r]
+       [(inc q) (dec r)]]))
 
 ;; (def get-adjacent-coords (memoize get-adjacent-coords*))
 
@@ -50,15 +56,25 @@
   {:pre [(s/valid? ::coord center)
          (s/valid? pos-int? n)]
    :post [#(s/valid? ::coords %)]}
-  (let [-n (- n)]
-    (reduce into
-            #{}
-            (for [q (range -n (+ 1 n))]
-              (let [less-r (max -n (- 0 q n))
-                    more-r (+ 1 (min n (- 0 q -n)))]
-                (map
-                 #(map + center [q %])
-                 (range less-r more-r)))))))
+  (reduce
+   (fn [coords q]
+     (reduce
+      (fn [coords r]
+        (cons [q r] coords))
+      coords
+      (range (max (- n) (- 0 q n))
+             (inc (min n (+ (- q) n))))))
+   []
+   (range (- n) (inc n)))
+  #_(let [-n (- n)]
+      (reduce into
+              #{}
+              (for [q (range -n (+ 2 n))
+                    :let [less-r (max -n (- 0 q n))
+                          more-r (+ 2 (min n (- 0 q -n)))]]
+                (set
+                 (for [r (range less-r more-r)]
+                   (map + center [q r])))))))
 
 (defn lerp [a b t]
   {:pre [(s/valid? int? a)

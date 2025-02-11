@@ -24,8 +24,10 @@
     "shadow-cljs": "^2.26.4"
   },
   "dependencies": {
-    "phaser": "^3.70.0",
+    "@pixi/ui": "^2.2.1",
+    "phaser": "^3.88.0",
     "phaser3-rex-plugins": "^1.80.13",
+    "pixi.js": "^8.7.3",
     "pouchdb": "^8.0.1",
     "react-dom": "^18.2.0"
   }
