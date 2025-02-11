@@ -4,7 +4,9 @@
    [planetcall-next.web.camera :as camera]
    [planetcall-next.web.colors :as colors]
    [planetcall-next.web.config :as config]
-   [planetcall-next.web.utils :refer [midpoint]]))
+   [planetcall-next.web.utils :refer [midpoint]]
+   [planetcall.geometry :refer [get-adjacent-coords]]
+   [dimdark.abilities :as a]))
 
 (set! *warn-on-infer* false)
 
@@ -236,23 +238,163 @@
     (when (seq units)
       (draw-units scene gfx ne-vertex center s-vertex units))))
 
+(defn draw-adjacency-highlights [scene board r & {:keys [color width] :or {color colors/YELLOW width 7}}]
+  (let [[sw-neighbor
+         w-neighbor
+         nw-neighbor
+         se-neighbor
+         e-neighbor
+         ne-neighbor]
+        (get-adjacent-coords [0 0])
+        container (.add.container scene 0 0)
+        [+x +y] [(* (/ r 4) (js/Math.sqrt 3)) (/ r 4)]
+        [*x *y] [0 (/ r 2)]]
+    (let [[x y] nw-neighbor
+          points (.getGridPoints board x y true)
+          [ne-vertex
+           _se-vertex
+           _s-vertex
+           sw-vertex
+           nw-vertex
+           n-vertex] (rex/cljs-points points)
+          lines [(.add.line scene +x +y
+                            (first nw-vertex) (second nw-vertex)
+                            (first n-vertex) (second n-vertex))
+                 (.add.line scene *x *y
+                            (first nw-vertex) (second nw-vertex)
+                            (first sw-vertex) (second sw-vertex))
+                 (.add.line scene (* (/ r 4) (js/Math.sqrt 3)) (/ r 4)
+                            (first ne-vertex) (second ne-vertex)
+                            (first n-vertex) (second n-vertex))]]
+      (.add container (clj->js lines)))
+    (let [[x y] ne-neighbor
+          points (.getGridPoints board x y true)
+          [ne-vertex
+           se-vertex
+           _s-vertex
+           _sw-vertex
+           nw-vertex
+           n-vertex] (rex/cljs-points points)
+          lines [(.add.line scene +x +y
+                            (first nw-vertex) (second nw-vertex)
+                            (first n-vertex) (second n-vertex))
+                 (.add.line scene *x *y
+                            (first ne-vertex) (second ne-vertex)
+                            (first se-vertex) (second se-vertex))
+                 (.add.line scene +x +y
+                            (first ne-vertex) (second ne-vertex)
+                            (first n-vertex) (second n-vertex))]]
+      (.add container (clj->js lines)))
+    (let [[x y] e-neighbor
+          points (.getGridPoints board x y true)
+          [ne-vertex
+           se-vertex
+           s-vertex
+           _sw-vertex
+           _nw-vertex
+           n-vertex] (rex/cljs-points points)
+          lines [(.add.line scene +x +y
+                            (first se-vertex) (second se-vertex)
+                            (first s-vertex) (second s-vertex))
+                 (.add.line scene *x *y
+                            (first ne-vertex) (second ne-vertex)
+                            (first se-vertex) (second se-vertex))
+                 (.add.line scene +x +y
+                            (first ne-vertex) (second ne-vertex)
+                            (first n-vertex) (second n-vertex))]]
+      (.add container (clj->js lines)))
+    (let [[x y] se-neighbor
+          points (.getGridPoints board x y true)
+          [ne-vertex
+           se-vertex
+           s-vertex
+           sw-vertex
+           _nw-vertex
+           _n-vertex] (rex/cljs-points points)
+          lines [(.add.line scene +x +y
+                            (first se-vertex) (second se-vertex)
+                            (first s-vertex) (second s-vertex))
+                 (.add.line scene *x *y
+                            (first ne-vertex) (second ne-vertex)
+                            (first se-vertex) (second se-vertex))
+                 (.add.line scene +x +y
+                            (first sw-vertex) (second sw-vertex)
+                            (first s-vertex) (second s-vertex))]]
+      (.add container (clj->js lines)))
+    (let [[x y] sw-neighbor
+          points (.getGridPoints board x y true)
+          [_ne-vertex
+           se-vertex
+           s-vertex
+           sw-vertex
+           nw-vertex
+           _n-vertex] (rex/cljs-points points)
+          lines [(.add.line scene +x +y
+                            (first se-vertex) (second se-vertex)
+                            (first s-vertex) (second s-vertex))
+                 (.add.line scene *x *y
+                            (first nw-vertex) (second nw-vertex)
+                            (first sw-vertex) (second sw-vertex))
+                 (.add.line scene +x +y
+                            (first sw-vertex) (second sw-vertex)
+                            (first s-vertex) (second s-vertex))]]
+      (.add container (clj->js lines)))
+    (let [[x y] w-neighbor
+          points (.getGridPoints board x y true)
+          [_ne-vertex
+           _se-vertex
+           s-vertex
+           sw-vertex
+           nw-vertex
+           n-vertex] (rex/cljs-points points)
+          lines [(.add.line scene +x +y
+                            (first sw-vertex) (second sw-vertex)
+                            (first s-vertex) (second s-vertex))
+                 (.add.line scene *x *y
+                            (first nw-vertex) (second nw-vertex)
+                            (first sw-vertex) (second sw-vertex))
+                 (.add.line scene +x +y
+                            (first nw-vertex) (second nw-vertex)
+                            (first n-vertex) (second n-vertex))]]
+      (.add container (clj->js lines)))
+    (doseq [line (.-list container)]
+      (.setStrokeStyle line width color)
+      (.setLineWidth line width))
+    {:container container
+     :update
+     (fn [[x y]]
+       (.setVisible container true)
+       (let [center-points (map #(vec [(.-x %) (.-y %)]) (.getGridPoints board x y true))
+             [ct-x ct-y] (apply midpoint center-points)]
+         (.setPosition container ct-x ct-y)))
+     :reset
+     (fn []
+       (.setVisible container false))}))
+
 (defn create-map-scene [scene]
   (let [{:keys [board coords game]} (.registry.get scene "game")
         center-points (map #(vec [(.-x %) (.-y %)]) (.getGridPoints board 12 12 true)) ; map center
         [ct-x ct-y] (apply midpoint center-points)
         _camera (camera/draggable-camera scene ct-x ct-y 0.5)
-        gfx (init-gfx scene)]
+        gfx (init-gfx scene)
+        r 64
+        {highlight-space :update
+         reset-highlight :reset} (draw-adjacency-highlights scene board r)]
     (let [coord->units (group-by :coord (vals (:units @game)))]
       (doall
        (for [coord coords
              :let [units (coord->units coord)
                    space (get-in @game [:spaces coord])]]
-         (draw-space scene gfx board 64 coord space units))))
+         (draw-space scene gfx board r coord space units))))
     (.setInteractive board)
     (.on board "tilemove"
          (fn [_pointer xy]
            (let [coord [(.-x xy) (.-y xy)]
                  space (get-in @game [:spaces coord])]
              (if space
-               (.events.emit scene "tilemove" space)
-               (.events.emit scene "tilereset")))))))
+               (do
+                 (highlight-space coord)
+                 (.events.emit scene "tilemove" space))
+               (do
+                 (reset-highlight)
+                 (.events.emit scene "tilereset"))))))))

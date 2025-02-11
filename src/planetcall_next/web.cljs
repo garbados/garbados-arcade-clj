@@ -26,7 +26,7 @@
   (extends js/Phaser.Scene)
   (constructor [this] (super (clj->js {:key "ui" :active true})))
   Object
-  (create [this] (create-ui-scene this :active :tech)))
+  (create [this] (create-ui-scene this :active :map)))
 
 (defclass MapScene
   (extends js/Phaser.Scene)

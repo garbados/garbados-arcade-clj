@@ -11,12 +11,12 @@
   {:pre [(s/valid? ::coord coord)]
    :post [#(s/valid? ::coords %)]}
   (let [[q r] coord]
-    #{[(dec q) r]
-      [(dec q) (inc r)]
-      [q (inc r)]
-      [(dec q) (dec r)]
-      [(inc q) (dec r)]
-      [(inc q) r]}))
+    [[q (inc r)]
+     [(dec q) r]
+     [q (dec r)]
+     [(inc q) (inc r)]
+     [(inc q) r]
+     [(inc q) (dec r)]]))
 
 ;; (def get-adjacent-coords (memoize get-adjacent-coords*))
 
