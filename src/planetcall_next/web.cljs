@@ -1,53 +1,76 @@
 (ns planetcall-next.web
   (:require
-   ["pixi.js" :refer [Application Container Graphics]]
+   ["pixi.js" :refer [Application Container Graphics TextStyle]]
    ["@pixi/ui" :refer [Button]]
    [planetcall-next.pixi.utils :as pixi]
    [planetcall-next.web.colors :as colors]))
 
 (set! *warn-on-infer* false)
 
-(defn new-game-button []
-  (let [view (new Container)
-        outer-view (new Container)
-        text (pixi/->text "New Game" {:fontSize 30 :fill colors/WHITE})
+(defn create-title-button [text & {:keys [on-hover on-out on-click font-size]
+                                   :or {on-hover identity
+                                        on-out identity
+                                        on-click identity
+                                        font-size 30}}]
+  (let [inner-container (new Container)
+        outer-container (new Container)
+        style (new TextStyle (clj->js {:fontSize font-size :fill colors/WHITE}))
+        text (pixi/->text text style)
         bg-w (.-width text) bg-h (.-height text)
-        bg (-> (new Graphics)
-               (.roundRect 0 0 bg-w bg-h 45)
-               (.fill colors/BLACK))
-        button (new Button view)]
-    (.addChild view text bg)
-    (.addChild outer-view button)
+        bg (new Graphics)
+        draw-bg (fn [gfx color]
+                  (-> gfx
+                      (.rect 0 0 bg-w bg-h)
+                      (.fill color)))
+        button (new Button inner-container)
+        reset-button (fn []
+                       (set! (.-fill style) colors/WHITE)
+                       (draw-bg bg colors/BLACK)
+                       (on-out))
+        hover-button (fn []
+                       (set! (.-fill style) colors/BLACK)
+                       (draw-bg bg colors/WHITE)
+                       (on-hover))]
+    (draw-bg bg colors/BLACK)
     (set! (.-enabled button) true)
-    (.onHover.connect button (fn []
-                               (set! (.-style.-fill text) colors/BLACK)
-                               (set! (.-style.-fill bg) colors/WHITE)))
-    (.onOut.connect button (fn []
-                             (set! (.-style.-fill text) colors/WHITE)
-                             (set! (.-style.-fill bg) colors/BLACK)))
-    outer-view))
+    (.addChild inner-container bg text)
+    (.addChild outer-container inner-container)
+    (.onHover.connect button hover-button)
+    (.onOut.connect button reset-button)
+    (.onDown.connect button (fn []
+                              (set! (.-fill style) colors/WHITE)
+                              (draw-bg bg colors/DIM-GRAY)
+                              (on-click)))
+    (.onUp.connect button hover-button)
+    (.onUpOut.connect button reset-button)
+    outer-container))
 
 (defn create-title-menu []
   (let [title-text (pixi/->text "- P L A N E T C A L L -" {:fontSize 70 :fill colors/WHITE})
-        continue-game-text (pixi/->text "Continue" {:fontSize 30 :fill colors/WHITE})
-        new-game-text (new-game-button)
-        load-game-text (pixi/->text "Load Game" {:fontSize 30 :fill colors/WHITE})
-        settings-text (pixi/->text "Settings" {:fontSize 20 :fill colors/WHITE})
-        credits-text (pixi/->text "Credits" {:fontSize 20 :fill colors/WHITE})
+        continue-game-text (create-title-button "Continue")
+        new-game-text (create-title-button "New Game")
+        load-game-text (create-title-button "Load Game")
+        settings-text (create-title-button "Settings")
+        credits-text (create-title-button "Credits")
         title-menu (new Container)
         title-menu-texts (new Container)
         w-margin 30
         h-margin 30
-        text-objects [title-text continue-game-text new-game-text load-game-text settings-text credits-text]]
+        buttons [continue-game-text new-game-text load-game-text settings-text credits-text]]
     (pixi/move-to title-menu-texts [w-margin h-margin])
-    (pixi/move-below title-text continue-game-text 30)
-    (pixi/move-below continue-game-text new-game-text)
-    (pixi/move-below new-game-text load-game-text)
-    (pixi/move-below load-game-text settings-text 30)
-    (pixi/move-below settings-text credits-text)
-    (doseq [obj text-objects]
-      (.addChild title-menu-texts obj)
-      (.anchor.set obj 0.5 0))
+    (pixi/move-below title-text continue-game-text 5)
+    (pixi/move-below continue-game-text new-game-text 5)
+    (pixi/move-below new-game-text load-game-text 5)
+    (pixi/move-below load-game-text settings-text 5)
+    (pixi/move-below settings-text credits-text 5)
+    (doseq [obj (cons title-text buttons)]
+      (.addChild title-menu-texts obj))
+    (.anchor.set title-text 0.5 0)
+    (doseq [button buttons]
+      (pixi/anchor-container [(.-x button)
+                              (+ (.-y button) (.-height button))]
+                             button
+                             0.5 1))
     (let [{:keys [w h]} (pixi/container-size title-menu-texts)
           bg-w (+ (* 2 w-margin) w)
           bg-h (+ (* 2 h-margin) h)
