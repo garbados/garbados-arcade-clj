@@ -30,17 +30,18 @@
         hover-button (fn []
                        (set! (.-fill style) colors/BLACK)
                        (draw-bg bg colors/WHITE)
-                       (on-hover))]
+                       (on-hover))
+        click-button (fn []
+                       (set! (.-fill style) colors/WHITE)
+                       (draw-bg bg colors/DIM-GRAY)
+                       (on-click))]
     (draw-bg bg colors/BLACK)
     (set! (.-enabled button) true)
     (.addChild inner-container bg text)
     (.addChild outer-container inner-container)
     (.onHover.connect button hover-button)
     (.onOut.connect button reset-button)
-    (.onDown.connect button (fn []
-                              (set! (.-fill style) colors/WHITE)
-                              (draw-bg bg colors/DIM-GRAY)
-                              (on-click)))
+    (.onDown.connect button click-button)
     (.onUp.connect button hover-button)
     (.onUpOut.connect button reset-button)
     outer-container))
