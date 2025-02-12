@@ -1,114 +1,80 @@
 (ns planetcall-next.web
   (:require
-   ["phaser" :as Phaser]
-   [planetcall-next.web.camera :as camera]
-   [planetcall-next.web.colors :as colors]
-   [planetcall-next.web.config :as config]
-   [planetcall-next.web.scenes.map :as map]
-   [planetcall-next.web.utils :refer [midpoint]]
-   [planetcall.geometry :as geo]
-   [shadow.cljs.modern :refer [defclass]]))
+   ["pixi.js" :refer [Application Container Graphics]]
+   ["@pixi/ui" :refer [Button]]
+   [planetcall-next.pixi.utils :as pixi]
+   [planetcall-next.web.colors :as colors]))
 
 (set! *warn-on-infer* false)
 
-(def sqrt3 (js/Math.sqrt 3))
+(defn new-game-button []
+  (let [view (new Container)
+        outer-view (new Container)
+        text (pixi/->text "New Game" {:fontSize 30 :fill colors/WHITE})
+        bg-w (.-width text) bg-h (.-height text)
+        bg (-> (new Graphics)
+               (.roundRect 0 0 bg-w bg-h 45)
+               (.fill colors/BLACK))
+        button (new Button view)]
+    (.addChild view text bg)
+    (.addChild outer-view button)
+    (set! (.-enabled button) true)
+    (.onHover.connect button (fn []
+                               (set! (.-style.-fill text) colors/BLACK)
+                               (set! (.-style.-fill bg) colors/WHITE)))
+    (.onOut.connect button (fn []
+                             (set! (.-style.-fill text) colors/WHITE)
+                             (set! (.-style.-fill bg) colors/BLACK)))
+    outer-view))
 
-(defn size->points [size]
-  (let [w (* size sqrt3)
-        h (* size 2)]
-    [[(* w 0.5) 0]
-     [w (* h 0.25)]
-     [w (* h 0.75)]
-     [(* w 0.5) h]
-     [0 (* h 0.75)]
-     [0 (* h 0.25)]]))
+(defn create-title-menu []
+  (let [title-text (pixi/->text "- P L A N E T C A L L -" {:fontSize 70 :fill colors/WHITE})
+        continue-game-text (pixi/->text "Continue" {:fontSize 30 :fill colors/WHITE})
+        new-game-text (new-game-button)
+        load-game-text (pixi/->text "Load Game" {:fontSize 30 :fill colors/WHITE})
+        settings-text (pixi/->text "Settings" {:fontSize 20 :fill colors/WHITE})
+        credits-text (pixi/->text "Credits" {:fontSize 20 :fill colors/WHITE})
+        title-menu (new Container)
+        title-menu-texts (new Container)
+        w-margin 30
+        h-margin 30
+        text-objects [title-text continue-game-text new-game-text load-game-text settings-text credits-text]]
+    (pixi/move-to title-menu-texts [w-margin h-margin])
+    (pixi/move-below title-text continue-game-text 30)
+    (pixi/move-below continue-game-text new-game-text)
+    (pixi/move-below new-game-text load-game-text)
+    (pixi/move-below load-game-text settings-text 30)
+    (pixi/move-below settings-text credits-text)
+    (doseq [obj text-objects]
+      (.addChild title-menu-texts obj)
+      (.anchor.set obj 0.5 0))
+    (let [{:keys [w h]} (pixi/container-size title-menu-texts)
+          bg-w (+ (* 2 w-margin) w)
+          bg-h (+ (* 2 h-margin) h)
+          title-menu-bg (-> (new Graphics)
+                            (.roundRect 0 0 bg-w bg-h 45)
+                            (.fill colors/BLACK))]
+      (set! (.-pivot.-x title-menu) (- (.-x title-menu) (/ w 2)))
+      (.addChild title-menu
+                 title-menu-bg
+                 title-menu-texts))
+    title-menu))
 
-(defn axial->offset [[q r]]
-  [(+ q (/ (- r (mod r 2)) 2))
-   r])
-
-(defn create-hex-board [scene radius n & {:keys [width height]
-                                          :or {width (/ config/WIDTH 2)
-                                               height (/ config/HEIGHT 2)}}]
-  (let [container (.add.container scene width height)
-        coords (geo/get-coords-within [0 0] n)
-        w (* radius sqrt3)
-        h (* radius 2)
-        points (size->points radius)
-        js-points (clj->js (map (fn [[x y]] (clj->js {:x x :y y})) points))
-        hexagons
-        (reduce
-         (fn [polygons [coord container object]]
-           (assoc polygons coord {:container container
-                                  :object object}))
-         {}
-         (for [[q r] coords
-               :let [[x y] (axial->offset [q r])
-                     px (cond-> (* x w)
-                          (odd? y) (+ (/ w 2))
-                          :also int)
-                     py (* y h 0.75)
-                     p-container (.add.container scene px py)
-                     polygon (.add.polygon scene 0 0 js-points)]]
-           (do
-             (.add p-container polygon)
-             (.add container p-container)
-             [[x y] p-container polygon])))]
-    {:container container
-     :vertices points
-     :center (apply midpoint points)
-     :hexagons hexagons}))
-
-(defn create-test-screen [scene]
-  (let [width (/ config/WIDTH 2)
-        height (/ config/HEIGHT 2)
-        camera (camera/draggable-camera scene width height 0.5)
-        radius 64
-        [ct-x ct-y] [(- (/ radius 2))
-                     (- (/ radius 2))]
-        {:keys [hexagons center]
-         [n-vertex
-          ne-vertex
-          se-vertex
-          s-vertex
-          sw-vertex
-          nw-vertex
-          :as vertices] :vertices}
-        (create-hex-board scene radius 6 :width width :height height)]
-    (doseq [{object :object
-             container :container} (vals hexagons)]
-      (let [[[x1 y1]
-             [x2 y2]
-             [x3 y3]] [nw-vertex n-vertex center]
-            triangle (.add.triangle scene ct-x ct-y x1 y1 x2 y2 x3 y3 colors/WHITE)]
-        (.add container triangle))
-      (let [[[x1 y1]
-             [x2 y2]
-             [x3 y3]] [ne-vertex n-vertex center]
-            triangle (.add.triangle scene ct-x ct-y x1 y1 x2 y2 x3 y3 colors/YELLOW)]
-        (.add container triangle))
-      (.setStrokeStyle object 3 colors/GREEN))))
-
-(defclass TestScreen
-  (extends js/Phaser.Scene)
-  (constructor [this] (super (clj->js {:key "title"})))
-  Object
-  (create [this] (create-test-screen this)))
-
-(def game-config
-  (clj->js {:type (.-AUTO Phaser)
-            :scene [TestScreen]
-            :width config/WIDTH
-            :height config/HEIGHT
-            :parent "app"
-            :scale {:mode (-> Phaser .-Scale .-FIT)
-                    :autoCenter (-> Phaser .-Scale .-CENTER_BOTH)}}))
-
-(defonce game (atom nil))
+(defn init [app]
+  (set! (-> app .-stage .-eventMode) "static")
+  (set! (-> app .-stage .-hitArea) (.-screen app))
+  (let [title-menu (create-title-menu)
+        [ox oy] [(-> app .-screen .-width)
+                 (-> app .-screen .-height)]]
+    (pixi/anchor-container [ox oy] title-menu 0.5 1)
+    (.stage.addChild app title-menu)))
 
 (defn main []
-  (if @game
-    (js/window.location.reload)
-    (reset! game (new (.-Game Phaser) game-config))))
+  (let [app (new Application)]
+    (.then
+     (.init app (clj->js {:background colors/BLACK :resizeTo js/window}))
+     (fn []
+       (init app)
+       (js/document.body.appendChild (.-canvas app))))))
 
 (main)
