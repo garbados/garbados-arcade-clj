@@ -12,8 +12,7 @@
     (set! (.-y thing) y)))
 
 (defn pivot-to [thing [x y]]
-  (set! (.-pivot.-x ^js/Object thing) x)
-  (set! (.-pivot.-y ^js/Object thing) y))
+  (.pivot.set ^js/Object thing x y))
 
 (defn move-below [above below & {:as padding :or {padding 0}}]
   (let [y (+ (.-y above) (.-height above) padding)]

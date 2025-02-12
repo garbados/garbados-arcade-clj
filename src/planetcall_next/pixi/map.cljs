@@ -11,12 +11,13 @@
 (defn radius->points [r]
   (let [w (* r sqrt3)
         h (* r 2)]
-    [[(* w 0.5) 0]
-     [w (* h 0.25)]
-     [w (* h 0.75)]
-     [(* w 0.5) h]
-     [0 (* h 0.75)]
-     [0 (* h 0.25)]]))
+    (map (partial map #(js/Math.round %))
+         [[(* w 0.5) 0]
+          [w (* h 0.25)]
+          [w (* h 0.75)]
+          [(* w 0.5) h]
+          [0 (* h 0.75)]
+          [0 (* h 0.25)]])))
 
 (defn axial->offset [[q r]]
   [(+ q (/ (- r (mod r 2)) 2))
@@ -53,14 +54,29 @@
     (-> prefix-gfx
         (.poly (clj->js (flatten [nw-vertex n-vertex center])))
         (.fill (clj->js {:color colors/GREEN})))
+    (-> suffix-gfx
+        (.poly (clj->js (flatten [ne-vertex n-vertex center])))
+        (.fill (clj->js {:color colors/YELLOW})))
+    (-> fungus-gfx
+        (.poly (clj->js (flatten [nw-vertex
+                                  center
+                                  (midpoint s-vertex center)
+                                  (midpoint nw-vertex sw-vertex)])))
+        (.fill (clj->js {:color colors/RED})))
+    (-> fungus-gfx
+        (.poly (clj->js (flatten [s-vertex
+                                  (midpoint s-vertex center)
+                                  (midpoint nw-vertex sw-vertex)
+                                  sw-vertex])))
+        (.fill (clj->js {:color colors/TEAL})))
     (.addChild container
-               border-gfx
                prefix-gfx
                suffix-gfx
                fungus-gfx
-               miasma-gfx
                road-gfx
-               feature-gfx)
+               miasma-gfx
+               feature-gfx
+               border-gfx)
     (pixi/move-to container [px py])
     container))
 
