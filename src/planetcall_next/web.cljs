@@ -18,10 +18,14 @@
         activate-view
         (fn [state]
           (let [view (get @-views state)
-                other-views (disj (set (keys @-views)) state)]
+                other-views (-> (set (keys @-views))
+                                (disj state :nav))]
             (doseq [view-name other-views
                     :let [view (get @-views view-name)]]
               (set! (.-visible view) false))
+              (if (= state :game)
+                (set! (.-visible (:nav @-views)) false)
+                (set! (.-visible (:nav @-views)) true))
             (set! (.-visible view) true)))
         title-view (create-title-menu :click-continue-game #(activate-view :map))
         map-view (create-map-view app -game)
@@ -33,6 +37,7 @@
       (pixi/anchor-container offset title-view 0.5 1))
     (swap! -views assoc :game title-view)
     (swap! -views assoc :map map-view)
+    (swap! -views assoc :nav nav-view)
     (activate-view :game)
     (.stage.addChild app title-view map-view nav-view)))
 
