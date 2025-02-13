@@ -16,13 +16,7 @@
      [q (dec r)]
      [(dec q) r]
      [(dec q) (inc r)]
-     [q (inc r)]]
-    #_[[q (inc r)]
-       [(dec q) r]
-       [q (dec r)]
-       [(inc q) (inc r)]
-       [(inc q) r]
-       [(inc q) (dec r)]]))
+     [q (inc r)]]))
 
 ;; (def get-adjacent-coords (memoize get-adjacent-coords*))
 
@@ -56,6 +50,7 @@
   {:pre [(s/valid? ::coord center)
          (s/valid? pos-int? n)]
    :post [#(s/valid? ::coords %)]}
+  ;; FIXME use of center got lost in the refactor
   (reduce
    (fn [coords q]
      (reduce
@@ -65,16 +60,7 @@
       (range (max (- n) (- 0 q n))
              (inc (min n (+ (- q) n))))))
    []
-   (range (- n) (inc n)))
-  #_(let [-n (- n)]
-      (reduce into
-              #{}
-              (for [q (range -n (+ 2 n))
-                    :let [less-r (max -n (- 0 q n))
-                          more-r (+ 2 (min n (- 0 q -n)))]]
-                (set
-                 (for [r (range less-r more-r)]
-                   (map + center [q r])))))))
+   (range (- n) (inc n))))
 
 (defn lerp [a b t]
   {:pre [(s/valid? int? a)

@@ -1,45 +1,8 @@
 (ns planetcall-next.pixi.title 
   (:require
-   ["@pixi/ui" :refer [Button]]
-   ["pixi.js" :refer [Container Graphics TextStyle]]
+   ["pixi.js" :refer [Container Graphics]]
    [planetcall-next.pixi.utils :as pixi]
    [planetcall-next.web.colors :as colors]))
-
-(defn create-title-button [text & {:keys [on-hover on-out on-click font-size]
-                                   :or {font-size 30}}]
-  (let [inner-container (new Container)
-        outer-container (new Container)
-        style (new TextStyle (clj->js {:fontSize font-size :fill colors/WHITE}))
-        text (pixi/->text text style)
-        bg-w (.-width text) bg-h (.-height text)
-        bg (new Graphics)
-        draw-bg (fn [gfx color]
-                  (-> gfx
-                      (.rect 0 0 bg-w bg-h)
-                      (.fill color)))
-        button (new Button inner-container)
-        reset-button (fn []
-                       (set! (.-fill style) colors/WHITE)
-                       (draw-bg bg colors/BLACK)
-                       (when on-out (on-out)))
-        hover-button (fn []
-                       (set! (.-fill style) colors/BLACK)
-                       (draw-bg bg colors/WHITE)
-                       (when on-hover (on-hover)))
-        click-button (fn []
-                       (set! (.-fill style) colors/WHITE)
-                       (draw-bg bg colors/DIM-GRAY)
-                       (when on-click (on-click)))]
-    (draw-bg bg colors/BLACK)
-    (set! (.-enabled button) true)
-    (.addChild inner-container bg text)
-    (.addChild outer-container inner-container)
-    (.onHover.connect button hover-button)
-    (.onOut.connect button reset-button)
-    (.onDown.connect button click-button)
-    (.onUp.connect button hover-button)
-    (.onUpOut.connect button reset-button)
-    outer-container))
 
 (defn create-title-menu [& {:keys [click-continue-game
                                    click-new-game
@@ -47,11 +10,11 @@
                                    click-settings
                                    click-credits]}]
   (let [title-text (pixi/->text "- P L A N E T C A L L -" {:fontSize 70 :fill colors/WHITE})
-        continue-game-text (create-title-button "Continue" :on-click click-continue-game)
-        new-game-text (create-title-button "New Game" :on-click click-new-game)
-        load-game-text (create-title-button "Load Game" :on-click click-load-game)
-        settings-text (create-title-button "Settings" :on-click click-settings)
-        credits-text (create-title-button "Credits" :on-click click-credits)
+        continue-game-text (pixi/create-button "Continue" :on-click click-continue-game)
+        new-game-text (pixi/create-button "New Game" :on-click click-new-game)
+        load-game-text (pixi/create-button "Load Game" :on-click click-load-game)
+        settings-text (pixi/create-button "Settings" :on-click click-settings)
+        credits-text (pixi/create-button "Credits" :on-click click-credits)
         title-menu (new Container)
         title-menu-texts (new Container)
         w-margin 30

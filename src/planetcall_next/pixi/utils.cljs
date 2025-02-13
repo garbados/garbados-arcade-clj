@@ -1,9 +1,16 @@
 (ns planetcall-next.pixi.utils
-  (:require ["pixi.js" :refer [Text Container]]))
+  (:require
+   ["@pixi/ui" :refer [Button]]
+   ["pixi.js" :refer [BitmapText Container Text TextStyle Graphics]]
+   [planetcall-next.web.colors :as colors]))
 
 (defn ->text
   ([s style & {:as options :or {options {}}}]
    (new Text (clj->js (merge {:text s :style style} options)))))
+
+(defn ->bitmap-text
+  ([s style & {:as options :or {options {}}}]
+   (new BitmapText (clj->js (merge {:text s :style style} options)))))
 
 (defn move-to [thing [x y]]
   (when x
@@ -14,9 +21,13 @@
 (defn pivot-to [thing [x y]]
   (.pivot.set ^js/Object thing x y))
 
-(defn move-below [above below & {:as padding :or {padding 0}}]
-  (let [y (+ (.-y above) (.-height above) padding)]
+(defn move-below [above below & [padding]]
+  (let [y (+ (.-y above) (.-height above) (or padding 0))]
     (set! (.-y below) y)))
+
+(defn move-right [left right & [padding]]
+  (let [y (+ (.-x left) (.-width left) (or padding 0))]
+    (set! (.-x right) y)))
 
 (defn container-size [container]
   (reduce
@@ -36,8 +47,8 @@
 (defn on-drag-handlers [app container & {:keys [horz vert]}]
   (let [on-drag-move
         (fn [event]
-          (let [dx (-> ^js/Object event .-movement .-x)
-                dy (-> ^js/Object event .-movement .-y)]
+          (let [dx (-> ^js/Object event .-movement .-x (* (/ 1 (.-parent.-scale.-x ^js/Object container))))
+                dy (-> ^js/Object event .-movement .-y (* (/ 1 (.-parent.-scale.-y ^js/Object container))))]
             (when horz
               (set! (.-x container) (+ (.-x container) dx)))
             (when vert
@@ -93,3 +104,45 @@
                              (.scale.set outer (min max-zoom (+ (.-scale.-x outer) 0.1))))))
     (.addChild outer container)
     outer))
+
+(defn create-button [text & {:keys [top right on-hover on-out on-click font-size border-width]
+                             :or {font-size 30
+                                  top 6
+                                  right 6}}]
+  (let [inner-container (new Container)
+        outer-container (new Container)
+        style (new TextStyle (clj->js {:fontSize font-size :fill colors/WHITE}))
+        text (->text text style)
+        bg-w (+ (* 2 right) (.-width text))
+        bg-h (+ (* 2 top) (.-height text))
+        bg (new Graphics)
+        draw-bg (fn [gfx color]
+                  (.rect gfx 0 0 bg-w bg-h)
+                  (.fill gfx color)
+                  (when border-width
+                    (.stroke gfx (clj->js {:color colors/WHITE
+                                           :width border-width}))))
+        button (new Button inner-container)
+        reset-button (fn []
+                       (set! (.-fill style) colors/WHITE)
+                       (draw-bg bg colors/BLACK)
+                       (when on-out (on-out)))
+        hover-button (fn []
+                       (set! (.-fill style) colors/BLACK)
+                       (draw-bg bg colors/WHITE)
+                       (when on-hover (on-hover)))
+        click-button (fn []
+                       (set! (.-fill style) colors/WHITE)
+                       (draw-bg bg colors/DIM-GRAY)
+                       (when on-click (on-click)))]
+    (draw-bg bg colors/BLACK)
+    (move-to text [right top])
+    (set! (.-enabled button) true)
+    (.addChild inner-container bg text)
+    (.addChild outer-container inner-container)
+    (.onHover.connect button hover-button)
+    (.onOut.connect button reset-button)
+    (.onDown.connect button click-button)
+    (.onUp.connect button hover-button)
+    (.onUpOut.connect button reset-button)
+    outer-container))
