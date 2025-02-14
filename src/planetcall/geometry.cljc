@@ -63,11 +63,11 @@
    (range (- n) (inc n))))
 
 (defn lerp [a b t]
-  {:pre [(s/valid? int? a)
-         (s/valid? int? b)
+  {:pre [(s/valid? number? a)
+         (s/valid? number? b)
          (s/valid? number? t)]
-   :post [#(s/valid? int? %)]}
-  (int (+ a (* t (- b a)))))
+   :post [#(s/valid? number? %)]}
+  (+ a (* t (- b a))))
 
 (defn get-coords-between [coord1 coord2]
   {:pre [(s/valid? ::coord coord1)
