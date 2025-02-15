@@ -1,6 +1,7 @@
 (ns planetcall-next.rules.tech
   (:require
    [arcade.slurp :refer-macros [slurp->details]]
+   [clojure.set :as set]
    [clojure.string :as string]))
 
 (def ideology-names
@@ -16,6 +17,13 @@
    :industry-contact
    :contact-ecology
    :ecology-science])
+
+(def synergy->ideologies
+  {:science-military [:science :military]
+   :military-industry [:military :industry]
+   :industry-contact [:industry :contact]
+   :contact-ecology [:contact :ecology]
+   :ecology-science [:ecology :science]})
 
 (def ideology->opposites
   {:ecology [:military :industry :military-industry]
@@ -143,3 +151,29 @@
        tech-id*))))
 
 (def tech-forbidden-by (memoize tech-forbidden-by*))
+
+(defn has-researched-tier? [known-tech ideology level]
+  (if (contains? (set synergy-names) ideology)
+    (let [ideologies (synergy->ideologies ideology)]
+      (every? #(has-researched-tier? known-tech % (dec level)) ideologies))
+    (let [candidates (set (vals (get-in ideograph [ideology level] {})))]
+      (some some? (set/intersection known-tech candidates)))))
+
+(defn is-forbidden? [known-tech tech-id]
+  (let [forbidden (tech-forbidden-by tech-id)]
+    (seq (set/intersection known-tech forbidden))))
+
+(defn may-research? [known-tech tech-id]
+  (let [{ideology :ideology level :level} (ideotech->details tech-id)]
+    (and
+     (not (contains? known-tech tech-id))
+     (if (< 0 (dec level))
+       (has-researched-tier? known-tech ideology (dec level))
+       true)
+     (not (is-forbidden? known-tech tech-id)))))
+
+(defn get-researchable [known-tech]
+  (set
+   (filter
+    (partial may-research? known-tech)
+    (keys ideotech->details))))

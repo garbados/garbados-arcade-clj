@@ -35,6 +35,7 @@
                                   (.circle x y 9)
                                   (.fill (clj->js {:color color})))
                       :pos [x y]
+                      :color color
                       :ideology (nth names j)
                       :level (inc i)
                       :n k})
@@ -88,6 +89,7 @@
                                      :wordWrap true
                                      :wordWrapWidth (- w (* 2 right))})
         effect-rect (new Graphics)
+        effect-container (new Container)
         flavor-text (pixi/->text "" {:fill colors/WHITE
                                      :fontStyle "italic"
                                      :fontSize 20
@@ -95,8 +97,11 @@
                                      :wordWrap true
                                      :wordWrapWidth (- w (* 2 right))})
         flavor-rect (new Graphics)
+        flavor-container (new Container)
         container (new Container)]
-    (.addChild container effect-rect tech-title effect-text flavor-rect flavor-text)
+    (.addChild effect-container effect-rect tech-title effect-text)
+    (.addChild flavor-container flavor-rect flavor-text)
+    (.addChild container effect-container flavor-container)
     (.anchor.set tech-title 0 1)
     (.anchor.set effect-text 0 1)
     (.anchor.set flavor-text 1)
@@ -104,21 +109,32 @@
     (pixi/move-to flavor-text [(- right) (- top)])
     {:container container
      :update
-     (fn [[x y] details]
+     (fn [[x y] {tech-id :id :as details} known-tech]
        (set! (.-visible container) true)
        (pixi/move-to container [x y])
        (set! (.-text tech-title) (tech/tech-name details))
-       (set! (.-text effect-text) (tech/explain-tech details))
-       (set! (.-text flavor-text) (:flavor details ""))
-       (let [w (+ (.-width flavor-text) (* 2 right))
-             h (+ (.-height flavor-text) (* 2 top))]
-         (-> flavor-rect
-             (.clear)
-             (.rect 0 0 w h)
-             (.fill (clj->js {:color colors/BLACK}))
-             (.stroke (clj->js {:color colors/WHITE
-                                :width 2}))
-             (pixi/move-to [(- w) (- h)])))
+       (let [known? (contains? known-tech tech-id)
+             researchable? (tech/may-research? known-tech tech-id)
+             forbidden? (tech/is-forbidden? known-tech tech-id)]
+         (set! (.-text effect-text)
+               (cond-> (tech/explain-tech details)
+                 known? (str "\n\n[Realized]")
+                 researchable? (str "\n\n[Conceivable]")
+                 forbidden? (str "\n\n[Unthinkable]"))))
+       (if-let [flavor (:flavor details)]
+         (do
+           (set! (.-visible flavor-container) true)
+           (set! (.-text flavor-text) flavor)
+           (let [w (+ (.-width flavor-text) (* 2 right))
+                 h (+ (.-height flavor-text) (* 2 top))]
+             (-> flavor-rect
+                 (.clear)
+                 (.rect 0 0 w h)
+                 (.fill (clj->js {:color colors/BLACK}))
+                 (.stroke (clj->js {:color colors/WHITE
+                                    :width 2}))
+                 (pixi/move-to [(- w) (- h)]))))
+         (set! (.-visible flavor-container) false))
        (let [w (+ (* 2 right) (max (.-width tech-title) (.-width effect-text)))
              h (+ (.-height tech-title) (.-height effect-text) (* 2 top))]
          (-> effect-rect
@@ -145,17 +161,31 @@
          reset-tooltip :reset} (create-tech-tooltip 500 :top 5 :right 5)
         offset [(-> app .-screen .-width (/ 2))
                 (-> app .-screen .-height (/ 2))]
-        container (new Container)]
+        container (new Container)
+        known-tech (get-in @-game [:factions 0 :research :known] #{})
+        researchable (tech/get-researchable known-tech)]
     (pixi/move-to container offset)
     (doseq [{circles :circles} tech-circles]
       (doseq [{circle :circle
                ideology :ideology
                level :level
                n :n
-               pos :pos} circles
-              :let [details (get-in tech/ideograph [ideology level n])]]
-        (set! (.-eventMode circle) "static")
-        (.on circle "pointerover" (partial update-tooltip pos details) )
-        (.on circle "pointerout" reset-tooltip)))
+               pos :pos
+               color :color} circles
+              :let [{tech-id :id :as details}
+                    (get-in tech/ideograph [ideology level n])]]
+        (when details
+          (set! (.-eventMode circle) "static")
+          (when (contains? researchable tech-id)
+            (.stroke circle (clj->js {:color colors/WHITE
+                                      :width 5})))
+          (when (tech/is-forbidden? known-tech tech-id)
+            (.stroke circle (clj->js {:color colors/BLACK
+                                      :width 5})))
+          (when (contains? known-tech tech-id)
+            (.stroke circle (clj->js {:color color
+                                      :width 10})))
+          (.on circle "pointerover" (partial update-tooltip pos details known-tech))
+          (.on circle "pointerout" reset-tooltip))))
     (.addChild container tech-view tooltip-container)
     container))

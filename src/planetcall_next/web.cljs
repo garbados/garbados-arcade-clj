@@ -6,6 +6,7 @@
    [planetcall-next.pixi.tech :refer [create-tech-view]]
    [planetcall-next.pixi.title :refer [create-title-menu]]
    [planetcall-next.pixi.utils :as pixi]
+   [planetcall-next.rules.games :as games]
    [planetcall-next.rules.scenarios :as scenarios]
    [planetcall-next.web.colors :as colors]))
 
@@ -14,7 +15,10 @@
 (defn start [app]
   (set! (-> app .-stage .-eventMode) "static")
   (set! (-> app .-stage .-hitArea) (.-screen app))
-  (let [-game (atom (scenarios/init-game-from-scenario :standard))
+  (let [-game (atom
+               (-> (scenarios/init-game-from-scenario :standard)
+                   (games/gain-tech 0 :colonialism)
+                   (games/gain-tech 0 :first-to-market)))
         -views (atom {})
         activate-view
         (fn [state]
@@ -24,9 +28,9 @@
             (doseq [view-name other-views
                     :let [view (get @-views view-name)]]
               (set! (.-visible view) false))
-              (if (= state :game)
-                (set! (.-visible (:nav @-views)) false)
-                (set! (.-visible (:nav @-views)) true))
+            (if (= state :game)
+              (set! (.-visible (:nav @-views)) false)
+              (set! (.-visible (:nav @-views)) true))
             (set! (.-visible view) true)))
         title-view (create-title-menu :click-continue-game #(activate-view :map))
         map-view (create-map-view app -game)
