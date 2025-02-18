@@ -1,7 +1,7 @@
 [{:ideology :industry
   :level 1
   :id :fiduciary-duty
-  :flavor "Put another way, the right of first refusal must advance a valid corporate purpose.  [The owners] have sought to control craigslist's stockholder composition for their personal and sentimental benefit at [the shareholder]'s expense. Thus, it fails the price element of the entire fairness test and does not advance a proper corporate purpose.
+  :flavor "Put another way, the right of first refusal must advance a valid corporate purpose.  [The owners] have sought to control [the firm]'s stockholder composition for their personal and sentimental benefit at [the shareholder]'s expense. Thus, it fails the price element of the entire fairness test and does not advance a proper corporate purpose.
                 -- Domestic Hldgs., Inc. v. Newmark (2010)"
   :grants {:wonders [:externalities-market]}
   :modifies

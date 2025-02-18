@@ -35,6 +35,7 @@
                                   (.circle x y 9)
                                   (.fill (clj->js {:color color})))
                       :color color
+                      :pos [x y]
                       :ideology (nth names j)
                       :level (inc i)
                       :n k})
@@ -149,9 +150,9 @@
                                      :or {radius 128}}]
   (let [{tech-view-container :container
          tech-circles :ideologies} (create-tech-graph radius)
-        tech-view (->> tech-view-container
-                       (pixi/scrollable-container app)
-                       (pixi/zoomable-container))
+        tech-view (as-> tech-view-container $
+                    (pixi/scrollable-container app $)
+                    (pixi/zoomable-container $ :min-zoom 0.5))
         {tooltip-container :container
          update-tooltip :update
          reset-tooltip :reset} (create-tech-tooltip 500 :top 5 :right 5)
