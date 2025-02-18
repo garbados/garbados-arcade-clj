@@ -17,8 +17,9 @@
   (set! (-> app .-stage .-hitArea) (.-screen app))
   (let [-game (atom
                (-> (scenarios/init-game-from-scenario :standard)
-                   (games/gain-tech 0 :colonialism)
-                   (games/gain-tech 0 :first-to-market)))
+                   (games/gain-tech 0 :contamination-protocols)
+                   (games/gain-tech 0 :antimiasmic-enamel)
+                   (games/gain-tech 0 :rigorous-harmony)))
         -views (atom {})
         activate-view
         (fn [state]

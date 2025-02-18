@@ -156,7 +156,7 @@
   (if (contains? (set synergy-names) ideology)
     (let [ideologies (synergy->ideologies ideology)]
       (every? #(has-researched-tier? known-tech % (dec level)) ideologies))
-    (let [candidates (set (vals (get-in ideograph [ideology level] {})))]
+    (let [candidates (set (map :id (vals (get-in ideograph [ideology level] {}))))]
       (some some? (set/intersection known-tech candidates)))))
 
 (defn is-forbidden? [known-tech tech-id]
@@ -167,9 +167,9 @@
   (let [{ideology :ideology level :level} (ideotech->details tech-id)]
     (and
      (not (contains? known-tech tech-id))
-     (if (< 0 (dec level))
-       (has-researched-tier? known-tech ideology (dec level))
-       true)
+     (if (= 1 level)
+       true
+       (has-researched-tier? known-tech ideology (dec level)))
      (not (is-forbidden? known-tech tech-id)))))
 
 (defn get-researchable [known-tech]

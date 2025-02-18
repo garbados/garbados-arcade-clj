@@ -34,7 +34,6 @@
                      {:circle (-> (new Graphics)
                                   (.circle x y 9)
                                   (.fill (clj->js {:color color})))
-                      :pos [x y]
                       :color color
                       :ideology (nth names j)
                       :level (inc i)
@@ -159,7 +158,9 @@
         {tooltip-container :container
          update-tooltip :update
          reset-tooltip :reset} (create-tech-tooltip 500 :top 5 :right 5)
-        offset [(-> app .-screen .-width (/ 2))
+        [offset-x
+         offsey-y
+         :as offset] [(-> app .-screen .-width (/ 2))
                 (-> app .-screen .-height (/ 2))]
         container (new Container)
         known-tech (get-in @-game [:factions 0 :research :known] #{})
@@ -170,7 +171,6 @@
                ideology :ideology
                level :level
                n :n
-               pos :pos
                color :color} circles
               :let [{tech-id :id :as details}
                     (get-in tech/ideograph [ideology level n])]]
@@ -185,7 +185,11 @@
           (when (contains? known-tech tech-id)
             (.stroke circle (clj->js {:color color
                                       :width 10})))
-          (.on circle "pointerover" (partial update-tooltip pos details known-tech))
+          (.on circle "pointerover"
+               (fn [event]
+                 (let [x* (-> event .-screen .-x (- offset-x))
+                       y* (-> event .-screen .-y (- offsey-y))]
+                   (update-tooltip [x* y*] details known-tech))))
           (.on circle "pointerout" reset-tooltip))))
     (.addChild container tech-view tooltip-container)
     container))
