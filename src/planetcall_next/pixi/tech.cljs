@@ -66,17 +66,14 @@
 (defn create-tech-graph [radius]
   (let [container (new Container)
         ideo-circles (create-ideo-circles radius)
-        syng-circles (create-syng-circles radius)]
-    (doseq [{circles :circles line :line} ideo-circles]
-      (.addChild container line)
-      (doseq [{circle :circle} circles]
-        (.addChild container circle)))
-    (doseq [{circles :circles line :line} syng-circles]
+        syng-circles (create-syng-circles radius)
+        circles (concat ideo-circles syng-circles)]
+    (doseq [{circles :circles line :line} circles]
       (.addChild container line)
       (doseq [{circle :circle} circles]
         (.addChild container circle)))
     {:container container
-     :ideologies (concat ideo-circles syng-circles)}))
+     :ideologies circles}))
 
 (defn create-tech-tooltip
   [w & {:keys [top right]}]
@@ -111,7 +108,7 @@
      (fn [[x y] {tech-id :id :as details} known-tech]
        (set! (.-visible container) true)
        (pixi/move-to container [x y])
-       (set! (.-text tech-title) (tech/tech-name details))
+       (set! (.-text tech-title) (tech/get-tech-name details))
        (let [known? (contains? known-tech tech-id)
              researchable? (tech/may-research? known-tech tech-id)
              forbidden? (tech/is-forbidden? known-tech tech-id)]
@@ -161,7 +158,7 @@
         [offset-x
          offsey-y
          :as offset] [(-> app .-screen .-width (/ 2))
-                (-> app .-screen .-height (/ 2))]
+                      (-> app .-screen .-height (/ 2))]
         container (new Container)
         known-tech (get-in @-game [:factions 0 :research :known] #{})
         researchable (tech/get-researchable known-tech)]

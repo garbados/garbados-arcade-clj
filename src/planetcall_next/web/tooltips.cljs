@@ -201,7 +201,7 @@
          (.setX container x)
          (.setY container y))
        (.setText title
-                 (tech/tech-name details))
+                 (tech/get-tech-name details))
        (let [{game :game} (.registry.get scene "game")
              player (games/get-current-player @game)
              known (get-in @game [:factions player :research :known] #{})

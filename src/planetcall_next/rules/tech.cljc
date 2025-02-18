@@ -69,10 +69,11 @@
    {}
    (->> ideograph vals (map vals) flatten (map #(map second %)) flatten)))
 
-(defn tech-name [{tech-id :id}]
-  (->> (string/split (name tech-id) #"-")
-       (map string/capitalize)
-       (string/join " ")))
+(defn get-tech-name [{tech-id :id tech-name :name}]
+  (or tech-name
+      (->> (string/split (name tech-id) #"-")
+           (map string/capitalize)
+           (string/join " "))))
 
 (def explain-key-names
   {:actions ["action" "actions"]
