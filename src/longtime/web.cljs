@@ -2,8 +2,9 @@
   (:require ["pouchdb" :as pouchdb]
             [arcade.db :as db :refer [delete-doc fetch-doc save-doc]]
             [arcade.reagent :refer [prompt-int prompt-text]]
+            [arcade.text :as text]
             [clojure.string :as string]
-            [longtime.contact-text :as contact-text]
+            [longtime.contacts :as contacts]
             [longtime.core :as core]
             [longtime.dream :as dream]
             [longtime.event :as event]
@@ -11,7 +12,7 @@
             [longtime.moment :as moment]
             [longtime.project :as project]
             [longtime.remark :as remark]
-            [arcade.text :as text]
+            [markdown.core :as md]
             [reagent.core :as r]
             [reagent.dom :as rd]))
 
@@ -120,11 +121,7 @@
 (defn- credits []
   [:div.container>div.box>div.content
    [:h3 "Credits"]
-   (let [lines (string/split-lines meta-text/credits-description)]
-     (for [i (range (count lines))
-           :let [line (nth lines i)]]
-       ^{:key i}
-       [:p line]))])
+   [:div {:dangerouslySetInnerHTML {:__html (md/md->html meta-text/credits-description)}}]])
 
 (defn- navbar []
   [:div.level
@@ -291,10 +288,7 @@
   [:div
    [:div.box>div.content
     [:h3 "Welcome to " [:em "The Longtime"]]
-    (let [lines (string/split-lines (meta-text/tutorial-text @herd))]
-      (for [i (range (count lines))
-            :let [line (nth lines i)]]
-        ^{:key i} [:p line]))]
+    [:div {:dangerouslySetInnerHTML {:__html (md/md->html (meta-text/template-tutorial @herd))}}]]
    [:button.button.is-fullwidth.is-primary
     {:on-click #(reset! gamestate :playing)}
     "Then let us begin!"]])
@@ -558,7 +552,7 @@
                                     (core/get-next-contact herd*))]
               (swap! herd update :contacts conj contact)
               [(str "A new People has made contact!")
-               (contact-text/contact->blurb contact)])
+               (contacts/contact->blurb contact)])
             (when (core/should-add-syndicate? herd*)
               (let [votes (core/tally-votes (:individuals herd*))
                     candidates (core/rank-candidates votes)]

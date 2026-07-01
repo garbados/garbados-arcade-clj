@@ -1,0 +1,8 @@
+The herd's migration path consists of stages of up to four locations each.
+At the end of each month, you will select a location from the next stage
+to travel to.
+Steppe locations can be crossed without spending a month,
+though nor can you enact projects on steppes.
+Longer paths may support larger herds,
+though it takes significant organization
+to adjust a migration like that.

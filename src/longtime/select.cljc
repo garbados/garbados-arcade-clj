@@ -1,6 +1,5 @@
 (ns longtime.select 
   (:require [clojure.spec.alpha :as s]
-            [clojure.spec.gen.alpha :as g]
             [longtime.core :as core]))
 
 (s/def ::skills (s/map-of ::core/skill nat-int?))
@@ -95,66 +94,82 @@
                :filter ::filter)
   :ret boolean?)
 
-(s/def ::comp? 
-  (s/with-gen
-    ifn?
-    #(g/return <)))
-
-(s/def ::set-comp?
-  (s/with-gen
-    ifn?
-    #(g/return contains?)))
+(s/def ::comparator #{:< :<= :> :>=})
+(def comparator->fn {:< < :<= <= :> > :>= >=})
 
 (s/def ::fulfillment
   (s/or :n ::core/fulfillment
-        :comp (s/tuple ::comp? ::core/fulfillment)))
+        :comparator (s/tuple ::comparator ::core/fulfillment)))
 
 (s/def ::passions
-  (s/or :passion ::core/skill
-        :set ::core/uses
-        :comp (s/tuple ::set-comp? any?)))
+  (s/or :one ::core/skill
+        :many ::core/uses))
+(s/def ::-passions ::passions)
 
 (s/def ::traits
   (s/or :one core/traits
         :many ::core/traits))
+(s/def ::-trait ::traits)
 
 (s/def ::age
-  (s/tuple ::comp? ::core/age))
+  (s/tuple ::comparator ::core/age))
 
 (s/def ::select (s/keys :opt-un [::traits
+                                 ::-trait
                                  ::core/skills
                                  ::fulfillment
                                  ::passions
+                                 ::-passions
                                  ::age]))
 
+(defn individual-traits-ok? [individual p? traits]
+  (if (and traits (s/valid? ::traits traits))
+    (let [[kind x] (s/conform ::traits traits)
+          individual-traits (:traits individual #{})]
+      (case kind
+        :one (p? (get individual-traits x))
+        :many (every? p? (for [trait x]
+                             (get individual-traits trait)))))
+    true))
+
+(s/fdef individual-traits-ok?
+  :args (s/cat :individual ::core/individual
+               :spec keyword?
+               :p? fn?
+               :traits ::traits*)
+  :ret boolean?)
+
+(defn individual-passions-ok? [individual p? passions]
+  (if (and passions (s/valid? ::passions passions))
+    (let [[kind x] (s/conform ::passions passions)
+          individual-passions (:passions individual #{})]
+      (case kind
+        :one (p? individual-passions x)
+        :many (every? some? (map individual-passions x))))
+    true))
+
 (defn passes-select?
-  [herd individual {:keys [traits skills fulfillment passions age]}]
-  (and (if (and traits (s/valid? ::traits traits))
-         (let [[kind x] (s/conform ::traits traits)]
-           (case kind
-             :one (some? (-> individual :traits x))
-             :many (every? some? (for [trait x]
-                                   (-> individual :traits trait)))))
-         true)
+  [herd individual {:keys [traits -traits
+                           passions -passions
+                           skills fulfillment age]}]
+  (and (individual-traits-ok? individual some? traits)
+       (individual-traits-ok? individual nil? -traits)
+       (individual-passions-ok? individual some? passions)
+       (individual-passions-ok? individual nil? -passions)
        (if skills
-         (every? true? (for [[skill value] skills]
-                         (-> individual :skills skill (>= value))))
+         (let [individual-skills (:skills individual {})]
+           (every? true? (for [[skill value] skills]
+                           (-> individual-skills (get skill 0) (>= value)))))
          true)
-       (if-let [[comp n] age]
-         (comp (core/get-age herd individual) n)
+       (if-let [[comparator n] age]
+         ((comparator->fn comparator) (core/get-age herd individual) n)
          true)
        (if (and fulfillment (s/valid? ::fulfillment fulfillment))
-         (let [[kind x] (s/conform ::fulfillment fulfillment)]
-           (case kind
-             :n (> (:fulfillment individual) x)
-             :comp ((first x) (:fulfillment individual) (second x))))
-         true)
-       (if (and passions (s/valid? ::passions passions))
-         (let [[kind x] (s/conform ::passions passions)]
-           (case kind
-             :passion (contains? (:passions individual) x)
-             :set (empty? (reduce disj (set x) (:passions individual)))
-             :comp ((first x) (:passions individual) (second x))))
+         (let [[kind x] (s/conform ::fulfillment fulfillment)
+               individual-fulfillment (:fulfillment individual 0)
+               [comparator n] (if (= :n kind) [:> x] x)
+               f (comparator->fn comparator)]
+           (f individual-fulfillment n))
          true)))
 
 (s/fdef passes-select?
@@ -193,3 +208,43 @@
   :args (s/cat :herd ::core/herd
                :selects (s/coll-of ::select))
   :ret (s/nilable ::core/individuals))
+
+(defn contains-individual? [personae individual]
+  (some
+   #(= individual %)
+   (reduce concat [] (vals personae))))
+
+(s/fdef contains-individual?
+  :args (s/cat :personae (s/map-of keyword? ::core/individuals)
+               :individual ::core/individual)
+  :ret boolean?)
+
+(s/def :selects/cast
+  (s/map-of keyword? ::select))
+
+(s/def :found/cast
+  (s/map-of keyword? ::core/individual))
+
+(defn fetch-cast [herd cast-selects]
+  (reduce
+   (fn [personae [key select]]
+     (when personae
+       (when-let [selected
+                  (first
+                   (shuffle
+                    (filter
+                     (partial contains-individual? personae)
+                     (or (find-individuals herd select) []))))]
+         (assoc personae key selected))))
+   {}
+   (seq cast-selects)))
+
+(s/fdef fetch-cast
+  :args (s/cat :herd ::core/herd
+               :cast-selects :selects/cast)
+  :ret (s/nilable :found/cast)
+  :fn (fn [{:keys [args ret]}]
+        (if ret
+          (= (sort (keys ret))
+             (sort (keys (:cast-selects args))))
+          true)))
