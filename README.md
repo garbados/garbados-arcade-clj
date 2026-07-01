@@ -2,6 +2,10 @@
 
 ![Build and Test](https://github.com/garbados/garbados-arcade-clj/actions/workflows/test.yaml/badge.svg)
 
+> **HEADS UP: I HAVE MADE AN ABSOLUTE MESS.**
+>
+> This arcade is undergoing certain renovations. The source and the live version are quite separated, because the source is a morass of decisions whose reasoning I have long since forgotten. I will fix it, eventually, in some eventuality, maybe.
+
 An arcade of games by [garbados](https://github.com/garbados) AKA Diana Belle. You can visit the arcade [online][arcade].
 
 The arcade contains several games, which you can read about in the [documentation](./doc/intro.md).
