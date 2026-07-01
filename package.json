@@ -25,8 +25,10 @@
     "standard": "^17.1.0"
   },
   "dependencies": {
+    "@pixi/ui": "^2.2.1",
     "phaser": "^4.2.0",
     "phaser3-rex-plugins": "^1.80.20",
+    "pixi.js": "^8.7.3",
     "pouchdb": "^9.0.0",
     "react-dom": "^19.2.7"
   }

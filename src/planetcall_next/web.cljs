@@ -1,68 +1,75 @@
 (ns planetcall-next.web
   (:require
-   ["phaser" :as Phaser]
-   ["phaser3-rex-plugins/plugins/board-plugin.js" :as BoardPlugin]
-   [planetcall-next.web.config :as config]
-   [planetcall-next.web.scenes.map :refer [create-map-scene]]
-   [planetcall-next.web.scenes.ui :refer [create-ui-scene]]
-   [planetcall-next.web.scenes.tech :refer [create-tech-scene]]
-   [shadow.cljs.modern :refer [defclass]]))
+   ["pixi.js" :refer [Application]]
+   [planetcall-next.pixi.map :refer [create-map-view]]
+   [planetcall-next.pixi.nav :refer [create-nav-view]]
+   [planetcall-next.pixi.tech :refer [create-tech-view]]
+   [planetcall-next.pixi.title :refer [create-title-menu]]
+   [planetcall-next.pixi.utils :as pixi]
+   [planetcall-next.rules.games :as games]
+   [planetcall-next.rules.scenarios :as scenarios]
+   [planetcall-next.web.colors :as colors]))
 
 (set! *warn-on-infer* false)
 
-(defn create-title-screen [scene]
-  nil)
+(defn start [app]
+  (set! (-> app .-stage .-eventMode) "static")
+  (set! (-> app .-stage .-hitArea) (.-screen app))
+  (let [-game (atom
+               (-> (scenarios/init-game-from-scenario :standard)
+                   (games/gain-tech 0 :contamination-protocols)
+                   (games/gain-tech 0 :antimiasmic-enamel)
+                   (games/gain-tech 0 :rigorous-harmony)))
+        -views (atom {})
+        activate-view
+        (fn [state]
+          (let [view (get @-views state)
+                other-views (-> (set (keys @-views))
+                                (disj state :nav))]
+            (doseq [view-name other-views
+                    :let [view (get @-views view-name)]]
+              (set! (.-visible view) false))
+            (if (= state :game)
+              (set! (.-visible (:nav @-views)) false)
+              (set! (.-visible (:nav @-views)) true))
+            (set! (.-visible view) true)))
+        title-view (create-title-menu :click-continue-game #(activate-view :map))
+        map-view (create-map-view app -game)
+        tech-view (create-tech-view app -game)
+        nav-view (create-nav-view
+                  :on-click-game #(activate-view :game)
+                  :on-click-tech #(activate-view :tech)
+                  :on-click-map #(activate-view :map))]
+    (let [offset [(-> app .-screen .-width)
+                  (-> app .-screen .-height)]]
+      (pixi/anchor-container offset title-view 0.5 1))
+    (swap! -views assoc :game title-view)
+    (swap! -views assoc :map map-view)
+    (swap! -views assoc :tech tech-view)
+    (swap! -views assoc :nav nav-view)
+    (activate-view :tech)
+    (.stage.addChild app
+                     title-view
+                     map-view tech-view
+                     nav-view)))
 
-(defn create-wiki-scene [scene]
-  nil)
+(defonce -started? (atom false))
 
-(defclass TitleScreen
-  (extends js/Phaser.Scene)
-  (constructor [this] (super (clj->js {:key "title"})))
-  Object
-  (create [this] (create-title-screen this)))
-
-(defclass UIScene
-  (extends js/Phaser.Scene)
-  (constructor [this] (super (clj->js {:key "ui" :active true})))
-  Object
-  (create [this] (create-ui-scene this :active :map)))
-
-(defclass MapScene
-  (extends js/Phaser.Scene)
-  (constructor [this] (super (clj->js {:key "map"})))
-  Object
-  (create [this] (create-map-scene this)))
-
-(defclass TechScene
-  (extends js/Phaser.Scene)
-  (constructor [this] (super (clj->js {:key "tech"})))
-  Object
-  (create [this] (create-tech-scene this)))
-
-(defclass WikiScene
-  (extends js/Phaser.Scene)
-  (constructor [this] (super (clj->js {:key "wiki"})))
-  Object
-  (create [this] (create-wiki-scene this)))
-
-(def game-config
-  (clj->js {:type (.-AUTO Phaser)
-            :scene [TitleScreen MapScene TechScene WikiScene UIScene]
-            :width config/WIDTH
-            :height config/HEIGHT
-            :parent "app"
-            :scale {:mode (-> Phaser .-Scale .-FIT)
-                    :autoCenter (-> Phaser .-Scale .-CENTER_BOTH)}
-            :plugins {:scene [{:key "rexBoard"
-                               :plugin BoardPlugin/default
-                               :mapping "rexBoard"}]}}))
-
-(defonce game (atom nil))
+(defn init-app []
+  (let [app (new Application)]
+    (.then
+     (.init app (clj->js {:background colors/BLACK
+                          :resizeTo js/window}))
+     (fn [] app))))
 
 (defn main []
-  (if @game
-    (js/window.location.reload)
-    (reset! game (new (.-Game Phaser) game-config))))
+  (if-not @-started?
+    (.then
+     (init-app)
+     (fn [app]
+       (reset! -started? true)
+       (start app)
+       (js/document.body.appendChild (.-canvas app))))
+    (js/location.reload)))
 
 (main)

@@ -6,17 +6,17 @@
 (s/def ::coords (s/coll-of ::coord :kind set?))
 
 (defn get-adjacent-coords
-  "Returns coordinates for hexes "
+  "Returns coordinates for adjacent hexes."
   [coord]
   {:pre [(s/valid? ::coord coord)]
    :post [#(s/valid? ::coords %)]}
   (let [[q r] coord]
-    [[q (inc r)]
-     [(dec q) r]
+    [[(inc q) r]
+     [(inc q) (dec r)]
      [q (dec r)]
-     [(inc q) (inc r)]
-     [(inc q) r]
-     [(inc q) (dec r)]]))
+     [(dec q) r]
+     [(dec q) (inc r)]
+     [q (inc r)]]))
 
 ;; (def get-adjacent-coords (memoize get-adjacent-coords*))
 
@@ -50,22 +50,24 @@
   {:pre [(s/valid? ::coord center)
          (s/valid? pos-int? n)]
    :post [#(s/valid? ::coords %)]}
-  (let [-n (- n)]
-    (reduce into
-            #{}
-            (for [q (range -n (+ 1 n))]
-              (let [less-r (max -n (- 0 q n))
-                    more-r (+ 1 (min n (- 0 q -n)))]
-                (map
-                 #(map + center [q %])
-                 (range less-r more-r)))))))
+  ;; FIXME use of center got lost in the refactor
+  (reduce
+   (fn [coords q]
+     (reduce
+      (fn [coords r]
+        (cons [q r] coords))
+      coords
+      (range (max (- n) (- 0 q n))
+             (inc (min n (+ (- q) n))))))
+   []
+   (range (- n) (inc n))))
 
 (defn lerp [a b t]
-  {:pre [(s/valid? int? a)
-         (s/valid? int? b)
+  {:pre [(s/valid? number? a)
+         (s/valid? number? b)
          (s/valid? number? t)]
-   :post [#(s/valid? int? %)]}
-  (int (+ a (* t (- b a)))))
+   :post [#(s/valid? number? %)]}
+  (+ a (* t (- b a))))
 
 (defn get-coords-between [coord1 coord2]
   {:pre [(s/valid? ::coord coord1)
