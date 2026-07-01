@@ -123,3 +123,20 @@
     (clojure.core/slurp `~(str "resources/" path "/config.edn")))
    :template
    (clojure.core/slurp `~(str "resources/" path "/text.mustache"))})
+
+(defn scene-may-occur?
+  [herd {:keys [filter selects filter-fn]}]
+  (and (if filter
+         (select/passes-filter? herd filter)
+         true)
+       (if selects
+         (some? (select/get-cast herd selects))
+         true)
+       (if filter-fn
+         (filter-fn herd)
+         true)))
+
+(s/fdef scene-may-occur?
+  :args (s/cat :herd ::core/herd
+               :scene ::scene)
+  :ret boolean?)

@@ -7,15 +7,15 @@ Formally codenamed *Arken Regards*, the mission was an endeavor of the Polynatio
 There are ten leaders, one for each ideology both primary and synergy. They are:
 
 - Deitrich O'Doyle, life support engineer, leader of Solemnity (Ecology)
-- ???, head of seedbanks, leader of Stewardship (Ecology-Science)
+- Tomlin Ronsin, head of seedbanks, leader of Stewards (Ecology-Science)
 - Petyr Gagarin, chief physicist, leader of Institute (Science)
-- ???, ???, leader of Thinktank (Science-Military)
-- ???, ???, leader of Jurisdiction (Military)
+- Jessa Sevesna, consultant, leader of Thinktank (Science-Military)
+- Sarah Armstrong, security supervisor, leader of Jurisdiction (Military)
 - ???, ???, leader of Complex (Military-Industry)
-- Martin Augustus, paid-aboard tycoon, leader of Corporation (Industry)
-- Francois Martin, engineblock supervisor, leader of Syndicate (Industry-Contact)
+- Arthur Augustus, paid-aboard tycoon, leader of Corporation (Industry)
+- Francois Martin, engine boss, leader of Syndicate (Industry-Contact)
 - Naya Anand, retired diplomat, leader of Federation (Contact)
-- ???, sponsored artist, leader of Planetcult (Contact-Ecology)
+- "E10D1E", sponsored artist, leader of Planetcult (Contact-Ecology)
 
 Many other faction members make appearances, but generally only leaders have many excerpts.
 
@@ -25,3 +25,5 @@ You'll encounter characters in quotations, excerpts, and vignettes from two sour
 - When certain events occur in the game, such as first combat.
 
 Note that factions in an individual game do not represent these canonical factions. Rather, canonical factions exist to illustrate the nature of different ideologies.
+
+See [Strategies](./strategies.md) to see how each of these factions behaves in-game.

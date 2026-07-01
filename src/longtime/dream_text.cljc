@@ -1,5 +1,5 @@
 (ns longtime.dream-text 
-  (:require [longtime.text :refer [join-text]]))
+  (:require [arcade.text :refer [join-text]]))
 
 (defn catharsis
   [_herd [sadcow] depressed?]

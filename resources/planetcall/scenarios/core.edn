@@ -1,0 +1,35 @@
+[{:id :standard
+  :shape :hexagon
+  :gen :default
+  :size 12
+  :coords
+  [[6 8]
+   [12 4]
+   [18 8]
+   [6 16]
+   [12 20]
+   [18 16]]
+  :start
+  {:units [{:chassis :infantry :loadout :oldworld-weapons}
+           {:chassis :infantry :loadout :engineering}]
+   :improvement :stockpile}}
+ {:id :triad
+  :shape :triangle
+  :gen :default
+  :size 18
+  :coords
+  []
+  :start
+  {:units [{:chassis :infantry :loadout :oldworld-weapons}
+           {:chassis :infantry :loadout :engineering}]
+   :improvement :stockpile}}
+ {:id :duel
+  :shape :parallelogram
+  :gen :default
+  :size 18
+  :coords
+  []
+  :start
+  {:units [{:chassis :infantry :loadout :oldworld-weapons}
+           {:chassis :infantry :loadout :engineering}]
+   :improvement :stockpile}}]

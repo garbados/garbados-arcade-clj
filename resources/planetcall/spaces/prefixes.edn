@@ -1,0 +1,9 @@
+[{:id :rotting
+  :yield {:food 1}}
+ {:id :volatile
+  :yield {:energy 1}}
+ {:id :shattered
+  :yield {:materials 1}}
+ {:id :preserved
+  :yield {:insight 1}}
+ {:id :ashen}]

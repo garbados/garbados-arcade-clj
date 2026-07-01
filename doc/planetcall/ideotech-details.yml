@@ -57,7 +57,7 @@ ecology:
     - name: Closed Lifecycle Models
       flavor: >
         "Price cannot encapsulate cost. If I fish a river to extinction, I cannot offset that systemic destruction with cheaper boats; the difference is lost in the evaluation of a unidimensional price, free for the profiteer to discard upon the public. We can choose to do better. If we want to survive, we must!" - Dietrich O'Doyle, *Governance, After Earth*
-      description: Grants the *Zero Trace* unit mod, which makes units *Clean*;and the *Scrub Radiation* action, which lowers the radiation level of a controlled space by 1.
+      description: Grants the *Zero Trace* unit mod, which makes units *Clean*; and the *Scrub Radiation* action, which lowers the radiation level of a controlled space by 1.
   -
     - name: Assertive Rehabilitation
       flavor: >
@@ -65,11 +65,11 @@ ecology:
       description: May construct the *Detoxer* improvement (-1 energy, -5 impact); Fungus vegetation increases yields by 1.
     - name: Pathfinder Corps
       flavor: >
-        "It's the ridgelines, yeah? They sprawl and they flex and they tumble, moving like arms or veins over seasons or even days, but they're the highways of this world. They follow a higher pattern; one can't just map the land's topology because the land has a mind of its own. Rather, one charts its moods. Once you see them for what they are, you'll never get lost again." - Xavier Benji, Solemnity pathfinder 
+        "It's the ridgelines, yeah? They sprawl and they flex and they tumble, moving like arms or veins over seasons or even days, but they're the highways of this world. They follow a higher pattern; one can't just map the land's topology because the land has a mind of its own. Rather, one charts its moods. Once you see them for what they are, you'll never get lost again." - Xavier Benji, Solemnity pathfinder
       description: Your units treat spaces with Fungus vegetation as though they were roads.
     - name: Rigorous Harmony
       flavor: >
-        "Empires of old dreamed of control. They fantasized of the day that the sum total of Earth's potential would lie in their grasp, and then the sum of the sun, and then of the galaxy. Their hunger had no end; appeasement could not stay their greed. What they could not see is that Earth, and the sun, and all of Creation, could not be seized like a jewel. The potential they coveted lay within the systems that populate them; to displace those systems destroys the very source of that power. To obtain it truly, a polity must integrate -- to move as one being, with the force of all things behind every motion." - Dietrich O'Doyle, *Governance, After Earth*
+        "Empires of old dreamed of control. They fantasized of the day that the sum total of Earth's potential would lie in their grasp, and then the sum of the sun, and then of the galaxy. Their hunger had no end; appeasement could not stay their greed. What they could not see is that Earth, and the sun, and all of Creation, could not be seized like a jewel, because their wealth is a thing in motion. Displacing those systems destroyed the power they coveted. To obtain it truly, a polity must integrate -- to move as one being, with the force of all things behind every motion." - Dietrich O'Doyle, *Governance, After Earth*
       description: -1 action per turn; yields are doubled.
   -
     - name: Biosymmetric Engineering

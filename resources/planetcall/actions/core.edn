@@ -1,0 +1,26 @@
+[{:id :construct-farm
+  :type :improvement
+  :improvement :farm}
+ {:id :construct-factory
+  :type :improvement
+  :improvement :factory}
+ {:id :construct-reactor
+  :type :improvement
+  :improvement :reactor}
+ {:id :construct-laboratory
+  :type :improvement
+  :improvement :reactor}
+ {:id :construct-stockpile
+  :type :improvement
+  :improvement :stockpile}
+ {:id :create-design
+  :type :create-design
+  :cost 0}
+ {:id :forget-design
+  :type :forget-design
+  :cost 0}
+ {:id :marshal-unit
+  :type :marshal-unit}
+ {:id :disband-unit
+  :type :disband-unit
+  :cost 0}]

@@ -1,0 +1,4 @@
+[{:id :construct-road
+  :type :modify-space
+  :places :road
+  :traits #{:engineering}}]

@@ -4,7 +4,7 @@ The arcade contains the following games, at varying states of development:
 
 - [The Longtime](./longtime/intro.md): A nomadic city-builder about cooperation and minotaurs. (**PLAYABLE ALPHA**)
 - [Planetcall](./planetcall/intro.md): A turn-based 4X about the unthinkable and the inevitable. (**ENGINE COMPLETE, UI PENDING**)
-- [The Dimdark, 2e](./dimdark/intro.md): A party-battler RPG about kobolds and love. (**IN DEVELOPMENT**)
+- [The Dimdark, 2e](./dimdark/intro.md): A party battler RPG about kobolds and love. (**IN DEVELOPMENT**)
 - [Ambition, 2e](./ambition/intro.md): A chess-like about societies facing cataclysm. (**IN DEVELOPMENT**)
 - ... and more to come!
 

@@ -1,0 +1,2 @@
+{:jawtrapped {:quickened -1 :damage 0.5}
+ :mawtrapped {:bleeding 1 :damage 1}}

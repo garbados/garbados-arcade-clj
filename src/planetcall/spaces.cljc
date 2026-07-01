@@ -28,7 +28,6 @@
 
 (def all-improvements (into improvements wonders))
 
-(s/def ::elevation (s/int-in -4 7))
 (s/def ::rainfall (set rainfalls))
 (s/def ::terrain (set terrains))
 (s/def ::vegetation (s/nilable vegetations))
@@ -38,8 +37,7 @@
 (s/def ::miasma boolean?)
 (s/def ::space
   (s/keys :req-un
-          [::elevation
-           ::rainfall
+          [::rainfall
            ::terrain
            ::vegetation
            ::feature
@@ -48,8 +46,7 @@
            ::miasma]))
 
 (defn gen-unclaimed-space []
-  {:elevation (- (rand-int 11) 4)
-   :rainfall (rand-nth rainfalls)
+  {:rainfall (rand-nth rainfalls)
    :terrain (rand-nth terrains)
    :vegetation (rand-nth [nil :fungus])
    :feature (rand-nth (concat

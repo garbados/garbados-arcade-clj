@@ -1,0 +1,194 @@
+{:goblin
+ {:raider
+  {:abilities [:hew :net :trample :razor-pilum :plunderer]
+   :growth {:prowess 3 :alacrity 3 :vigor 2 :spirit 1 :focus 1 :scales 1}
+   :vulns #{:frost}
+   :row :front}
+  :warg
+  {:abilities [:bite :takedown :flank :rend :howl]
+   :growth {:prowess 2 :alacrity 3 :vigor 2 :spirit 1 :focus 2 :squish 1}
+   :vulns #{:mental}
+   :row :front}
+  :mancer
+  {:abilities [:poison-dart :knit-flesh :putrefy :flesh-offering :spirit-offering]
+   :growth {:prowess 1 :alacrity 2 :vigor 1 :spirit 3 :focus 2 :stink 2}
+   :vulns #{:physical}
+   :row :back}
+  :junker
+  {:abilities [:spark-bomb :blunderblast :tinker-tailor :oil-bomb :war-machine]
+   :growth {:prowess 3 :alacrity 1 :vigor 2 :spirit 2 :focus 2 :scales 1}
+   :vulns #{:fire}
+   :row :back}}
+ :orc
+ {:berserker
+  {:abilities [:attack :blitz :battlecry :rampage :do-and-die]
+   :growth {:prowess 3 :alacrity 3 :vigor 1 :spirit 2 :focus 1 :brat 1}
+   :vulns #{:fire}
+   :row :front}
+  :warhead
+  {:abilities [:augment :organize :rally :browbeat :master-tactician]
+   :growth {:prowess 1 :alacrity 2 :vigor 2 :spirit 3 :focus 3}
+   :vulns #{:poison}
+   :row :back}
+  :bloodmucker
+  {:abilities [:essence-bolt :searing-lash :devitalize :bloodlust :sacrifice]
+   :growth {:prowess 1 :alacrity 1 :vigor 3 :spirit 2 :focus 3 :scales 1}
+   :vulns #{:frost}
+   :row :back}
+  :grunt
+  {:abilities [:attack :bash :bully :soldier :first-aid]
+   :growth {:prowess 3 :alacrity 2 :vigor 3 :spirit 1 :focus 1 :squish 1}
+   :vulns #{:mental}
+   :row :front}}
+ :spider
+ {:myrmidon
+  {:abilities [:attack :mandible-crush :grapple :steelskin :eight-leg-assault]
+   :growth {:prowess 2 :alacrity 3 :vigor 2 :spirit 2 :focus 2}
+   :vulns #{:mental}
+   :row :front}
+  :weaver
+  {:abilities [:dream-eater :mesmerize :ennervate :sleep :???]
+   :growth {:prowess 1 :alacrity 3 :vigor 1 :spirit 3 :focus 3}
+   :vulns #{:fire}
+   :row :back}
+  :trapper
+  {:abilities [:attack :string-shot :drag :lay-web :feed]
+   :growth {:prowess 2 :alacrity 3 :vigor 1 :spirit 2 :focus 2 :stink 1}
+   :vulns #{:frost}
+   :row :front}
+  :widow
+  {:abilities [:attack :poison-bite :acid-spray :concentrated-bile :virulent-climax]
+   :growth {:prowess 3 :alacrity 2 :vigor 2 :spirit 2 :focus 2}
+   :vulns #{:frost}
+   :row :front}}
+ :troll
+ {:cave
+  {:abilities [:attack :smash :regeneration :hurl-rock :rage]
+   :growth {:prowess 3 :alacrity 2 :vigor 3 :spirit 2 :focus 1}
+   :vulns #{:fire}
+   :row :front}
+  :ancient
+  {:abilities [:attack :regeneration :crush :venerable :revitalize]
+   :growth {:prowess 2 :alacrity 2 :vigor 3 :spirit 3 :focus 1}
+   :vulns #{:mental}
+   :row :front}
+  :forest
+  {:abilities [:vine-lash :spore-burst :regeneration :root-swarm :moss-grave]
+   :growth {:prowess 1 :alacrity 2 :vigor 2 :spirit 3 :focus 1 :stink 2}
+   :vulns #{:fire}
+   :row :back}
+  :grizzly
+  {:abilities [:attack :ravage :regeneration :devour :roar]
+   :growth {:prowess 3 :alacrity 3 :vigor 3 :spirit 1 :focus 1}
+   :vulns #{:mental}
+   :row :front}}
+ :undead
+ {:banshee
+  {:abilities [:haunt :scream :chilling-touch :reverie :vanish]
+   :growth {:prowess 1 :alacrity 3 :vigor 1 :spirit 2 :focus 3 :brat 1}
+   :vulns #{:fire}
+   :row :back}
+  :awoken
+  {:abilities [:attack :fetid-bite :jagged-nail :consume-corpse :dire-ghoul]
+   :growth {:prowess 3 :alacrity 1 :vigor 3 :spirit 2 :focus 1 :stink 1}
+   :vulns #{:fire}
+   :row :front}
+  :shadow
+  {:abilities [:attack :paralyze :umbra-slash :darkness-falls :vantablack]
+   :growth {:prowess 3 :alacrity 3 :vigor 1 :spirit 3 :focus 1}
+   :vulns #{:fire}
+   :row :front}
+  :necromancer
+  {:abilities [:spirit-link :horrify :drink-terror :necrotize :sacrifice]
+   :growth {:prowess 1 :alacrity 1 :vigor 2 :spirit 3 :focus 3 :brat 1}
+   :vulns #{:physical}
+   :row :back}}
+ :demon
+ {:succubus
+  {:abilities [:pain-lash :tempt :seduce :consume-essence :???]
+   :growth {}
+   :vulns #{:frost}
+   :row :back}
+  :fiend
+  {:abilities [:attack :bind :torture :menace :internal-wretch]
+   :growth {}
+   :vulns #{:frost}
+   :row :front}
+  :vengeful
+  {:abilities [:attack :brutal-envy :mad-rage :doom :so-be1]
+   :growth {}
+   :vulns #{:frost}
+   :row :front}
+  :ornias
+  {:abilities [:absorb-agony :exhale-suffering :languish :haunting-cry :parasite]
+   :growth {}
+   :vulns #{:fire}
+   :row :back}}
+ :slime
+ {:natto
+  {:abilities [:attack :venom-splash :noxious-gas :gelatinous-prism :intoxicating-ooze]
+   :growth {}
+   :vulns #{:mental}
+   :row :front}
+  :flan
+  {:abilities [:fire-spit :magma-slime :searing-goo :furnace-belly :???]
+   :growth {}
+   :vulns #{:frost}
+   :row :back}
+  :sorbet
+  {:abilities [:icicles :melt :igloo :frost-nova :???]
+   :growth {}
+   :vulns #{:fire}
+   :row :back}
+  :muckling
+  {:abilities [:attack :mud-fight :grit-slap :glomp :goop-blast]
+   :growth {}
+   :vulns #{:poison}
+   :row :front}}
+ :mechini
+ {:needlecrab
+  {:abilities [:attack :puncture :razor-slice :claw-crush :king-crab]
+   :growth {}
+   :vulns #{:frost}
+   :row :front}
+  :steelfly
+  {:abilities [:attack :fire-nail :alarming-buzz :fiery-sting :overheat]
+   :growth {}
+   :vulns #{:physical}
+   :row :front}
+  :manufacterist
+  {:abilities [:repair :overdrive :upgrade :construct-ally :industrialist]
+   :growth {}
+   :vulns #{:fire}
+   :row :back}
+  :rockbiter
+  {:abilities [:attack :drill-strike :stone-drop :collapse-roof :grit-golem]
+   :growth {}
+   :vulns #{:mental}
+   :row :front}}
+ :hooman
+ {:paladin
+  {:abilities [:attack :judgment :holy-shield :penitent-b1 :lay-on-hands]
+   :growth {}
+   :vulns #{:poison}
+   :row :front}
+  :cleric
+  {:abilities [:cure :panacea :purify :healing-nova :wizened-healer]
+   :growth {}
+   :vulns #{:mental}
+   :row :back}
+  :wizard
+  {:abilities [:ice-knife :fireball :force-shield :center-the-eye :greater-magi]
+   :growth {}
+   :vulns #{:physical}
+   :row :back}
+  :bard
+  {:abilities [:rousing-anthem :intimidating-chant :grave-dirge :shocking-aria :maestro]
+   :growth {}
+   :vulns #{:physical}
+   :row :back}
+  :gladiator
+  {:abilities [:attack :assault :leap-slam :whirlwind :shrug-off]
+   :growth {}
+   :vulns #{:mental}
+   :row :front}}}

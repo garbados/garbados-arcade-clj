@@ -1,7 +1,7 @@
 (ns longtime.event-text 
   (:require [clojure.string :as string]
             [longtime.core :as core]
-            [longtime.text :as text]))
+            [arcade.text :as text]))
 
 (def -trait->adj
   {:angry      "strong"

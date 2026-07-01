@@ -1,0 +1,238 @@
+# Monsters
+
+There are several types of monsters waiting down in the Dimdark. Some of them mean to be there. Some have been lost far longer than they care to remember. Many would find a few kobold pelts a fine prize.
+
+Monsters have two available skills to start, and gain another each time they level up, except for the fifth level where instead they experience doubled attribute growth. Unlike Kobolds, all of a monster's available skills are considered *activated* and can thus be used.
+
+Monsters share some common skills, but are mostly distinct.
+
+- Goblins
+    - Raider: front row
+        - Attack
+        - Net
+        - Trample
+        - Razor Pilum
+        - Plunderer
+    - Mancer: back row
+        - Knit Flesh
+        - Poison Dart
+        - Putrefy
+        - Flesh Offering
+        - ???
+    - Junker: back row
+        - Attack
+        - Blunderblast
+        - Tinker Tailor
+        - Oil Bomb
+        - War Machine
+    - Warg: front row
+        - Attack
+        - Takedown
+        - Flank
+        - Rend
+        - Howl
+- Orcs:
+    - Berserker: front row
+        - Attack
+        - Battle Rage
+        - Rampage
+        - Do And Die
+    - Warhead: back row
+        - Shock
+        - Augment
+        - Organize
+        - Rally
+        - Master Tactician
+    - Bloodmucker: back row
+        - Essence Bolt
+        - Searing Lash
+        - Decrepify
+        - Bloodlust
+        - Invoke
+    - Grunt: front row
+        - Attack
+        - Bash
+        - Bully
+        - Soldier
+        - First Aid
+- Spiders:
+    - Myrmidon: front row
+        - Attack
+        - Mandible Crush
+        - Grapple
+        - Steelskin
+        - Eight-Leg Assault
+    - Weaver: back row
+        - Sleep
+        - Dream-Eater
+        - Mesmerize
+        - Enervate
+        - ???
+    - Trapper: back row
+        - String Shot
+        - Drag
+        - Lay Web
+        - Feed
+        - ???
+    - Widow: front row
+        - Attack
+        - Poison Bite
+        - Acid Spray
+        - Concentrated Bile
+        - Virtulent Climax
+- Undead:
+    - Restless: back row
+        - Haunt
+        - Scream
+        - Reverie
+        - Vanish
+        - ???
+    - Awoken: front row
+        - Attack
+        - Fetid Bite
+        - Jagged Nail
+        - Consume Corpse
+        - Dire Ghoul
+    - Shadow: front row
+        - Attack
+        - Paralyze
+        - Light's Edge
+        - Darkness Falls
+        - Vantablack
+    - Ghastlord: back row
+        - Spirit Link
+        - Horrify
+        - Grim Resurrection
+        - Necrotize
+        - Sacrifice
+- Slimes:
+    - Nattō: front row
+        - Attack
+        - Slime Spew
+        - Acid Spray
+        - Intoxicating Ooze
+        - ???
+    - Flan: back row
+        - Fire Spit
+        - Magma Slime
+        - Searing Goo
+        - Furnace Belly
+        - ???
+    - Sorbet: back row
+        - Icicles
+        - Melt
+        - Igloo
+        - Frost Nova
+        - ???
+    - Mudpie: front row
+        - Attack
+        - Mud Slap
+        - Eat Grit
+        - Glomp
+        - Goop Blast
+- Trolls:
+    - Cave: front row
+        - Attack
+        - Regeneration
+        - Smash
+        - Hurl Rock
+        - Rage
+    - Ancient: front row
+        - Attack
+        - Regeneration
+        - Venerable
+        - Crush
+        - Revitalize
+    - Forest: back row
+        - Vine Lash
+        - Regeneration
+        - Root Swarm
+        - Moss Grave
+        - Razor Leaf
+    - Grizzly: front row
+        - Attack
+        - Roar
+        - Regeneration
+        - Ravage
+        - Devour
+- Hoomans:
+    - Paladin: front row
+        - Attack
+        - Judgment
+        - Holy Shield
+        - Penitent Blow
+        - Lay On Hands
+    - Cleric: back row
+        - Bless
+        - Cure
+        - Panacea
+        - Purify
+        - Healing Nova
+    - Wizard: back row
+        - Jolting Arc
+        - Fireball
+        - Force Shield
+        - Freezing Rain
+        - Master Arcanist
+    - Bard: back row
+        - Rousing Anthem
+        - Intimidating Chant
+        - Grave Dirge
+        - Shocking Aria
+        - Deadly Crescendo
+    - Gladiator: front row
+        - Attack
+        - Assault
+        - Leap Slam
+        - Whirlwind
+        - Shrug It Off
+- Demons:
+    - Succubus: back row
+        - Pain Lash
+        - Tempt
+        - Seduce
+        - Consume Essence
+        - ???
+    - Banshee: back row
+        - Absorb Agony
+        - Exhale Suffering
+        - Scream
+        - Languish
+        - Haunting Cry
+    - Fiend: front row
+        - Attack
+        - Constrict
+        - Menace
+        - Hellish Wretch
+        - Torture
+    - Imp: front row
+        - Attack
+        - Brutal Envy
+        - Connive
+        - Infernal Stricture
+        - Doom
+- Mechini:
+    - Needlecrab: front row
+        - Attack
+        - Puncture
+        - Razor Slice
+        - Claw Crush
+        - King Crab
+    - Steelfly: back row
+        - Fire Nail
+        - Buzz
+        - ???
+        - ???
+        - Queen Bee
+    - Manufacterist: back row
+        - Repair
+        - Activate Overdrive
+        - Upgrade
+        - Construct Ally
+        - Industrialist
+    - Rockbiter: front row
+        - Attack
+        - Drill Strike
+        - Stone Drop
+        - ???
+        - Grit Golem

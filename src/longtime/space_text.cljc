@@ -1,5 +1,5 @@
 (ns longtime.space-text 
-  (:require [longtime.text :refer [join-text]]))
+  (:require [arcade.text :refer [join-text]]))
 
 (def probe
   (join-text

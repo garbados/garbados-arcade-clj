@@ -1,0 +1,130 @@
+## Classes
+
+There are six classes, with 15 total skills each:
+
+- Druid
+    - Level 1
+        - Restore
+        - Tanglefoot
+        - Frostbolt
+    - Level 2
+        - Protect
+        - Swarm
+        - Rejuvenate
+    - Level 3
+        - Cleanse
+        - Skunkspray
+        - Nullify
+    - Level 4
+        - Contain
+        - Hailstorm
+        - Snake Bite
+    - Level 5
+        - Augment
+        - Bury
+        - Slither Form
+- Guardian
+    - Level 1
+        - Shield Wall
+        - Shield Bash
+        - Defensive Stance
+    - Level 2
+        - Armor Break
+        - Spirit Break
+        - Goad
+    - Level 3
+        - Dragonheart
+        - Fire Slash
+        - Radiance
+    - Level 4
+        - Dragon Tail
+        - Giantslayer
+        - Fire Breath
+    - Level 5
+        - Grim Cleave
+        - Stunning Bash
+        - Dread Roar
+- Mage
+    - Level 1
+        - Dragonblooded
+        - Firebolt
+        - Empower Spell
+    - Level 2
+        - Magic Missile
+        - Mage Armor
+        - Extend Spell
+    - Level 3
+        - Soaring Strike
+        - Flame Breath
+        - Blink
+    - Level 4
+        - Rend and Tear
+        - Blood Rite
+        - Flame Wall
+    - Level 5
+        - Inferno
+        - Devour
+        - Master Arcanist
+- Ranger
+    - Level 1
+        - Scout
+        - Poison Shot
+        - Jawtrap
+    - Level 2
+        - Aimed Shot
+        - Stinkbomb
+        - Field Medicine
+    - Level 3
+        - Toxic Rain
+        - Flashbang
+        - Camouflage
+    - Level 4
+        - Flurry Shot
+        - Hunter's Mark
+        - Precision
+    - Level 5
+        - Trick Shot
+        - Exploding Shot
+        - Mawtrap
+- Sneakthief
+    - Level 1
+        - Fade
+        - Backstab
+        - Feint
+    - Level 2
+        - Pickpocket
+        - Steal Magic
+        - Trapsense
+    - Level 3
+        - Skewer
+        - Hamstring
+        - Sabotage
+    - Level 4
+        - Brute
+        - Phase Bolt
+        - Evasion
+    - Level 5
+        - Barrel Roll
+        - Panache
+        - Arcane Trickster
+- Warrior
+    - Level 1
+        - Weapon Master
+        - Precise Strike
+        - Shove
+    - Level 2
+        - Trip
+        - Disarm
+        - Wolf Stance
+    - Level 3
+        - Frostbite
+        - Sweep
+        - Knockdown
+    - Level 4
+        - Cold Snap
+        - Sunder
+        - Shatter
+    - Level 5
+        - Wintertide
+        - Gutting Strike
+        - Lacerate

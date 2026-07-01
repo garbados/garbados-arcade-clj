@@ -1,0 +1,75 @@
+{:restore
+ {:name :restore
+  :description "Invoke positive energy to close wounds."
+  :traits #{:direct :friendly :spell :poison}
+  :effects {:healing :1d4}}
+ :tanglefoot
+ {:name :tanglefoot
+  :description "Roots sprout from the barren earth to snare your foes."
+  :traits #{:hostile :area :spell :poison :ranged}
+  :effects {:slowed -1}}
+ :frostbolt
+ {:name :frostbolt
+  :description "Hurl a frigid orb at a foe."
+  :traits #{:hostile :direct :ranged :spell :frost}
+  :effects {:damage :1d3 :chilled 1}}
+ :protect
+ {:name :protect
+  :description "Summon a barrier of air and force to protect an ally."
+  :traits #{:friendly :direct :spell :poison}
+  :effects {:toughened 1 :nimble 1}}
+ :swarm
+ {:name :swarm
+  :description "Afflict a foe with a buzzing horde of insects."
+  :traits #{:hostile :ranged :direct :spell :poison}
+  :effects {:withered 1 :sickened 1}}
+ :rejuvenate
+ {:name :rejuvenate
+  :description "Enchant an ally to restore health over time."
+  :traits #{:friendly :direct :spell :poison}
+  :effects {:mending 2}}
+ :cleanse
+ {:name :cleanse
+  :description "Purge negative effects from an ally."
+  :traits #{:friendly :direct :spell :frost}
+  :effects {:cleansed 1}}
+ :skunkspray
+ {:name :skunkspray
+  :description "Douse your enemies in putrid gasses."
+  :traits #{:hostile :ranged :front-row :spell :poison}
+  :effects {:poisoned 1 :sickened 1}}
+ :nullify
+ {:name :nullify
+  :description "Purge positive effects from an enemy."
+  :traits #{:hostile :ranged :direct :spell :poison}
+  :effects {:purged 1}}
+ :healing-roots
+ {:name :healing-roots
+  :description "Magical roots sprout from the ground, protecting the party."
+  :traits #{:ranged :area :spell :poison :friendly}
+  :effects {:healing 1 :toughened 0.5}}
+ :hailstorm
+ {:name :hailstorm
+  :description "Freezing ice and rain descend from above!"
+  :traits #{:ranged :area :hostile :spell :frost}
+  :effects {:damage :1d4 :frozen 1}}
+ :snake-bite
+ {:name :snake-bite
+  :description "Loose your trusty viper upon a foe!"
+  :traits #{:ranged :direct :hostile :piercing :spell :poison}
+  :effects {:damage 0.5 :poisoned 1}}
+ :true-strike
+ {:name :true-strike
+  :description "Hone with icy precision an ally's weapon to strike true."
+  :traits #{:friendly :direct :spell :frost}
+  :effects {:honed 1}}
+ :bury-alive
+ {:name :bury-alive
+  :description "Raise up the earth to swallow a foe!"
+  :traits #{:hostile :direct :ranged :spell :piercing :poison}
+  :effects {:damage 0.5 :slowed 1}}
+ :elder-druid
+ {:name :elder-druid
+  :description "Your vast experience reveals the mysteries of nature."
+  :traits #{:passive}
+  :affects {:stink 3 :squish 3}}}

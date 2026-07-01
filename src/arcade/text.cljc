@@ -1,4 +1,4 @@
-(ns longtime.text 
+(ns arcade.text
   (:require [clojure.spec.alpha :as s]
             [clojure.string :as string]))
 
