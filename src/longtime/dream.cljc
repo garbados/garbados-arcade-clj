@@ -94,7 +94,7 @@
 (s/def ::dream
   (s/with-gen
     (s/and
-     ::scene/scene
+     ::scene/scene-config
      (s/keys :req-un [::text-fn
                       ::choices-fn]
              :opt-un [::post-text-fn])
