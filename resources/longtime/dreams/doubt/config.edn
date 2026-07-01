@@ -1,0 +1,7 @@
+{:match
+ {:cast
+  {:sadcow {:-trait :depressed}}}
+ :effect
+ {:cast
+  {:sadcow {:+trait :depressed
+            :+fulfillment 20}}}}

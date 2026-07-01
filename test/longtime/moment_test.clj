@@ -8,8 +8,8 @@
 (deftest test-valid-moments
   (testing "Moments conform to scene spec."
     (doseq [scene moment/moment-scenes]
-      (is (s/valid? ::scene/scene scene)
-          (s/explain-str ::scene/scene scene)))))
+      (is (s/valid? ::scene/scene-config scene)
+          (s/explain-str ::scene/scene-config scene)))))
 
 (deftest spec-tests
   (spec-test-syms

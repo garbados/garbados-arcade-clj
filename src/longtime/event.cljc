@@ -160,7 +160,7 @@
 
 (s/def ::event
   (s/with-gen
-    ::scene/scene
+    ::scene/scene-config
     #(g/elements
       (concat critical-events
               general-events))))
