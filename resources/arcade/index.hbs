@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{#if css}}<link rel="stylesheet" href="css/{{ css }}">{{/if}}
+    <title>{{ title }}</title>
+</head>
+<body>
+    <div id="arcade" style="text-align: center;">
+      <p class="content">
+        <h1 class="title">&lt;{{ title }}&gt;</h1>
+        <hr>
+        <p class="subtitle">Games</p>
+        {{#each games}}
+        <p><a name="{{name}}" href="./{{ name }}.html">{{ title }} {{ emoji }} ({{ status }})</a></p>
+        {{/each}}
+        <br>
+        <p class="subtitle">Links</p>
+        {{#each links}}
+        <p><a name="{{name}}" href="{{ url }}">{{ emoji }} {{ title }} {{ emoji }}</a></p>
+        {{/each}}
+      </p>
+    </div>
+</body>
+</html>

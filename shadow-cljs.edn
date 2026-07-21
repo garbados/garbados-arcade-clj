@@ -2,24 +2,30 @@
 {:lein {:profile "+cljs"}
  :dev-http {3000 "public"}
  :builds
- {:lib
-  {:target :esm
-   :runtime :browser
-   :modules {:index {:exports {arcade arcade.exports/arcade
-                               planetcall planetcall.exports/planetcall}}}
-   :output-dir "lib/arcade"}
-  :planetcall
+ {:ambition
   {:target :browser
-   :output-dir "public/js/planetcall"
-   :asset-path "/js/planetcall"
-   :modules {:main {:entries [planetcall-next.web]}}}
-  :longtime
-  {:target :browser
-   :output-dir "public/js/longtime"
-   :asset-path "/js/longtime"
-   :modules {:main {:entries [longtime.web]}}}
-  #_:dimdark
-  #_{:target :browser
-     :output-dir "public/js/dimdark"
-     :asset-path "/js/dimdark"
-     :modules {:main {:entries [dimdark.web]}}}}}
+   :output-dir "public/js/ambition"
+   :asset-path "/js/ambition"
+   :modules {:main {:entries [ambition.web]}}}
+  ;; :lib
+  ;; {:target :esm
+  ;;  :runtime :browser
+  ;;  :modules {:index {:exports {arcade arcade.exports/arcade
+  ;;                              planetcall planetcall.exports/planetcall}}}
+  ;;  :output-dir "lib/arcade"}
+  ;; :planetcall
+  ;; {:target :browser
+  ;;  :output-dir "public/js/planetcall"
+  ;;  :asset-path "/js/planetcall"
+  ;;  :modules {:main {:entries [planetcall-next.web]}}}
+  ;; :longtime
+  ;; {:target :browser
+  ;;  :output-dir "public/js/longtime"
+  ;;  :asset-path "/js/longtime"
+  ;;  :modules {:main {:entries [longtime.web]}}}
+  ;; :dimdark
+  ;; {:target :browser
+  ;;    :output-dir "public/js/dimdark"
+  ;;    :asset-path "/js/dimdark"
+  ;;    :modules {:main {:entries [dimdark.web]}}}
+  }}

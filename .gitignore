@@ -16,5 +16,5 @@ node_modules
 .lsp
 lib/arcade
 .shadow-cljs
-public/js
+public
 .calva

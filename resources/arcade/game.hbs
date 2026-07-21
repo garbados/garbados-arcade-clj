@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetcall</title>
+    {{#if css}}<link rel="stylesheet" href="css/{{ css }}">{{/if}}
+    <title>{{ title }}</title>
 </head>
 <body style="background-color: black; height: 100%; overflow: hidden;">
     <div id="app"></div>
-    <script src="js/planetcall/main.js" type="text/javascript"></script>
+    <script src="js/{{ name }}/main.js" type="text/javascript"></script>
 </body>
 </html>

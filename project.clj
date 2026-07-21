@@ -3,17 +3,14 @@
   :url "http://github.com/garbados/garbados-arcade-clj"
   :license {:name "CC BY-NC-SA 4.0"
             :url "https://creativecommons.org/licenses/by-nc-sa/4.0/"}
-  :dependencies [[org.clojure/clojure "1.12.0"]
-                 [clj-commons/clj-yaml "1.0.27"]
-                 [markdown-clj "1.12.1"]]
+  :dependencies [[org.clojure/clojure "1.12.5"]
+                 [hbs "1.1.0"]]
   :repl-options {:init-ns arcade.core}
-  :plugins [[lein-cloverage "1.2.4"]]
+  :plugins [[lein-cloverage "1.2.4"]
+            [lein-exec "0.3.7"]]
+  :test-selectors {:ambition (fn [m & _] (some? (re-matches #"^ambition.+" (:file m))))}
   :profiles
-  {:dev {:dependencies [[org.clojure/test.check "1.1.1"]]}
+  {:dev {:dependencies [[org.clojure/test.check "1.1.3"]]}
    :cljs
    {:source-paths ["src" "test"]
-    :dependencies [[thheller/shadow-cljs "2.26.4"]
-                   [reagent "1.2.0"]
-                   [metosin/reitit "0.7.0-alpha7"]
-                   [metosin/reitit-spec "0.7.0-alpha7"]
-                   [metosin/reitit-frontend "0.7.0-alpha7"]]}})
+    :dependencies [[thheller/shadow-cljs "3.4.11"]]}})
