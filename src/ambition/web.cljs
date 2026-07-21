@@ -35,4 +35,6 @@
 
 (defonce -started? (atom false))
 
-(start-app! -started? boot-game!)
+(do
+  (println "Starting...")
+  (start-app! -started? boot-game!))

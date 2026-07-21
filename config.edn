@@ -1,0 +1,33 @@
+{:title "garbados-arcade"
+ :css :bulma
+ :games
+ [{:name "ambition"
+   :title "Ambition"
+   :status :development
+   :emoji "🏙️"}
+  {:name "the-longtime"
+   :title "The Longtime"
+   :status :alpha
+   :css :bulma
+   :emoji "🐄"}
+  {:name "the-dimdark"
+   :title "The Dimdark"
+   :status :alpha
+   :emoji "🐉"}
+  {:name "planetcall"
+   :title "Planetcall"
+   :status :development
+   :emoji "🪐"}]
+ :links
+ [{:name "source"
+   :title "Source"
+   :url "https://github.com/garbados/garbados-arcade-clj"
+   :emoji "💾"}
+  {:name "docs"
+   :title "Documentation"
+   :url "https://github.com/garbados/garbados-arcade-clj/blob/main/doc/intro.md"
+   :emoji "📖"}
+  {:name "home"
+   :title "Cows"
+   :url "https://bovid.space"
+   :emoji "🐮"}]}

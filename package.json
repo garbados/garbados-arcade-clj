@@ -2,7 +2,11 @@
   "private": true,
   "scripts": {
     "start": "shadow-cljs server",
-    "dev": "shadow-cljs watch",
+    "build": "npm run build:html && npm run build:games",
+    "build:html": "lein exec -p scripts/build_html.clj",
+    "build:games": "shadow-cljs compile ambition",
+    "release": "npm run build",
+    "dev": "npm run build:html && shadow-cljs watch",
     "test": "lein test",
     "test:ambition": "lein test :ambition",
     "cov": "lein cloverage",

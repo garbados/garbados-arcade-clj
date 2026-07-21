@@ -5,7 +5,8 @@
    [arcade.pixi.colors :as colors]))
 
 (defn start-app! [-started? start-fn]
-  (if-not @-started?
+  (if @-started?
+    (js/location.reload)
     (.then
      (let [app (new Application)]
        (.then
@@ -15,8 +16,7 @@
      (fn [app]
        (reset! -started? true)
        (start-fn app)
-       (js/document.body.appendChild (.-canvas app))))
-    (js/location.reload)))
+       (js/document.body.appendChild (.-canvas app))))))
 
 (defn ->text
   ([s style & {:as options :or {options {}}}]
