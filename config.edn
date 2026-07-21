@@ -5,19 +5,19 @@
    :title "Ambition"
    :status :development
    :emoji "🏙️"}
-  {:name "the-longtime"
-   :title "The Longtime"
-   :status :alpha
-   :css :bulma
-   :emoji "🐄"}
-  {:name "the-dimdark"
-   :title "The Dimdark"
-   :status :alpha
-   :emoji "🐉"}
-  {:name "planetcall"
-   :title "Planetcall"
-   :status :development
-   :emoji "🪐"}]
+  #_{:name "the-longtime"
+     :title "The Longtime"
+     :status :alpha
+     :css :bulma
+     :emoji "🐄"}
+  #_{:name "the-dimdark"
+     :title "The Dimdark"
+     :status :alpha
+     :emoji "🐉"}
+  #_{:name "planetcall"
+     :title "Planetcall"
+     :status :development
+     :emoji "🪐"}]
  :links
  [{:name "source"
    :title "Source"
