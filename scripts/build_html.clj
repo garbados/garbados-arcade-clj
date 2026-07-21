@@ -15,12 +15,14 @@
 (defn map-update [x key fn]
   (update x key #(map fn %)))
 
-(def arcade-config
-  (-> (edn/read-string (slurp "config.edn"))
+(defn process-config [config]
+  (-> config
       (update :css css-themes)
       (map-update :games #(-> %
                               (update :css css-themes)
                               (update :status dev-status)))))
+
+(def arcade-config (-> (slurp "config.edn") edn/read-string process-config))
 (def index-template (slurp "resources/arcade/index.hbs"))
 (def game-template (slurp "resources/arcade/game.hbs"))
 
