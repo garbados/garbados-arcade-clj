@@ -12,13 +12,13 @@
 (def css-themes
   {:bulma "bulma.min.css"})
 
-(defn map-update [x key fn]
+(defn update-map [x key fn]
   (update x key #(map fn %)))
 
 (defn process-config [config]
   (-> config
       (update :css css-themes)
-      (map-update :games #(-> %
+      (update-map :games #(-> %
                               (update :css css-themes)
                               (update :status dev-status)))))
 
